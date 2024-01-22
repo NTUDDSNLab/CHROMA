@@ -1,1 +1,73 @@
 # GraphColoring
+以下是項目結構：
+
+    |-- Recursion
+        |-- recursion.cu
+    |-- hybridparallelgraphcol
+        |-- hybridparallelgraphcol.cu
+    |-- recustion_topo
+        |-- recustion_topo.cu
+    |-- dataset
+        |-- complete_graph_2000.txt
+        |-- complete_graph_4.txt
+        |-- facebook.txt
+        |-- jean.col.txt
+        |-- le450_25d.col.txt
+        |-- miles750.col.txt
+        |-- queen11_11.col.txt
+        |-- queen9_9.col.txt
+## hybridparallelgraphcol
++ from:https://github.com/melchizedekdas/gpu-graph-coloring/tree/master
+
++ iteration的著色比例<5%時會由degree mode 切換成 random mode
+### Compile command
+
+```
+nvcc hybridparallelgraphcol.cu -o hybridparallelgraphcol
+```
+### execute command
+```
+./hybridparallelgraphcol ../dataset_path
+```
+## Recursion
+### Compile command
+
+```
+nvcc recursion.cu -o recursion
+```
+### execute command
+```
+./recursion ../dataset_path
+```
+## Fake Feluca ​
+### Compile command
+
+```
+nvcc feluca.cu -o feluca
+```
+### execute command
+```
+./feluca ../dataset_path
+```
+## recustion_topo
++ recustion算法+topo算法
++ 當為著色節點<40%時會由recustion切換到topo，以此來避免長尾效應
+### Compile command
+
+```
+nvcc recustion_topo.cu -o recustion_topo
+```
+### execute command
+```
+./recustion_topo ../dataset_path
+```
+## Comepare
+### Facebook
+#### Time(ms)
+|hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
+|  :----:  |  :----:  | :----:  | :----:  |
+|  45.4  |  43.5  | 43.8  | 49.7  |
+#### color
+|hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
+|  :----:  |  :----:  | :----:  | :----:  |
+|  186.344  |  156.7  | 95  | 87.85  |
