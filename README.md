@@ -85,5 +85,5 @@ nvcc recustion_topo.cu -o recustion_topo
 #### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
 |DataSet|serial|  topo | GM   | csrcolor  |
 |  :----:  |  :----:  |  :----:  | :----:  | :----:  |
-|  facebook |  86.00  |  86.9  | -  | 208.00  |
+|  facebook |  86.00  |  86.9  | 87.8  | 208.00  |
 |  asia_osm  |  5  |  5  | -  | 32  |
