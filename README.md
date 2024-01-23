@@ -64,10 +64,22 @@ nvcc recustion_topo.cu -o recustion_topo
 ## Comepare
 ### Facebook
 #### Time(ms)
+#### Our
 |hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
 |  :----:  |  :----:  | :----:  | :----:  |
-|  45.4  |  43.5  | 43.8  | 49.7  |
+|  45.4  |  43.5  | 43.8  | 52.23  |
+#### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
+|serial|  topo | GM   | csrcolor  |
+|  :----:  |  :----:  | :----:  | :----:  |
+|  0.231075  |  3.701735  | 85.5281  | 9.082413  |
+
 #### color
+#### Our(後面trace了一下發現csrcolor的時間單單只有執行時間，沒有把數據遷移算進去，所以差距很大)
+
 |hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
 |  :----:  |  :----:  | :----:  | :----:  |
 |  186.344  |  156.7  | 95  | 87.85  |
+#### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
+|serial|  topo | GM   | csrcolor  |
+|  :----:  |  :----:  | :----:  | :----:  |
+|  86.00  |  86.9  | -  | 208.00  |
