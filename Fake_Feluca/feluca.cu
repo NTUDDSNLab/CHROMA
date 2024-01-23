@@ -10,6 +10,8 @@
 #include<cuda.h>
 #include<curand_kernel.h>
 #include <math.h>
+#include <sys/time.h>
+
 #include <unordered_set>
 #define NO_COLOR 0
 #define MIN_COLOR -1
@@ -27,6 +29,14 @@ struct edge{
 };
 int read_graph(new_csr_graph *graph, char *file_name);
 
+double rtclock() {
+    struct timezone Tzp;
+    struct timeval Tp;
+    int stat;
+    stat = gettimeofday (&Tp, &Tzp);
+    if (stat != 0) printf("Error return from gettimeofday: %d",stat);
+    return(Tp.tv_sec + Tp.tv_usec*1.0e-6);
+}
 
 __global__
 void init_kernel(int *d_color,bool *d_color_code, float *d_node_val, int v_count){
@@ -42,8 +52,8 @@ __global__
 void  color_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code, float *d_node_val, int curr_color, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
 	if(vertex_id<v_count && d_color_code[vertex_id]){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
 				d_color[d_A[i]]=curr_color;
 			}
@@ -56,8 +66,8 @@ void  check_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code, float *
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=false;
 	if(vertex_id<v_count && d_color_code[vertex_id]){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
     			*d_cont=1;
                 colored=true;
@@ -72,10 +82,10 @@ void greedy_kernel(int *d_A, int *d_IA, int *d_color, bool *d_color_code, float 
     int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
     int min_neighbor_color=INT_MAX;
     if(vertex_id < v_count && d_color_code[vertex_id]){
-        int total = d_IA[vertex_id + 1];
+        int total = __ldg(&d_IA[vertex_id + 1]);
         bool used_colors[MAX_COLOR] = { false };
 
-        for(int i = d_IA[vertex_id]; i < total; i++){
+        for(int i = __ldg(&d_IA[vertex_id]); i < total; i++){
             int neighbor_color = d_color[d_A[i]];
             if(neighbor_color < MAX_COLOR){
                 if(neighbor_color<min_neighbor_color){
@@ -99,8 +109,8 @@ void  greedy_check_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code, 
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=false;
 	if(vertex_id<v_count){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
     			*d_cont=1;
                 colored=true;
@@ -114,7 +124,7 @@ int validate_coloring(struct new_csr_graph *input_graph){
 	for(int i=0;i<input_graph->v_count;i++){
 		for(int j=input_graph->IA[i];j<input_graph->IA[i+1];j++){
 			if(input_graph->color[i]==input_graph->color[input_graph->A[j]]){
-                cout<<input_graph->color[i]<<" "<<i<<" "<<input_graph->A[j];
+                // cout<<input_graph->color[i]<<" "<<i<<" "<<input_graph->A[j];
 				return 0;
 			}
 		}
@@ -124,22 +134,22 @@ int validate_coloring(struct new_csr_graph *input_graph){
 
 int main(int argc,char* argv[]){
 	new_csr_graph graph;
-	clock_t start, end;
+	double start, end;
 	double cpu_time_used;
-	start = clock();
+	start = rtclock();
     if (argc>0)
     {
 	    read_graph(&graph,argv[1]);
     }
 
-    end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    end = rtclock();
+	cpu_time_used = (1000.0f) * (end -start);
     cout << "\n cpu time taken: " << cpu_time_used <<endl;  
-    start = clock();
+    start = rtclock();
 	graph_color(&graph,argv[1]);
-    end = clock();
+    end = rtclock();
     double gpu_time_used;
-    gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    gpu_time_used = (1000.0f) * (end -start);
     cout << "\n gpu time taken: " << gpu_time_used <<endl;  
     
 	if(validate_coloring(&graph)==0){
@@ -280,10 +290,10 @@ void graph_color(struct new_csr_graph *graph,string file_name){
         cur_color++;
 	}
 
-    cout<<"switch mode:"<<" "<<iteration<<endl;
+    // cout<<"switch mode:"<<" "<<iteration<<endl;
 	while(cont){
         iteration++;
-        cout<<iteration<<endl;
+        // cout<<iteration<<endl;
 		cont=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
 		greedy_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,cur_color,graph->v_count);

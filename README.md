@@ -67,7 +67,9 @@ nvcc recustion_topo.cu -o recustion_topo
 #### Our
 |hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
 |  :----:  |  :----:  | :----:  | :----:  |
-|  45.4  |  43.5  | 43.8  | 52.23  |
+|  45.4  |  43.5  | 61.5  | 52.23  |
+|  43.4  |  42.7  | 59.9  | 49.8  |
+
 #### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
 |DataSet|serial|  topo | GM   | csrcolor  |
 |  :----:  |  :----:  |  :----:  | :----:  | :----:  |
