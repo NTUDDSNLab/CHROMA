@@ -10,6 +10,8 @@
 #include<cuda.h>
 #include<curand_kernel.h>
 #include <math.h>
+#include <sys/time.h>
+
 #include <unordered_set>
 #define NO_COLOR 0
 #define MIN_COLOR -1
@@ -42,8 +44,8 @@ __global__
 void  color_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code, float *d_node_val, int curr_color, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
 	if(vertex_id<v_count && d_color_code[vertex_id]){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
 				d_color[d_A[i]]=curr_color;
 			}
@@ -56,8 +58,8 @@ void  check_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code, float *
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=false;
 	if(vertex_id<v_count && d_color_code[vertex_id]){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
     			*d_cont=1;
                 colored=true;
@@ -72,10 +74,10 @@ void topology_kernel(int *d_A, int *d_IA, int *d_color, bool *d_color_code, floa
     int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
     int min_neighbor_color=INT_MAX;
     if(d_color[vertex_id]==NO_COLOR && vertex_id<v_count){
-        int total = d_IA[vertex_id + 1];
+        int total = __ldg(&d_IA[vertex_id + 1]);
         bool used_colors[MAX_COLOR] = { false };
 
-        for(int i = d_IA[vertex_id]; i < total; i++){
+        for(int i = __ldg(&d_IA[vertex_id]); i < total; i++){
             int neighbor_color = d_color[d_A[i]];
             if(neighbor_color < MAX_COLOR){
                 if(neighbor_color<min_neighbor_color){
@@ -99,8 +101,8 @@ void  topology_check_kernel(int *d_A, int *d_IA, int *d_color,bool *d_color_code
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=false;
 	if(vertex_id<v_count){
-		int total=d_IA[vertex_id+1];
-		for(int i=d_IA[vertex_id];i<total;i++){
+		int total=__ldg(&d_IA[vertex_id+1]);
+		for(int i=__ldg(&d_IA[vertex_id]);i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
     			*d_cont=1;
                 colored=true;
@@ -123,11 +125,20 @@ int validate_coloring(struct new_csr_graph *input_graph){
 	return 1;
 }
 
+double rtclock() {
+    struct timezone Tzp;
+    struct timeval Tp;
+    int stat;
+    stat = gettimeofday (&Tp, &Tzp);
+    if (stat != 0) printf("Error return from gettimeofday: %d",stat);
+    return(Tp.tv_sec + Tp.tv_usec*1.0e-6);
+}
+
 int main(int argc,char* argv[]){
 	new_csr_graph graph;
-	clock_t start, end;
+	double start, end;
 	double cpu_time_used;
-	start = clock();
+	start = rtclock();
     if (argc>0)
     {
 	    read_graph(&graph,argv[1]);
@@ -139,19 +150,20 @@ int main(int argc,char* argv[]){
     // printArray(graph.A_dir,12);
     // printArray(graph.IA_dir,graph.v_count);
 
-    end = clock();
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    end = rtclock();
+	cpu_time_used =(1000.0f) * (end -start);
     cout << "\n cpu time taken: " << cpu_time_used <<endl;  
 	// graph_color(&graph,argv[1],threadhold);
-    for (float threshold = 0.001; threshold <= 1; threshold += 0.001) {
-        cout<<"========"<<threshold<<"========"<<endl;
-        start = clock();
-        graph_color(&graph,argv[1],threshold);
-        end = clock();
-        double gpu_time_used;
-        gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        cout << "\n gpu time taken: " << gpu_time_used <<endl;  
-    }
+    float threshold = 0.4;
+    // for (float threshold = 0.001; threshold <= 1; threshold += 0.001) {
+        // cout<<"========"<<threshold<<"========"<<endl;
+    start = rtclock();
+    graph_color(&graph,argv[1],threshold);
+    end = rtclock();
+    double gpu_time_used;
+    gpu_time_used =(1000.0f) * (end -start);
+    cout << "\n gpu time taken: " << gpu_time_used <<endl;  
+    // }
     
 	if(validate_coloring(&graph)==0){
 		printf("\nInvalid coloring!");
@@ -273,9 +285,9 @@ int count_color(int* arr, int size) {
     return unique_colors.size();
 }
 void graph_color(struct new_csr_graph *graph , string file_name ,float threadhold){
-    clock_t start, end;
-
-    start = clock();
+    double start, end;
+    int blksz=1024;
+    start = rtclock();
     std::ofstream csvfile;
     string csvPath=file_name+".csv";
     csvfile.open(csvPath, std::ios::out | std::ios::app);
@@ -302,7 +314,7 @@ void graph_color(struct new_csr_graph *graph , string file_name ,float threadhol
     cudaMemcpy(d_A_dir, graph->A_dir, graph->IA_dir[graph->v_count] * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_IA_dir, graph->IA_dir, (graph->v_count + 1) * sizeof(int), cudaMemcpyHostToDevice);
 
-    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, d_node_val, graph->v_count);
+    init_kernel<<<((graph->v_count - 1) / blksz + 1),blksz>>>(d_color,d_color_code, d_node_val, graph->v_count);
 	cudaMemcpy(active_node, d_color_code, graph->v_count * sizeof(bool), cudaMemcpyDeviceToHost);
     // printArrayF(d_node_val_cpu,graph->v_count);
     int iteration=0;
@@ -313,8 +325,8 @@ void graph_color(struct new_csr_graph *graph , string file_name ,float threadhol
         iteration++;
 		// cont=0;
 		// cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
-		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color,graph->v_count);
-		check_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color, d_cont,graph->v_count);
+		color_kernel<<<((graph->v_count - 1) / blksz + 1),blksz>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color,graph->v_count);
+		check_kernel<<<((graph->v_count - 1) / blksz + 1),blksz>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color, d_cont,graph->v_count);
 		// cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
 
         // cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
@@ -325,18 +337,18 @@ void graph_color(struct new_csr_graph *graph , string file_name ,float threadhol
         cur_color++;
 	}
 
-    cout<<"switch mode:"<<" "<<iteration<<endl;
+    // cout<<"switch mode:"<<" "<<iteration<<endl;
 	while(cont){
         iteration++;
         // cout<<iteration<<endl;
 		cont=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
-		topology_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,cur_color,graph->v_count);
-		topology_check_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color, d_cont,graph->v_count);
+		topology_kernel<<<((graph->v_count - 1) / blksz + 1),blksz>>>(d_A, d_IA, d_color,d_color_code, d_node_val,cur_color,graph->v_count);
+		topology_check_kernel<<<((graph->v_count - 1) / blksz + 1),blksz>>>(d_A_dir, d_IA_dir, d_color,d_color_code, d_node_val,cur_color, d_cont,graph->v_count);
 		cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
 		cur_color++;
 	}
-    cout<<"finish:"<<" "<<iteration<<endl;
+    cout<<"iteration:"<<iteration<<endl;
 
   	cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
     int color_num=count_color(graph->color,graph->v_count);
@@ -346,10 +358,10 @@ void graph_color(struct new_csr_graph *graph , string file_name ,float threadhol
 	cudaFree(d_cont);
 	cudaFree(d_node_val);
     cout<<"cur_color: "<<color_num<<endl;
-    end = clock();
+    end = rtclock();
     double gpu_time_used;
-    gpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-    cout << "\n gpu time taken: " << gpu_time_used <<endl;  
+    gpu_time_used =(1000.0f) * (end -start);
+    // cout << "\n gpu time taken: " << gpu_time_used <<endl;  
     csvfile << gpu_time_used << "," << color_num << "\n";
     cudaFree(d_color);
 }
