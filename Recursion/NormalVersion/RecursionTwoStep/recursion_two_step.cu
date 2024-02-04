@@ -28,42 +28,25 @@ struct edge{
 int read_graph(new_csr_graph *graph, char *file_name);
 
 __global__
-void init_kernel(int *d_color,char *d_color_code, int *pre_color, int v_count){
+void init_kernel(int *d_color,char *d_color_code, float *d_node_val, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
 	if(vertex_id<v_count){
-		pre_color[vertex_id]=NO_COLOR;
+		d_node_val[vertex_id]=vertex_id;
 		d_color[vertex_id]=NO_COLOR;
         d_color_code[vertex_id]=0;
 	}
 }
 
-// __global__
-// void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_color_code, float *d_node_val, int *curr_color, int v_count){
-// 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
-// 	if(vertex_id<v_count && d_color_code[vertex_id]==0){
-// 		int total=d_IA[vertex_id+1];
-// 		for(int i=d_IA[vertex_id];i<total;i++){
-// 			if(d_color[d_A[i]]==d_color[vertex_id]){
-// 				d_color[d_A[i]]=*curr_color;
-// 			}
-// 		}
-// 	}
-// }
-
 __global__
-void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_color_code, float *d_node_val, int *curr_color, int v_count, char *d_cont){
+void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, float *d_node_val, int *curr_color, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
-    int colored=1;
-	if(vertex_id<v_count && d_color_code[vertex_id]==0){
+	if(vertex_id<v_count){
 		int total=d_IA[vertex_id+1];
 		for(int i=d_IA[vertex_id];i<total;i++){
-			if(pre_color[d_A[i]]==pre_color[vertex_id]){
+			if(d_color[d_A[i]]==d_color[vertex_id]){
 				d_color[d_A[i]]=*curr_color;
-                *d_cont=1;
-                colored=0;
 			}
 		}
-        d_color_code[vertex_id]=colored;
 	}
 }
 
@@ -71,7 +54,7 @@ __global__
 void  check_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, float *d_node_val, int *curr_color, char *d_cont, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=1;
-	if(vertex_id<v_count && d_color_code[vertex_id]==0){
+	if(vertex_id<v_count ){
 		int total=d_IA[vertex_id+1];
 		for(int i=d_IA[vertex_id];i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
@@ -192,22 +175,21 @@ void printArrayF(float* arr, int size) {
 
 void graph_color(struct new_csr_graph *graph,string file_name){
     int cur_color = NO_COLOR + 1;
-    char cont = 1;
-    int *d_A, *d_IA, *d_color,*pre_color;
+    char cont = 1;  
+    int *d_A, *d_IA, *d_color;
     char *d_cont, *d_color_code;
     int *d_cur_color;
     float *d_node_val;
     cudaMallocManaged(&d_A, graph->IA[graph->v_count] * sizeof(int));
     cudaMallocManaged(&d_IA, (graph->v_count + 1) * sizeof(int));
     cudaMallocManaged(&d_color, graph->v_count * sizeof(int));
-    cudaMallocManaged(&pre_color, graph->v_count * sizeof(int));
     cudaMallocManaged(&d_cont, sizeof(char));
     cudaMallocManaged(&d_cur_color, sizeof(int));
     cudaMallocManaged(&d_color_code, graph->v_count * sizeof(char));
     cudaMallocManaged(&d_node_val, graph->v_count * sizeof(float));
     cudaMemcpy(d_A, graph->A, graph->IA[graph->v_count] * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_IA, graph->IA, (graph->v_count + 1) * sizeof(int), cudaMemcpyHostToDevice);
-	init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, pre_color, graph->v_count);
+	init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, d_node_val, graph->v_count);
 
     
     int iteration=0;
@@ -219,18 +201,13 @@ void graph_color(struct new_csr_graph *graph,string file_name){
 		cont=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
 		cudaMemcpy(d_cur_color,&cur_color,sizeof(char),cudaMemcpyHostToDevice);
-		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,pre_color,d_color_code, d_node_val,d_cur_color,graph->v_count,d_cont);
+		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color,graph->v_count);
+		check_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color, d_cont,graph->v_count);
 		cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
-        if(cont==0){
-            break;
-        }
-        // cudaMemcpy(pre_color, d_color, graph->v_count * sizeof(int), cudaMemcpyDeviceToDevice);
-        cudaMemcpy(pre_color, d_color, graph->v_count * sizeof(int), cudaMemcpyDeviceToDevice);
-		// check_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color, d_cont,graph->v_count);
 		cur_color++;
 	}
     end = rtclock();
-    cout<<1000.0f * (end - start)<<endl;
+    cout<<"GPU used: "<<1000.0f * (end - start)<<" ms"<<endl;
   	cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
     
     cudaFree(d_A);

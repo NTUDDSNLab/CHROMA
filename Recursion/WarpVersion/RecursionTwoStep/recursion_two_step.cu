@@ -40,7 +40,7 @@ void init_kernel(int *d_color,char *d_color_code, float *d_node_val, int v_count
 __global__
 void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, float *d_node_val, int *curr_color, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
-	if(vertex_id<v_count && d_color_code[vertex_id]==0){
+	if(vertex_id<v_count){
 		int total=d_IA[vertex_id+1];
 		for(int i=d_IA[vertex_id];i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
@@ -54,7 +54,7 @@ __global__
 void  check_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, float *d_node_val, int *curr_color, char *d_cont, int v_count){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=1;
-	if(vertex_id<v_count && d_color_code[vertex_id]==0){
+	if(vertex_id<v_count ){
 		int total=d_IA[vertex_id+1];
 		for(int i=d_IA[vertex_id];i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
