@@ -44,15 +44,14 @@ void read_graph(csr_graph *graph, char *file_name,int mode){
             while (iss >> part) {
                 parts.push_back(part);
             }
+            edge_list[edge_id].vertex1=stoi(parts[1])-1;
+			edge_list[edge_id].vertex2=stoi(parts[2])-1;
+
             if (mode==0)
             {
-                edge_list[edge_id].vertex1=stoi(parts[1])-1;
-				edge_list[edge_id].vertex2=stoi(parts[2])-1;
                 graph->IA[stoi(parts[1])]++;
             }
             else{
-                edge_list[edge_id].vertex1=stoi(parts[1])-1;
-				edge_list[edge_id].vertex2=stoi(parts[2])-1;
                 graph->IA[stoi(parts[1])]++;
                 graph->IA[stoi(parts[2])]++;
             }
