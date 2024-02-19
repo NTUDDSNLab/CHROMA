@@ -20,19 +20,57 @@ using namespace std;
 void graph_color(struct csr_graph *graph,string file_name);
 
 
+int getDigitCount(int number) {
+    if (number == 0) return 1;
+    int count = 0;
+    while (number != 0) {
+        count++;
+        number /= 10;
+    }
+    return count;
+}
+
+
 __global__
-void init_kernel(int *d_color,char *d_color_code, int *pre_color, int v_count){
+void init_kernel(int *d_color,char *d_color_code, int *pre_color, int v_count,int *d_node_val,int *d_IA,int count_num){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
 	if(vertex_id<v_count){
 		pre_color[vertex_id]=NO_COLOR;
 		d_color[vertex_id]=NO_COLOR;
         d_color_code[vertex_id]=0;
+        d_node_val[vertex_id] = vertex_id+(d_IA[vertex_id + 1]-d_IA[vertex_id])*powf(10.0f, count_num);
 	}
 }
 
+__device__
+void insertionSort(int *d_A, int *d_node_val, int left, int right) {
+    for (int i = left + 1; i <= right; i++) {
+        int key = d_A[i];
+        int key_node_val = d_node_val[key];
+        int j = i - 1;
+
+        while (j >= left && d_node_val[d_A[j]] < key_node_val) {
+            d_A[j + 1] = d_A[j];
+            j = j - 1;
+        }
+        d_A[j + 1] = key;
+    }
+}
 
 __global__
-void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_color_code, float *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut){
+void sort_kernel(int *d_color, char *d_color_code, int v_count, int *d_node_val, int *d_A, int *d_IA) {
+    int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (vertex_id < v_count) {
+        int start = d_IA[vertex_id];
+        int end = d_IA[vertex_id + 1] - 1; 
+        insertionSort(d_A, d_node_val, start, end);
+    }
+}
+
+
+
+__global__
+void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=1;
 	if(vertex_id<v_count && d_color_code[vertex_id]==0){
@@ -40,7 +78,7 @@ void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_colo
         bool incoming=false;
 		for(int i=d_IA[vertex_id];i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
-                if(vertex_id>d_A[i]){
+                if(d_node_val[vertex_id]>d_node_val[d_A[i]]){
                     *d_shortcut=1;
                     incoming=true;
                 }
@@ -61,7 +99,34 @@ void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_colo
 	}
 }
 
-
+// __global__
+// void color_kernel(int *d_A, int *d_IA, int *d_color, int *pre_color, char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut) {
+//     int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
+//     int colored = 1;
+//     if (vertex_id < v_count && d_color_code[vertex_id] == 0) {
+//         int total = d_IA[vertex_id + 1];
+//         bool incoming = false;
+//         for (int i = d_IA[vertex_id]; i < total; i++) {
+//             if (d_color[d_A[i]] == d_color[vertex_id] && vertex_id > d_A[i]) {
+//                 *d_shortcut = 1;
+//                 incoming = true;
+//                 break; 
+//             }
+//         }
+//         for (int i = d_IA[vertex_id]; i < total; i++) {
+//             if (d_color[d_A[i]] == d_color[vertex_id] && vertex_id < d_A[i]) {
+//                 if (incoming) {
+//                     d_color[d_A[i]] = *curr_color + 1;
+//                 } else {
+//                     d_color[d_A[i]] = *curr_color;
+//                 }
+//                 *d_cont = 1;
+//                 colored = 0;
+//             }
+//         }
+//     }
+//     d_color_code[vertex_id] = colored;
+// }
 
 int validate_coloring(struct csr_graph *input_graph){
 	for(int i=0;i<input_graph->v_count;i++){
@@ -111,7 +176,7 @@ void graph_color(struct csr_graph *graph,string file_name){
     int *d_A, *d_IA, *d_color,*pre_color;
     char *d_cont, *d_color_code,*d_shortcut;
     int *d_cur_color;
-    float *d_node_val;
+    int *d_node_val;
     cudaMallocManaged(&d_A, graph->IA[graph->v_count] * sizeof(int));
     cudaMallocManaged(&d_IA, (graph->v_count + 1) * sizeof(int));
     cudaMallocManaged(&d_color, graph->v_count * sizeof(int));
@@ -120,10 +185,11 @@ void graph_color(struct csr_graph *graph,string file_name){
     cudaMallocManaged(&d_shortcut, sizeof(char));
     cudaMallocManaged(&d_cur_color, sizeof(int));
     cudaMallocManaged(&d_color_code, graph->v_count * sizeof(char));
-    cudaMallocManaged(&d_node_val, graph->v_count * sizeof(float));
+    cudaMallocManaged(&d_node_val, graph->v_count * sizeof(int));
     cudaMemcpy(d_A, graph->A, graph->IA[graph->v_count] * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_IA, graph->IA, (graph->v_count + 1) * sizeof(int), cudaMemcpyHostToDevice);
-	init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, pre_color, graph->v_count);
+    int count_num=getDigitCount(graph->v_count);
+    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, pre_color, graph->v_count,d_node_val,d_IA,count_num);
 
     
     int iteration=0;
