@@ -32,10 +32,9 @@ int getDigitCount(int number) {
 
 
 __global__
-void init_kernel(int *d_color,char *d_color_code, int *pre_color, int v_count,int *d_node_val,int *d_IA,int count_num){
+void init_kernel(int *d_color,char *d_color_code, int v_count,int *d_node_val,int *d_IA,int count_num){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
 	if(vertex_id<v_count){
-		pre_color[vertex_id]=NO_COLOR;
 		d_color[vertex_id]=NO_COLOR;
         d_color_code[vertex_id]=0;
         d_node_val[vertex_id] = vertex_id+(d_IA[vertex_id + 1]-d_IA[vertex_id])*powf(10.0f, count_num);
@@ -70,7 +69,7 @@ void sort_kernel(int *d_color, char *d_color_code, int v_count, int *d_node_val,
 
 
 __global__
-void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut){
+void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=1;
 	if(vertex_id<v_count && d_color_code[vertex_id]==0){
@@ -99,34 +98,6 @@ void  color_kernel(int *d_A, int *d_IA, int *d_color,int *pre_color,char *d_colo
 	}
 }
 
-// __global__
-// void color_kernel(int *d_A, int *d_IA, int *d_color, int *pre_color, char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut) {
-//     int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
-//     int colored = 1;
-//     if (vertex_id < v_count && d_color_code[vertex_id] == 0) {
-//         int total = d_IA[vertex_id + 1];
-//         bool incoming = false;
-//         for (int i = d_IA[vertex_id]; i < total; i++) {
-//             if (d_color[d_A[i]] == d_color[vertex_id] && vertex_id > d_A[i]) {
-//                 *d_shortcut = 1;
-//                 incoming = true;
-//                 break; 
-//             }
-//         }
-//         for (int i = d_IA[vertex_id]; i < total; i++) {
-//             if (d_color[d_A[i]] == d_color[vertex_id] && vertex_id < d_A[i]) {
-//                 if (incoming) {
-//                     d_color[d_A[i]] = *curr_color + 1;
-//                 } else {
-//                     d_color[d_A[i]] = *curr_color;
-//                 }
-//                 *d_cont = 1;
-//                 colored = 0;
-//             }
-//         }
-//     }
-//     d_color_code[vertex_id] = colored;
-// }
 
 int validate_coloring(struct csr_graph *input_graph){
 	for(int i=0;i<input_graph->v_count;i++){
@@ -189,9 +160,10 @@ void graph_color(struct csr_graph *graph,string file_name){
     cudaMemcpy(d_A, graph->A, graph->IA[graph->v_count] * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_IA, graph->IA, (graph->v_count + 1) * sizeof(int), cudaMemcpyHostToDevice);
     int count_num=getDigitCount(graph->v_count);
-    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code, pre_color, graph->v_count,d_node_val,d_IA,count_num);
+    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_IA,count_num);
+    // sort_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_A,d_IA);
 
-    
+
     int iteration=0;
     double start, end;
     start = rtclock();
@@ -202,14 +174,13 @@ void graph_color(struct csr_graph *graph,string file_name){
         shortcut=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
 		cudaMemcpy(d_cur_color,&cur_color,sizeof(char),cudaMemcpyHostToDevice);
-		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,pre_color,d_color_code, d_node_val,d_cur_color,graph->v_count,d_cont,d_shortcut);
+		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color,graph->v_count,d_cont,d_shortcut);
 		cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
 		cudaMemcpy(&shortcut,d_shortcut,sizeof(char),cudaMemcpyDeviceToHost);
         if(cont==0){
             break;
         }
         // cout<<shortcut<<endl;
-        cudaMemcpy(pre_color, d_color, graph->v_count * sizeof(int), cudaMemcpyDeviceToDevice);
         if(shortcut==1){
 		cur_color+=2;
         }else{
