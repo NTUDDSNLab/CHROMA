@@ -69,7 +69,7 @@ void sort_kernel(int *d_color, char *d_color_code, int v_count, int *d_node_val,
 
 
 __global__
-void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont, char *d_shortcut){
+void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, int *d_node_val, int *curr_color, int v_count, char *d_cont){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
     int colored=1;
 	if(vertex_id<v_count && d_color_code[vertex_id]==0){
@@ -77,8 +77,7 @@ void  color_kernel(int *d_A, int *d_IA, int *d_color,char *d_color_code, int *d_
         bool incoming=false;
 		for(int i=d_IA[vertex_id];i<total;i++){
 			if(d_color[d_A[i]]==d_color[vertex_id]){
-                if(d_node_val[vertex_id]>d_node_val[d_A[i]]){
-                    *d_shortcut=1;
+                if(d_node_val[vertex_id]<d_node_val[d_A[i]]){
                     incoming=true;
                 }
                 else{
@@ -110,14 +109,6 @@ int validate_coloring(struct csr_graph *input_graph){
 	}
 	return 1;
 }
-double rtclock() {
-    struct timezone Tzp;
-    struct timeval Tp;
-    int stat;
-    stat = gettimeofday (&Tp, &Tzp);
-    if (stat != 0) printf("Error return from gettimeofday: %d",stat);
-    return(Tp.tv_sec + Tp.tv_usec*1.0e-6);
-}
 
 int main(int argc,char* argv[]){
 	csr_graph graph;
@@ -142,10 +133,9 @@ int main(int argc,char* argv[]){
 void graph_color(struct csr_graph *graph,string file_name){
     int cur_color = NO_COLOR + 1;
     char cont = 1;
-    char shortcut;
 
     int *d_A, *d_IA, *d_color,*pre_color;
-    char *d_cont, *d_color_code,*d_shortcut;
+    char *d_cont, *d_color_code;
     int *d_cur_color;
     int *d_node_val;
     cudaMallocManaged(&d_A, graph->IA[graph->v_count] * sizeof(int));
@@ -153,39 +143,32 @@ void graph_color(struct csr_graph *graph,string file_name){
     cudaMallocManaged(&d_color, graph->v_count * sizeof(int));
     cudaMallocManaged(&pre_color, graph->v_count * sizeof(int));
     cudaMallocManaged(&d_cont, sizeof(char));
-    cudaMallocManaged(&d_shortcut, sizeof(char));
     cudaMallocManaged(&d_cur_color, sizeof(int));
     cudaMallocManaged(&d_color_code, graph->v_count * sizeof(char));
     cudaMallocManaged(&d_node_val, graph->v_count * sizeof(int));
     cudaMemcpy(d_A, graph->A, graph->IA[graph->v_count] * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_IA, graph->IA, (graph->v_count + 1) * sizeof(int), cudaMemcpyHostToDevice);
     int count_num=getDigitCount(graph->v_count);
-    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_IA,count_num);
-    // sort_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_A,d_IA);
 
 
     int iteration=0;
     double start, end;
+    init_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_IA,count_num);
+    sort_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_color_code ,graph->v_count,d_node_val,d_A,d_IA);
     start = rtclock();
 
 	while(cont){
         iteration++;
 		cont=0;
-        shortcut=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
 		cudaMemcpy(d_cur_color,&cur_color,sizeof(char),cudaMemcpyHostToDevice);
-		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color,graph->v_count,d_cont,d_shortcut);
+		color_kernel<<<ceil(graph->v_count/256.0),256>>>(d_A, d_IA, d_color,d_color_code, d_node_val,d_cur_color,graph->v_count,d_cont);
 		cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
-		cudaMemcpy(&shortcut,d_shortcut,sizeof(char),cudaMemcpyDeviceToHost);
         if(cont==0){
             break;
         }
         // cout<<shortcut<<endl;
-        if(shortcut==1){
 		cur_color+=2;
-        }else{
-		cur_color++;
-        }
 	}
     end = rtclock();
     cout<<"GPU used: "<<1000.0f * (end - start)<<" ms"<<endl;
