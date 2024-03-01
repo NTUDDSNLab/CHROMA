@@ -17,6 +17,8 @@
 #define MIN_COLOR -1
 #define MAX_COLOR 1
 using namespace std;
+
+static const int MAX_COLORS = 128;
 void graph_color(struct csr_graph *graph,string file_name);
 
 
@@ -29,7 +31,6 @@ int getDigitCount(int number) {
     }
     return count;
 }
-
 __global__
 void init_kernel(int *d_color,char *d_active_node,int *d_color_mask ,int v_count,int *d_node_val,int *d_IA,int count_num){
 	int vertex_id=blockIdx.x*blockDim.x+threadIdx.x;
@@ -87,38 +88,55 @@ void  broadcast_kernel(int *d_A, int *d_IA, int *d_color,int *d_color_mask,char 
     int warp_id = vertex_id / WS; 
     int lane_id = threadIdx.x % WS;
     if(warp_id < v_count){
+        if (lane_id == 0) {
+            d_color_mask[warp_id] = 0xFFFFFFFF; 
+        }
+        __syncwarp();
         int start = d_IA[warp_id];
         int end = d_IA[warp_id + 1];
         for(int i = start + lane_id; i < end; i += 32){ 
             int neighbor_id = d_A[i]; 
-            int color = d_color[warp_id]; 
-            int mask = ~(1 << color); 
-            // d_color_mask[neighbor_id] &= mask;
-            
-            atomicAnd(&d_color_mask[neighbor_id], mask);
+            int neighbor_color = d_color[neighbor_id]; 
+            int mask = ~(1 << neighbor_color); 
+            atomicAnd(&d_color_mask[warp_id], mask);
         }
     }
 }
-
 
 __global__
 void  color_kernel(int *d_A, int *d_IA, int *d_color,int *d_color_mask,char *d_color_code, int *d_node_val, int v_count,char *d_cont){
     int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
     int warp_id = vertex_id / WS; 
     int lane_id = threadIdx.x % WS;
+    bool conflict = false;
+    bool short_cut = false;
+    int available_color=-1;
     if(warp_id < v_count){
-        // printf("%d \n", warp_id);
-        // print_bits(d_color_mask[warp_id]);
-
         int start = d_IA[warp_id];
         int end = d_IA[warp_id + 1];
+        int color = d_color[warp_id]; 
         for(int i = start + lane_id; i < end; i += 32){ 
             int neighbor_id = d_A[i]; 
-            int color = d_color[warp_id]; 
             if(d_color[neighbor_id] == color){
                 *d_cont = 1;
-                if(warp_id>neighbor_id){
-                    d_color[neighbor_id] = __ffs(d_color_mask[neighbor_id])-1;
+                if(d_node_val[warp_id]<d_node_val[neighbor_id]){
+                conflict = true;
+                break; 
+                }
+            }
+        }
+        short_cut = __any_sync(0xffffffff, conflict);
+        for(int i = start + lane_id; i < end; i += 32){ 
+            int neighbor_id = d_A[i]; 
+            if(d_color[neighbor_id] == color){
+                if(d_node_val[warp_id]>d_node_val[neighbor_id]){
+                    if(short_cut){
+                    available_color = __ffs(d_color_mask[neighbor_id])-1;
+                    }
+                    else{
+                    available_color = 32-(__ffs(__brev(d_color_mask[neighbor_id])));
+                    }
+                    d_color[neighbor_id] = available_color;
                 }
             }
         }
@@ -174,32 +192,24 @@ void graph_color(struct csr_graph *graph,string file_name){
 
     sort_kernel<<<ceil(graph->v_count/256.0),256>>>(d_color,d_active_node ,graph->v_count,d_node_val,d_A,d_IA);
     start = rtclock();
-
 	while(cont){
         iteration++;
 		cont=0;
 		cudaMemcpy(d_cont,&cont,sizeof(char),cudaMemcpyHostToDevice);
-        reset_kernal<<<ceil(graph->v_count/256.0),256>>>(d_color_mask,graph->v_count);
+        // reset_kernal<<<ceil(graph->v_count/256.0),256>>>(d_color_mask,graph->v_count);
         broadcast_kernel<<<blocks_per_grid, threads_per_block>>>(d_A, d_IA, d_color,d_color_mask,d_color_code,graph->v_count);
         color_kernel<<<blocks_per_grid, threads_per_block>>>(d_A, d_IA, d_color,d_color_mask,d_color_code, d_node_val,graph->v_count,d_cont);
         cudaMemcpy(&cont,d_cont,sizeof(char),cudaMemcpyDeviceToHost);
-        cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
-        print_array(graph->color,graph->v_count);
-
-        if(iteration==52){
-            break;
-        }
+        // cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
+        // print_array(graph->color,graph->v_count);
     }
     end = rtclock();
     cout<<"GPU used: "<<1000.0f * (end - start)<<" ms"<<endl;
   	cudaMemcpy(graph->color,d_color,graph->v_count*sizeof(int),cudaMemcpyDeviceToHost);
-    
     cudaFree(d_A);
 	cudaFree(d_IA);
 	cudaFree(d_cont);
 	cudaFree(d_node_val);
-    
     cout<<"iteration:"<<iteration<<endl;
     cudaFree(d_color);
-    
 }
