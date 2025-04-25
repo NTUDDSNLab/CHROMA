@@ -1,5 +1,5 @@
-# GraphColoring
-以下是項目結構：
+# CHROMA: Coloring with High-Quality Resilient Optimized Multi-GPU Allocation
+Repository Organization:
 
     |-- Recursion
         |-- recursion.cu
