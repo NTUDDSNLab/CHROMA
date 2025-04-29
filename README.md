@@ -4,7 +4,6 @@
 + Hardware:
 + OS & Compler:
 + Important Files/Directories
-    + data/: contains all datasets that we want to compare with.
 Repository Organization:
     |-- CHROMA :our main code(Color Allocate cite [ECL-GC](https://userweb.cs.txstate.edu/~burtscher/research/ECL-GC/))
         |-- CHROMA.cu        
