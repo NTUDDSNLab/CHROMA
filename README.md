@@ -1,89 +1,67 @@
 # CHROMA: Coloring with High-Quality Resilient Optimized Multi-GPU Allocation
+## Getting started Instructions.
++ Clone this project git clone git@github.com:NTUDDSNLab/CHROMA.git
++ Hardware:
++ OS & Compler:
++ Important Files/Directories
+    + data/: contains all datasets that we want to compare with.
 Repository Organization:
+    |-- CHROMA :our main code(Color Allocate cite [ECL-GC](https://userweb.cs.txstate.edu/~burtscher/research/ECL-GC/))
+        |-- CHROMA.cu        
+        |-- chroma_utils.cuh  
+        |-- ECLgraph.h  
+        |-- globals.cuh  
+        |-- PA.cu
+        |-- chroma_utils.cu  
+        |-- ECLGC.cu          
+        |-- globals.cu  
+        |-- Makefile
+    |-- dataset :Some datasets(all datasets can download [here](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html))
+        |-- Email-Enron.col.egr  
+        |-- school1.egr               
+        |-- soc-Slashdot0902.col.egr  
+        |-- wiki-Vote.col.egr
+        |-- facebook.egr         
+        |-- soc-Epinions1.col.egr     
+        |-- Stanford.egr              
+        |-- youtube.egr
+        |-- le450_25d.egr        
+        |-- soc-Slashdot0811.col.egr  
+        |-- twitter_combined.col.egr
 
-    |-- Recursion
-        |-- recursion.cu
-    |-- hybridparallelgraphcol
-        |-- hybridparallelgraphcol.cu
-    |-- recustion_topo
-        |-- recustion_topo.cu
-    |-- dataset
-        |-- complete_graph_2000.txt
-        |-- complete_graph_4.txt
-        |-- facebook.txt
-        |-- jean.col.txt
-        |-- le450_25d.col.txt
-        |-- miles750.col.txt
-        |-- queen11_11.col.txt
-        |-- queen9_9.col.txt
-## hybridparallelgraphcol
-+ from:https://github.com/melchizedekdas/gpu-graph-coloring/tree/master
 
-+ iteration的著色比例<5%時會由degree mode 切換成 random mode
-### Compile command
+## Environment Setup
+## 2. Environment Setup
 
+### 1) Compile
 ```
-nvcc hybridparallelgraphcol.cu -o hybridparallelgraphcol
+cd ./CHROMA
+make
 ```
-### execute command
+### 2) Run
 ```
-./hybridparallelgraphcol ../dataset_path
+./CHROMA
 ```
-## Recursion
-### Compile command
-
+### 3) Choose dataset
 ```
-nvcc recursion.cu -o recursion
+Enter input filename: [input your dataset path]
 ```
-### execute command
+### 4) Choose RGC optimization (if no input 0)
 ```
-./recursion ../dataset_path
+Enter RGC (default $\theta$=10): [input your $\theta$]
 ```
-## Fake Feluca ​
-### Compile command
-
+### 5) Enable SDC
 ```
-nvcc feluca.cu -o feluca
+Enable SDC optimization? (y/n): 
 ```
-### execute command
+### 6) check the result
+You will get result like:
 ```
-./feluca ../dataset_path
+input: ../Datasets/facebook.egr
+nodes: 4039
+edges: 176468
+avg degree: 43.69
+runtime:    1.349632 ms
+result verification passed
+colors used: 75
 ```
-## recustion_topo
-+ recustion算法+topo算法
-+ 當為著色節點<40%時會由recustion切換到topo，以此來避免長尾效應
-### Compile command
-
-```
-nvcc recustion_topo.cu -o recustion_topo
-```
-### execute command
-```
-./recustion_topo ../dataset_path
-```
-## Comepare
-### Facebook
-#### Time(ms)
-#### Our
-|hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
-|  :----:  |  :----:  | :----:  | :----:  |
-|  45.4  |  43.5  | 61.5  | 52.23  |
-|  43.4  |  42.7  | 59.9  | 49.8  |
-
-#### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
-|DataSet|serial|  topo | GM   | csrcolor  |
-|  :----:  |  :----:  |  :----:  | :----:  | :----:  |
-|  facebook  |  0.231075  |  3.701735  | 85.5281  | 9.082413  |
-|  asia_osm  |  109  |  49.621177  | -  | 42.564845  |
-
-#### color
-#### Our(後面trace了一下發現csrcolor的時間單單只有執行時間，沒有把數據遷移算進去，所以差距很大)
-
-|hybridparallelgraphcol|  Recursion | Fake Feluca   | Recustion+topo  |
-|  :----:  |  :----:  | :----:  | :----:  |
-|  186.344  |  156.7  | 95  | 87.85  |
-#### [csrcolor](https://github.com/chenxuhao/csrcolor/tree/master)
-|DataSet|serial|  topo | GM   | csrcolor  |
-|  :----:  |  :----:  |  :----:  | :----:  | :----:  |
-|  facebook |  86.00  |  86.9  | 87.8  | 208.00  |
-|  asia_osm  |  5  |  5  | -  | 32  |
