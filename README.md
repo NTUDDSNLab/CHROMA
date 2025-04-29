@@ -2,17 +2,17 @@
 ## Getting started Instructions.
 + Clone this project git clone git@github.com:NTUDDSNLab/CHROMA.git
 +  🖥️ Hardware
-- `CPU`: Intel Core i9-14900 (32 cores) @ 5.5GHz
-- `Memory`: 128 GB
-- `GPU`: NVIDIA GeForce RTX 4090  (each with 24 GB VRAM)
-- `GPU Arch`: `sm_90` (Ada Lovelace, compute capability 8.9)
+    - `CPU`: Intel Core i9-14900 (32 cores) @ 5.5GHz
+    - `Memory`: 128 GB
+    - `GPU`: NVIDIA GeForce RTX 4090  (each with 24 GB VRAM)
+    - `GPU Arch`: `sm_90` (Ada Lovelace, compute capability 8.9)
 
 + 🧰 OS & Compiler
-- `OS`: Ubuntu 22.04.4 LTS (x86_64)
-- `Kernel`: 6.8.0-52-generic
-- `CUDA`: 12.6
-- `nvcc`: 12.6
-- `NVIDIA Driver`: 560.35.03
+    - `OS`: Ubuntu 22.04.4 LTS (x86_64)
+    - `Kernel`: 6.8.0-52-generic
+    - `CUDA`: 12.6
+    - `nvcc`: 12.6
+    - `NVIDIA Driver`: 560.35.03
 + Important Files/Directories
 ```
 Repository Organization:
