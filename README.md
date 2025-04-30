@@ -47,7 +47,7 @@ Repository Organization:
 ### 1) Compile
 ```
 cd ./CHROMA
-make
+make [ARCH=sm_xx(default sm_89)]
 ```
 ### 2) Run
 ```
@@ -59,7 +59,7 @@ Enter input filename: [input your dataset path]
 ```
 ### 4) Choose RGC optimization (if no input 0)
 ```
-Enter RGC (default $\theta$=10): [input your $\theta$]
+Enter RGC (default θ=10): [input your θ]
 ```
 ### 5) Enable SDC
 ```
