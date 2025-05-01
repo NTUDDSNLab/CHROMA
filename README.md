@@ -1,6 +1,5 @@
 # CHROMA: Coloring with High-Quality Resilient Optimized Multi-GPU Allocation
 ## Getting started Instructions
-+ Clone this project git clone git@github.com:NTUDDSNLab/CHROMA.git
 +  🖥️ Hardware
     - `CPU`: Intel Core i9-14900 (32 cores) @ 5.5GHz
     - `Memory`: 128 GB
