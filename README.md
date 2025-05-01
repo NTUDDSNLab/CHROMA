@@ -28,6 +28,20 @@ Repository Organization:
         |-- ECLGC.cu          
         |-- globals.cu  
         |-- Makefile
+    |-- CHROMA_RGP
+        |-- CHROMA_RGP.cu        
+        |-- ECLgraph.h  
+    |-- JP_Series
+        |-- chroma_utils.cu   
+        |-- ECLGC.cu    
+        |-- globals.cu   
+        |-- JP-Series     
+        |-- Makefile
+        |-- chroma_utils.cuh  
+        |-- ECLgraph.h  
+        |-- globals.cuh  
+        |-- JP-Series.cu  
+        |-- PA.cu
     |-- Dataset
         |-- Email-Enron.col.egr  
         |-- school1.egr               
@@ -107,20 +121,37 @@ Enter input filename: [input your dataset path]
 ```
 Enter RGC (default θ=10): [input your θ]
 ```
-#### 5) Enable SDC
+#### 5) Choose Partition number
 ```
-Enable SDC optimization? (y/n): 
+nPart: [input your Partition number]
 ```
 #### 6) check the result
 You will get result like:
 ```
+Enter input filename: ../Datasets/facebook.egr
+Enter RGC (default θ=10): 0
+Using RGC θ = 0
+nPart: 2
+Devide to = 2graphs
 input: ../Datasets/facebook.egr
 nodes: 4039
 edges: 176468
 avg degree: 43.69
-runtime:    1.349632 ms
+Boundary node count = 184
+Partition 0 => subgraph has 2040 nodes, 51650 edges
+Partition 1 => subgraph has 2183 nodes, 126886 edges
+Boundary graph has 184 nodes, 2068 edges
+h_nodes 184 
+[GPU 0] final iteration = 28, final theta = 2147483647
+INIT FINISH
+RUN LARGE FINISH
+RUN SMALL FINISH
+runtime:    7.244800 ms
+throughput: 0.557503 Mnodes/s
+throughput: 24.357884 Medges/s
 result verification passed
-colors used: 75
+colors used: 73
+
 ```
 ### 3. JP-Series
 #### 1) Compile
