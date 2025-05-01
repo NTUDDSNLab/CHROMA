@@ -1,35 +1,28 @@
-# ================== 使用方法 ==================
-# $ make         生成執行檔 CHROMA
-# $ make clean   刪除 *.o 及 CHROMA
-# =================================================
-
-# ---- 使用者可調參數 ----------------------------------
+# ---- 使用者可調 ----------------------------------
 ARCH      ?= sm_89
 CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH)
 DC_FLAGS  := -dc $(CXXFLAGS)
 LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177
-TARGET    := CHROMA_RGP
+TARGET    := CHROMA
 
-# ---- 原始檔清單 --------------------------------------
-SRCS := globals.cu chroma_utils.cu ECLGC.cu PA.cu CHROMA_RGP.cu
+# ---- 原始檔清單 -----------------------------------
+SRCS := globals.cu chroma_utils.cu ECLGC.cu PA.cu CHROMA.cu
 OBJS := $(SRCS:.cu=.o)
 
-# ---- 預設目標 ----------------------------------------
+# ---- 目標 ----------------------------------------
 all: $(TARGET)
 
-# ---- 可執行檔 ----------------------------------------
 $(TARGET): $(OBJS)
-	@echo "== Linking $(TARGET) =="
+	@echo "== Linking $(TARGET) (ARCH=$(ARCH)) =="
 	nvcc $(LINKFLAGS) $^ -o $@
 	@rm -f $(OBJS)
 
-# ---- 個別物件 ----------------------------------------
 %.o: %.cu
-	@echo "== Compiling $< =="
-	nvcc $(DC_FLAGS) $< -o $@
+	@echo "== Compiling $< (ARCH=$(ARCH)) =="
+	nvcc $(DC_FLAGS) -c $< -o $@
 
-# ---- 清理 -------------------------------------------
 clean:
-	rm -f  $(TARGET)
+	@echo "== Clean =="
+	@rm -f $(TARGET) $(OBJS)
 
 .PHONY: all clean
