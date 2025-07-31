@@ -147,7 +147,7 @@ grid.sync();
 
 if(grid.thread_rank()==0){
 atomicExch(&avg_deg, int(total_deg/total_worker));
-printf("avg is :%d\n",avg_deg);
+// printf("avg is :%d\n",avg_deg);
 atomicExch(&total_deg, 0);
 atomicExch(&total_worker, 0);
 }
