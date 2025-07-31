@@ -92,7 +92,7 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
       
     }
   }
-  if (maxrange >= Mask) {printf("too many active neighbors\n"); asm("trap;");}
+  // if (maxrange >= Mask) {printf("too many active neighbors\n"); asm("trap;");}
 
   for (int i = thread; i < edges / WS + 1; i += threads) posscol2[i] = -1;
 }

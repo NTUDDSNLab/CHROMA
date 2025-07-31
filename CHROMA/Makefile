@@ -5,9 +5,9 @@
 
 # ---- 使用者可調參數 ----------------------------------
 ARCH      ?= sm_89
-CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH)
+CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH) -rdc=true
 DC_FLAGS  := -dc $(CXXFLAGS)
-LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177
+LINKFLAGS := -O3 -arch=$(ARCH) -rdc=true -diag-suppress=177
 TARGET    := CHROMA
 
 # ---- 原始檔清單 --------------------------------------
