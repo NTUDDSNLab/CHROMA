@@ -186,5 +186,5 @@ runtime:    12.476577 ms
 result verification passed
 colors used: 74
 ```
-## APPANDIX
+## APPENDIX
 ### You can get datasets [here](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html)
