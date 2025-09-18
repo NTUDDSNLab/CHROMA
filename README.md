@@ -18,44 +18,16 @@
 ```
 Repository Organization:
     |-- CHROMA
-        |-- CHROMA.cu        
-        |-- chroma_utils.cuh  
-        |-- ECLgraph.h  
-        |-- globals.cuh  
-        |-- PA.cu
-        |-- chroma_utils.cu  
-        |-- ECLGC.cu          
-        |-- globals.cu  
-        |-- Makefile
+        |-- Source files of CHROMA
     |-- CHROMA_RGP
-        |-- CHROMA_RGP.cu        
-        |-- ECLgraph.h  
+        |-- Distributed version of CHROMA with resilient graph partition (RGP) 
     |-- JP_Series
-        |-- chroma_utils.cu   
-        |-- ECLGC.cu    
-        |-- globals.cu   
-        |-- JP-Series     
-        |-- Makefile
-        |-- chroma_utils.cuh  
-        |-- ECLgraph.h  
-        |-- globals.cuh  
-        |-- JP-Series.cu  
-        |-- PA.cu
+        |-- Other ordering heuristic implmented in CUDA on GPUs
     |-- Dataset
-        |-- Email-Enron.col.egr  
-        |-- school1.egr               
-        |-- soc-Slashdot0902.col.egr  
-        |-- wiki-Vote.col.egr
-        |-- facebook.egr         
-        |-- soc-Epinions1.col.egr     
-        |-- Stanford.egr              
-        |-- youtube.egr
-        |-- le450_25d.egr        
-        |-- soc-Slashdot0811.col.egr  
-        |-- twitter_combined.col.egr
+        |-- Experiment datasets
 ```
 
-## SOTA
+## State-of-the-art Design Sources
 ### MIS
 1. JP-SL (in /JP-Series)
 2. JP-SLL (in /JP-Series)
@@ -68,7 +40,7 @@ Repository Organization:
 4. [kokkos VB-BIT](https://github.com/kokkos/kokkos-kernels)
 
 
-## Environment Setup
+## How to Run?
 ### 1. CHROMA
 #### 1) Compile
 ```
@@ -152,7 +124,7 @@ result verification passed
 colors used: 73
 
 ```
-### 3. JP-Series
+### 3. Other Ordering Heursitic in JP Algorithm
 #### 1) Compile
 ```
 cd ./JP-Series
@@ -174,7 +146,7 @@ Select algorithm:
 3) JP-SLL
 Enter your choice (1/2/3): [input your algorithm]
 ```
-#### 5) check the result
+#### 5) Check the result
 You will get result like:
 ```
 Using JP-SL
