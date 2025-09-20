@@ -2,3 +2,7 @@
 *.csv
 *.out
 *.sh
+*.o
+CHROMA/CHROMA
+CHROMA/CHROMA_RGP
+JP-Series/JP-Series

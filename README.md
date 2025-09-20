@@ -41,6 +41,8 @@ Repository Organization:
 
 
 ## How to Run?
+
+## Exper
 ### 1. CHROMA
 #### 1) Compile
 ```
@@ -75,6 +77,18 @@ result verification passed
 colors used: 75
 ```
 ### 2. CHROMA(RGP)
+
+### 0) Install Essentials 
+
+Install [METIS](https://github.com/KarypisLab/METIS). Just follow the instruction of the repository.
+The default path, header file, and shared libary paths of METIS are:
+```
+$(HOME)/local/
+$(HOME)/local/include
+$(HOME)/local/lib
+```
+If you want to install METIS in different path, change the `INCLUDES_METIS` and `LIBS_METIS` in CHROMA_RGP/Makefile
+
 #### 1) Compile
 ```
 cd ./CHROMA_RGP
