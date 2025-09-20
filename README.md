@@ -51,21 +51,19 @@ make [ARCH=sm_xx(default sm_89)]
 ```
 #### 2) Run
 ```
-./CHROMA
+Usage ./CHROMA [options]
+
+Options:
+  -f, --file <path>         Input graph file path (required)
+  -a, --algorithm <algo>    Select algorithm:
+                            0 or P_SL_WBR     : P_SL_WBR algorithm
+                            1 or P_SL_WBR_SDC : P_SL_WBR_SDC algorithm
+                            (default: P_SL_WBR)
+  -r, --resilient <number>  Set resilient number θ value (default: 10)
+  -h, --help                Show this help message
 ```
-#### 3) Choose dataset
-```
-Enter input filename: [input your dataset path]
-```
-#### 4) Choose RGC optimization (if no input 0)
-```
-Enter RGC (default θ=10): [input your θ]
-```
-#### 5) Enable SDC
-```
-Enable SDC optimization? (y/n): 
-```
-#### 6) check the result
+
+#### 3) check the result
 You will get result like:
 ```
 input: ../Datasets/facebook.egr
@@ -96,21 +94,16 @@ make [ARCH=sm_xx(default sm_89)]
 ```
 #### 2) Run
 ```
-./CHROMA
+Usage: ./CHROMA_RGP [options]
+
+Options:
+  -f, --file <path>         Input graph file path (required)
+  -r, --resilient <number>  Set resilient number θ value (default: 10)
+  -p, --parts <number>      Number of partitions (default: 2)
+  -h, --help                Show this help message
 ```
-#### 3) Choose dataset
-```
-Enter input filename: [input your dataset path]
-```
-#### 4) Choose RGC optimization (if no input 0)
-```
-Enter RGC (default θ=10): [input your θ]
-```
-#### 5) Choose Partition number
-```
-nPart: [input your Partition number]
-```
-#### 6) check the result
+
+#### 3) check the result
 You will get result like:
 ```
 Enter input filename: ../Datasets/facebook.egr
@@ -146,21 +139,19 @@ make [ARCH=sm_xx(default sm_89)]
 ```
 #### 2) Run
 ```
-./JP-Series
+Usage: ./JP-Series [options]
+
+Options:
+  -f, --file <path>         Input graph file path (required)
+  -a, --algorithm <algo>    Select algorithm:
+                            0 or JP-SL  : JP-SL algorithm
+                            1 or JP-ADG : JP-ADG algorithm
+                            2 or JP-SLL : JP-SLL algorithm
+                            (default: JP-SL)
+  -r, --resilient <number>  Set resilient number θ value (default: 0)
+  -h, --help                Show this help message
 ```
-#### 3) Choose dataset
-```
-Enter input filename: [input your dataset path]
-```
-#### 4) Select Algorithm
-```
-Select algorithm:
-1) JP-SL
-2) JP-ADG
-3) JP-SLL
-Enter your choice (1/2/3): [input your algorithm]
-```
-#### 5) Check the result
+#### 3) Check the result
 You will get result like:
 ```
 Using JP-SL

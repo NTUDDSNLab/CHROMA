@@ -13,7 +13,7 @@ RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib -Xlinker --enable-new-
 LDFLAGS     := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
                $(LIBDIRS) -lmetis -lGKlib $(RPATH_FLAGS)
 # LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp $(LIBS_METIS) -lmetis -lGKlib
-TARGET    := CHROMA
+TARGET    := CHROMA_RGP
 
 # ---- 原始檔清單 -----------------------------------
 SRCS := CHROMA_RGP.cu
