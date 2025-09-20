@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <cooperative_groups.h>
+#include <cstring>
 namespace cg = cooperative_groups;
 
 #include <cuda_runtime.h>
@@ -896,41 +897,98 @@ void createMergeWithCopies(
   }
 }
 
+// 添加幫助函數
+void print_help(const char* program_name) {
+    std::cout << "Usage: " << program_name << " [options]\n\n";
+    std::cout << "Options:\n";
+    std::cout << "  -f, --file <path>         Input graph file path (required)\n";
+    std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 10)\n";
+    std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
+    std::cout << "  -h, --help                Show this help message\n\n";
+    std::cout << "Examples:\n";
+    std::cout << "  " << program_name << " -f graph.txt\n";
+    std::cout << "  " << program_name << " --file graph.txt --resilient 15\n";
+    std::cout << "  " << program_name << " -f graph.txt --parts 4 --resilient 8\n";
+}
+
 int main(int argc, char* argv[]) {
-    // ========================================PRE========================================
+    // 默認設置
     std::string filename;
-    int fuzzy_number = 10;
-  
-    std::cout << "Enter input filename: ";
-    std::cin >> filename;
-    std::cin.ignore();
-    std::string input_line;
+    int fuzzy_number = 10;  // RGC θ 默認值為 10
+    int nParts = 2;         // 默認分割為 2 個子圖
 
-    std::cout << "Enter RGC (default \u03B8=10): ";
-    std::getline(std::cin, input_line);
-    if (!input_line.empty()) {
-      fuzzy_number = std::stoi(input_line);
+    // 解析命令行參數
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+            print_help(argv[0]);
+            return 0;
+        } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--file") == 0) {
+            if (i + 1 < argc) {
+                filename = argv[++i];
+            } else {
+                std::cerr << "Error: File option requires an argument.\n";
+                print_help(argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--resilient") == 0) {
+            if (i + 1 < argc) {
+                try {
+                    fuzzy_number = std::stoi(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: Invalid resilient number '" << argv[i] << "'.\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: Resilient option requires an argument.\n";
+                print_help(argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--parts") == 0) {
+            if (i + 1 < argc) {
+                try {
+                    nParts = std::stoi(argv[++i]);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error: Invalid parts number '" << argv[i] << "'.\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: Parts option requires an argument.\n";
+                print_help(argv[0]);
+                return 1;
+            }
+        } else if (argv[i][0] == '-') {
+            std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
+            print_help(argv[0]);
+            return 1;
+        } else {
+            std::cerr << "Error: Unexpected argument '" << argv[i] << "'. Use -f to specify input file.\n";
+            print_help(argv[0]);
+            return 1;
+        }
     }
-    std::cout << "Using RGC \u03B8 = " << fuzzy_number << std::endl;
-    int nParts=2;
-    std::cout << "nPart: ";
-    std::getline(std::cin, input_line);
-    if (!input_line.empty()) {
-      nParts = std::stoi(input_line);
+
+    // 檢查是否提供了圖形文件
+    if (filename.empty()) {
+        std::cerr << "Error: No graph file specified. Use -f or --file to specify input file.\n";
+        print_help(argv[0]);
+        return 1;
     }
-    std::cout << "Devide to = " << nParts <<"graphs"<< std::endl;
 
-
+    // 讀取圖形文件
     ECLgraph g = readECLgraph(filename.c_str());
 
     if (nParts < 1) {
         printf("ERROR: nParts must be >= 1\n");
         exit(-1);
     }
-    printf("input: %s\n", filename.c_str());
-    printf("nodes: %d\n", g.nodes);
-    printf("edges: %d\n", g.edges);
-    printf("avg degree: %.2f\n", 1.0 * g.edges / g.nodes);
+    
+    // 顯示設置信息
+    printf("Input file: %s\n", filename.c_str());
+    printf("Resilient number θ: %d\n", fuzzy_number);
+    printf("Number of partitions: %d\n", nParts);
+    printf("Nodes: %d\n", g.nodes);
+    printf("Edges: %d\n", g.edges);
+    printf("Average degree: %.2f\n", 1.0 * g.edges / g.nodes);
 
     int* const color = new int [g.nodes];
     setParameters<<<1, 1>>>(fuzzy_number);

@@ -3,7 +3,16 @@ ARCH      ?= sm_89
 CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH)
 DC_FLAGS  := -dc $(CXXFLAGS)
 # 加入 METIS 與 OpenMP 的連結參數
-LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp -lmetis
+
+INCLUDES_METIS := -I$(HOME)/local/include
+LIBS_METIS := -L$(HOME)/local/lib
+
+# 寫入 rpath，讓執行檔自帶 ~/local/lib 的搜尋路徑（免 LD_LIBRARY_PATH）
+RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib -Xlinker --enable-new-dtags
+
+LDFLAGS     := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
+               $(LIBDIRS) -lmetis -lGKlib $(RPATH_FLAGS)
+# LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp $(LIBS_METIS) -lmetis -lGKlib
 TARGET    := CHROMA
 
 # ---- 原始檔清單 -----------------------------------
@@ -15,7 +24,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "== Linking $(TARGET) (ARCH=$(ARCH)) =="
-	nvcc $(LINKFLAGS) $^ -o $@
+	nvcc $(LDFLAGS) $^ -o $@
 
 %.o: %.cu
 	@echo "== Compiling $< (ARCH=$(ARCH)) =="
