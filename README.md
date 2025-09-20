@@ -42,7 +42,6 @@ Repository Organization:
 
 ## How to Run?
 
-## Exper
 ### 1. CHROMA
 #### 1) Compile
 ```
