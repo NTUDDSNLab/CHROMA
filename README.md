@@ -23,6 +23,11 @@ Repository Organization:
         |-- Distributed version of CHROMA with resilient graph partition (RGP) 
     |-- JP_Series
         |-- Other ordering heuristic implmented in CUDA on GPUs
+    |-- CPU
+        |-- Sequential
+          |-- Sequential heuristic implmented in CPU
+        |-- Parallel
+          |-- Parallel heuristic implmented in CPU      
     |-- Dataset
         |-- Experiment datasets
 ```
@@ -162,5 +167,33 @@ runtime:    12.476577 ms
 result verification passed
 colors used: 74
 ```
+
+### 1. Sequential Algorithm
+#### 1) Compile
+```
+cd ./CPU/Sequential
+g++ -O3 -std=c++17 <source_file>.cpp -o <output_binary> [extra_flags]
+```
+#### 2) Run
+```
+./<output_binary> [arguments]
+
+example: ./<output_binary> ../dataset/facebook.egr
+```
+### 1. Parallel Algorithm
+#### 1) Compile
+```
+cd ./CPU/Parallel
+g++ -O3 -std=c++17 -fopenmp <source_file>.cpp -o <output_binary> [extra_flags]
+```
+#### 2) Run
+```
+./<output_binary> [arguments]
+
+example: ./<output_binary> ../dataset/facebook.egr
+```
+
+
+
 ## APPENDIX
 ### You can get datasets [here](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html)
