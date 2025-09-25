@@ -3,6 +3,9 @@
 *.out
 *.sh
 *.o
+Datasets/
+*_pycache_*
+cpu_*
 CHROMA/CHROMA
 CHROMA_RGP/CHROMA_RGP
 JP-Series/JP-Series

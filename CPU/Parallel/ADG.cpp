@@ -5,7 +5,7 @@
  #include <algorithm>
  #include <sys/time.h>
  #include "ECLgraph.h"
-  #include <bits/stdc++.h>
+ #include <bits/stdc++.h>
  #include <omp.h>
  #include "ECLgraph.h"
  static const int BPI = 32;  // bits per int

@@ -5,7 +5,7 @@
 #include "ECLgraph.h"
 #include <vector>
 #include <algorithm>
-        #include <list>
+#include <list>
 #include <utility>
 #include <cstdio>
 

@@ -44,7 +44,7 @@ static int init(const int nodes, const int edges, const int* const __restrict__ 
       wl[tmp] = v;
       for (int i = beg; i < end; i++) {
         const int nei = nlist[i];
-        const int degn = nidx[nei + 1] - nidx[nei];
+        // const int degn = nidx[nei + 1] - nidx[nei];
         const int priority_n=priority[nei];
         int hash_v = hash(v);
         int hash_nei = hash(nei);
@@ -59,7 +59,7 @@ static int init(const int nodes, const int edges, const int* const __restrict__ 
       active = 0;
       for (int i = beg; i < end; i++) {
         const int nei = nlist[i];
-        const int degn = nidx[nei + 1] - nidx[nei];
+        // const int degn = nidx[nei + 1] - nidx[nei];
         const int priority_n=priority[nei];
         int hash_v = hash(v);
         int hash_nei = hash(nei);
