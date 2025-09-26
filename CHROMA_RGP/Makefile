@@ -1,18 +1,28 @@
 # ---- 使用者可調 ----------------------------------
 ARCH      ?= sm_89
-CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH) -DHAVE_METIS -Xcompiler -fopenmp
+PARTITIONER_FLAG := -DHAVE_METIS
+PARTITIONER_FLAG += -DHAVE_KAHIP # Open this if you want to use KaHIP
+CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH) $(PARTITIONER_FLAG) -Xcompiler -fopenmp
 DC_FLAGS  := -dc $(CXXFLAGS) 
 # 加入 METIS 與 OpenMP 的連結參數
 
+# METIS (保持原有的 ~/local 路徑)
 INCLUDES_METIS := -I$(HOME)/local/include
 LIBS_METIS := -L$(HOME)/local/lib
 
-# 寫入 rpath，讓執行檔自帶 ~/local/lib 的搜尋路徑（免 LD_LIBRARY_PATH）
-RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib -Xlinker --enable-new-dtags
+# KaHIP (修改為 External 目錄)
+INCLUDES_KAHIP := -I../External/KaHIP/deploy
+LIBS_KAHIP := -L../External/KaHIP/deploy
 
-LDFLAGS     := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
-               $(LIBDIRS) -lmetis -lGKlib $(RPATH_FLAGS)
-# LINKFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp $(LIBS_METIS) -lmetis -lGKlib
+# 寫入 rpath，讓執行檔自帶庫的搜尋路徑（免 LD_LIBRARY_PATH）
+RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib \
+               -Xlinker -rpath -Xlinker $(abspath ../External/KaHIP/deploy) \
+               -Xlinker --enable-new-dtags
+
+# 統一使用 LDFLAGS，移除冗餘的註釋行
+LDFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
+           $(LIBS_METIS) $(LIBS_KAHIP) -lmetis -lGKlib -lkahip $(RPATH_FLAGS)
+
 TARGET    := CHROMA_RGP
 
 # ---- 原始檔清單 -----------------------------------
@@ -24,11 +34,11 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "== Linking $(TARGET) (ARCH=$(ARCH)) =="
-	nvcc $(LDFLAGS) $^ -o $@
+	nvcc $(LDFLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) $^ -o $@
 
 %.o: %.cu
 	@echo "== Compiling $< (ARCH=$(ARCH)) =="
-	nvcc $(DC_FLAGS) -c $< -o $@
+	nvcc $(DC_FLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) -c $< -o $@
 
 clean:
 	@echo "== Clean =="

@@ -916,7 +916,7 @@ void print_help(const char* program_name) {
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
     std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
-    std::cout << "      --partitioner <name>  Partitioner: metis|round_robin|random|ldg (default: metis)\n";
+    std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip (default: metis)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";

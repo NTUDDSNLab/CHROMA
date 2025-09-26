@@ -1,0 +1,9 @@
+[submodule "External/KaHIP"]
+	path = External/KaHIP
+	url = https://github.com/KaHIP/KaHIP.git
+[submodule "External/GKlib"]
+	path = External/GKlib
+	url = https://github.com/KarypisLab/GKlib.git
+[submodule "External/METIS"]
+	path = External/METIS
+	url = https://github.com/KarypisLab/METIS.git

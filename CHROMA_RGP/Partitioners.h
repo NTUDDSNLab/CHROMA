@@ -17,14 +17,21 @@
 #include <metis.h>
 #endif
 
+#ifdef HAVE_KAHIP
+#include "kaHIP_interface.h"
+#endif
+
 namespace partitioning {
 
-enum class Method { Metis, RoundRobin, Random, LDG };
+enum class Method { Metis, RoundRobin, Random, LDG, KaHIP};
 
 inline std::string to_lower(std::string s) {
   for (char &c : s) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
   return s;
 }
+
+
+
 
 inline bool parse_method(const std::string &name, Method &out) {
   const std::string nm = to_lower(name);
@@ -32,8 +39,39 @@ inline bool parse_method(const std::string &name, Method &out) {
   if (nm == "round_robin" || nm == "rr") { out = Method::RoundRobin; return true; }
   if (nm == "random" || nm == "rand") { out = Method::Random; return true; }
   if (nm == "ldg") { out = Method::LDG; return true; }
+  if (nm == "kahip") { out = Method::KaHIP; return true; }
   return false;
 }
+
+#ifdef HAVE_KAHIP
+inline bool compute_partition_kahip(const ECLgraph &g, int nParts, std::vector<int> &part) {
+  int n = g.nodes;
+  int *xadj = g.nindex;
+  int *adjncy = g.nlist;
+  int *adjwgt = g.eweight;
+  int *vwgt = nullptr;
+  part.resize(g.nodes);
+
+  double imbalance = 0.03;
+  const bool suppress_output = true;
+  const int seed = 42;
+  const int mode = ECO;
+  int edgecut = 0;
+
+  std::cout << "----------<Start KaHIP>---------" << std::endl;
+  kaffpa(&n, vwgt, xadj, adjwgt, adjncy, &nParts, &imbalance, suppress_output, seed, mode, &edgecut, part.data());
+
+  std::cout << "[KaHIP] partition result: " << std::endl;
+  std::cout << " - edgecut: " << edgecut << std::endl;
+  std::cout << " - imbalance: " << imbalance << std::endl;
+  std::cout << " - seed: " << seed << std::endl;
+  std::cout << " - mode: " << mode << std::endl;
+  std::cout << "--------------------------------" << std::endl;
+  
+  return true;
+}
+#endif
+
 
 inline bool compute_partition_round_robin(const ECLgraph &g, int nParts, std::vector<int> &part) {
   part.resize(g.nodes);
@@ -160,6 +198,13 @@ inline bool compute_partition(const ECLgraph &g,
       }
 #else
       if (err) *err = "METIS not available (rebuild with -DHAVE_METIS and link METIS)";
+      return false;
+#endif
+    case Method::KaHIP:
+#ifdef HAVE_KAHIP
+      return compute_partition_kahip(g, nParts, part);
+#else
+      if (err) *err = "KaHIP not available (rebuild with -DHAVE_KAHIP and link KaHIP)";
       return false;
 #endif
   }
