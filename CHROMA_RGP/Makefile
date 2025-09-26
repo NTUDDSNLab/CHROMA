@@ -1,7 +1,7 @@
 # ---- 使用者可調 ----------------------------------
 ARCH      ?= sm_89
-CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH)
-DC_FLAGS  := -dc $(CXXFLAGS)
+CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH) -DHAVE_METIS -Xcompiler -fopenmp
+DC_FLAGS  := -dc $(CXXFLAGS) 
 # 加入 METIS 與 OpenMP 的連結參數
 
 INCLUDES_METIS := -I$(HOME)/local/include
@@ -35,3 +35,11 @@ clean:
 	@rm -f $(TARGET) $(OBJS)
 
 .PHONY: all clean
+
+# ---- Tests (CPU-only) --------------------------------
+# Build a small unit test for partitioners without CUDA/METIS
+test_partitioners:
+	@echo "== Building tests/partitioner_test =="
+	g++ -O3 -std=c++17 -I. tests/partitioner_test.cpp -o tests/partitioner_test
+	@echo "== Running tests/partitioner_test =="
+	./tests/partitioner_test
