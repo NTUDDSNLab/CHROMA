@@ -2,7 +2,7 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <metis.h>
+#include "Partitioners.h"
 #include "ECLgraph.h"
 #include <omp.h>
 #include <cuda.h>
@@ -537,7 +537,8 @@ void runBoundaryGC(
     const ECLgraph &g,
     unsigned int** partialColor_d_out,
     unsigned int** partialPosColor_d_out,
-    unsigned int** partialIterList_d_out 
+    unsigned int** partialIterList_d_out,
+    float* elapsed_ms_out
 ){
     cudaSetDevice(deviceID);
     cudaGetLastError();
@@ -572,6 +573,8 @@ void runBoundaryGC(
     cudaMemcpy(d_nidx,  g.nindex, (g.nodes+1)*sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_nlist, g.nlist,   g.edges   *sizeof(int), cudaMemcpyHostToDevice);
     cudaMemset(d_iterList, 0, g.nodes*sizeof(unsigned int));
+    // Time the boundary processing on this device
+    GPUTimer gpu_timer_boundary; gpu_timer_boundary.start();
     {
         init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d_nidx, d_nlist, d_degree);
         cudaDeviceSynchronize();
@@ -621,6 +624,9 @@ void runBoundaryGC(
     runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
     cudaDeviceSynchronize();
     printf("RUN SMALL FINISH\n");
+    // Stop timer and optionally report
+    float boundary_secs = gpu_timer_boundary.stop();
+    if (elapsed_ms_out) { *elapsed_ms_out = boundary_secs * 1000.0f; }
     {
         std::vector<unsigned int> hostColor(g.nodes);
         cudaMemcpy(hostColor.data(), color_d, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
@@ -651,11 +657,12 @@ void runOnGPU(
   unsigned int** partialColor_d_out,
   unsigned int** partialIterList_d_out,
   unsigned int* boundaryColor_d,
-  unsigned int* boundaryPosColor_d
+  unsigned int* boundaryPosColor_d,
+  float* elapsed_ms_out
 
 ){
   cudaSetDevice(deviceID);
-
+  
   cudaGetLastError(); 
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -709,6 +716,8 @@ void runOnGPU(
 
   cudaMemset(d_iterList, 0, g.nodes*sizeof(unsigned int));
 
+  // Time per-partition compute on this device
+  GPUTimer gpu_timer_partition; gpu_timer_partition.start();
   {
       init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d_nidx, d_nlist, d_degree);
       cudaDeviceSynchronize();
@@ -784,6 +793,9 @@ void runOnGPU(
 
   runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
   cudaDeviceSynchronize();
+  // Stop timer and optionally report
+  float part_secs = gpu_timer_partition.stop();
+  if (elapsed_ms_out) { *elapsed_ms_out = part_secs * 1000.0f; }
   {
       std::vector<unsigned int> hostColor(g.nodes);
       cudaMemcpy(hostColor.data(), color_d, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
@@ -904,11 +916,12 @@ void print_help(const char* program_name) {
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
     std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
+    std::cout << "      --partitioner <name>  Partitioner: metis|round_robin|random|ldg (default: metis)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
     std::cout << "  " << program_name << " --file graph.txt --resilient 15\n";
-    std::cout << "  " << program_name << " -f graph.txt --parts 4 --resilient 8\n";
+    std::cout << "  " << program_name << " -f graph.txt --parts 4 --resilient 8 --partitioner ldg\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -916,6 +929,7 @@ int main(int argc, char* argv[]) {
     std::string filename;
     int fuzzy_number = 10;  // RGC θ 默認值為 10
     int nParts = 2;         // 默認分割為 2 個子圖
+    std::string partitioner_name = "metis"; // 默認使用 METIS 分割
 
     // 解析命令行參數
     for (int i = 1; i < argc; i++) {
@@ -953,6 +967,14 @@ int main(int argc, char* argv[]) {
                 }
             } else {
                 std::cerr << "Error: Parts option requires an argument.\n";
+                print_help(argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "--partitioner") == 0) {
+            if (i + 1 < argc) {
+                partitioner_name = argv[++i];
+            } else {
+                std::cerr << "Error: Partitioner option requires a name.\n";
                 print_help(argv[0]);
                 return 1;
             }
@@ -1001,33 +1023,20 @@ int main(int argc, char* argv[]) {
     const int SMs = deviceProp.multiProcessorCount;
     const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
   
-    // ========================================METIS========================================
-    idx_t nVertices = g.nodes;
-    idx_t ncon      = 1;
-    idx_t objval;
-    std::vector<idx_t> part(nVertices, 0); 
+    // ===================================== Partitioning =====================================
+    partitioning::Method part_method;
+    if (!partitioning::parse_method(partitioner_name, part_method)) {
+        std::cerr << "Error: Unknown partitioner '" << partitioner_name
+                  << "'. Use one of: metis, round_robin, random, ldg\n";
+        return 1;
+    }
 
-    std::vector<real_t> tpwgts(nParts * ncon, 1.0 / (real_t)nParts);
-    std::vector<real_t> ubvec(ncon, 1.05);
-
-    int ret = METIS_PartGraphKway(
-        &nVertices,
-        &ncon,
-        g.nindex,
-        g.nlist,
-        nullptr, // vwgt
-        nullptr, // vsize
-        nullptr, // adjwgt
-        (idx_t*)&nParts,
-        tpwgts.data(),
-        ubvec.data(),
-        nullptr, // options
-        &objval,
-        part.data()
-    );
-    if (ret != METIS_OK) {
-        printf("METIS partition fail, code=%d\n", ret);
-        exit(-1);
+    std::vector<int> part; // part[v] in [0, nParts-1]
+    std::string part_err;
+    bool part_ok = partitioning::compute_partition(g, nParts, part_method, part, &part_err);
+    if (!part_ok) {
+        std::cerr << "Partitioning failed: " << part_err << "\n";
+        return 1;
     }
     // -----------------------------------------------------------------------
     //  Collect partitioned nodes & boundary
@@ -1103,28 +1112,53 @@ int main(int argc, char* argv[]) {
     GPUTimer timer;
     timer.start();
 
+    float boundary_ms = 0.0f;
     runBoundaryGC(0, boundaryGraph,
                   &boundaryColor_d,
                   &boundaryPosColor_d,
-                  &boundaryIterList_d);
+                  &boundaryIterList_d,
+                  &boundary_ms);
     cudaDeviceSynchronize();
     int deviceCount = 0;
     cudaGetDeviceCount(&deviceCount);
     std::vector<unsigned int*> partialColorVec(nParts, nullptr);
     std::vector<unsigned int*> partialIterVec(nParts,  nullptr);
+    // Accumulate per-GPU compute time across its assigned partitions
+    std::vector<float> per_gpu_ms(deviceCount, 0.0f);
+    std::vector<int> per_gpu_parts(deviceCount, 0);
+
+    std::cout << "**** DeviceCount: " << deviceCount << std::endl;
     #pragma omp parallel num_threads(deviceCount)
     {
         int threadID = omp_get_thread_num();
+        float local_accum_ms = 0.0f;
+        int local_parts = 0;
         for (int i = threadID; i < nParts; i += deviceCount) {
+            float part_ms = 0.0f;
+            std::cout << "[GPU: " << threadID << "] is running on partition: " << i << std::endl;
             runOnGPU(threadID,
                      subGraphs[i],
                      sub_boundaryToLocal[i],
                      &partialColorVec[i],
                      &partialIterVec[i],
                      boundaryColor_d,
-                     boundaryPosColor_d);
+                     boundaryPosColor_d,
+                     &part_ms);
             cudaDeviceSynchronize();
+            local_accum_ms += part_ms;
+            local_parts += 1;
         }
+        per_gpu_ms[threadID] = local_accum_ms;
+        per_gpu_parts[threadID] = local_parts;
+    }
+    // Report per-GPU timings
+    for (int d = 0; d < deviceCount; ++d) {
+      if (per_gpu_parts[d] > 0) {
+        printf("[GPU %d] partitions: %d, compute time: %.3f ms\n", d, per_gpu_parts[d], per_gpu_ms[d]);
+      }
+    }
+    if (boundary_ms > 0.0f) {
+      printf("[GPU 0] boundary phase time: %.3f ms\n", boundary_ms);
     }
     cudaSetDevice(Device);
     cudaGetLastError(); 
