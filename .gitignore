@@ -1,9 +1,14 @@
 *.py
 *.csv
 *.out
-*.sh
 *.o
-Datasets/
+
+# Datasets
+Datasets/*.egr
+Datasets/SNAP/*.txt
+Datasets/SNAP/*.bin
+Datasets/SNAP/snap2ecl
+
 *_pycache_*
 cpu_*
 CHROMA/CHROMA
