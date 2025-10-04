@@ -12,14 +12,26 @@
 #include <algorithm>
 #include "chroma_utils.cuh"
 #include <cstring>
+#include "graph.h"
 
 // namespace cg = cooperative_groups;
+
+enum GraphFormat {
+    ECLGraph,
+    SNAPGraph,
+    MMIOGraph
+};
+
 
 // 添加幫助函數
 void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
+    std::cout << "                            Supported formats:\n";
+    std::cout << "                            .egr  : ECL graph format (binary)\n";
+    std::cout << "                            .txt  : Text format (CSR graph)\n";
+    std::cout << "                            .bin  : Binary format (CSR graph)\n";
     std::cout << "  -a, --algorithm <algo>    Select algorithm:\n";
     std::cout << "                            0 or P_SL_WBR     : P_SL_WBR algorithm\n";
     std::cout << "                            1 or P_SL_WBR_SDC : P_SL_WBR_SDC algorithm\n";
@@ -28,8 +40,8 @@ void print_help(const char* program_name) {
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
-    std::cout << "  " << program_name << " --file graph.txt -a P_SL_WBR_SDC\n";
-    std::cout << "  " << program_name << " -f graph.txt --algorithm 1 --resilient 15\n";
+    std::cout << "  " << program_name << " --file graph.egr -a P_SL_WBR_SDC\n";
+    std::cout << "  " << program_name << " -f graph.bin --algorithm 1 --resilient 15\n";
 }
 
 // 解析算法參數
@@ -53,9 +65,10 @@ __global__ void setParameters(int fuzzy_number) {
 
 static __global__
 void init_degree(const int nodes, const int* const __restrict__ nidx, const int* const __restrict__ nlist, unsigned int* const __restrict__ degree_list) {
-    int vertex_id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (vertex_id < nodes) {
+    int thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int vertex_id = thread_id; vertex_id < nodes; vertex_id += blockDim.x * gridDim.x) {
         int deg = nidx[vertex_id + 1] - nidx[vertex_id];
+        if (deg < 0) printf("Degree is negative: %d\n", deg);
         degree_list[vertex_id] = deg;
     }
 }
@@ -150,17 +163,45 @@ int main(int argc, char* argv[])
     }
 
     // 讀取圖形文件
-    ECLgraph g = readECLgraph(filename.c_str());
+    // 讀取圖形文件
+    ECLgraph g;
+    CSRGraph graph;
+    
+    // 根據文件擴展名決定使用哪種格式
+    std::string file_extension = filename.substr(filename.find_last_of(".") + 1);
+    
+    if (file_extension == "egr") {
+        // 使用 ECLgraph 讀取 .egr 文件
+        g = readECLgraph(filename.c_str());
+        // 創建一個空的 CSRGraph 用於兼容後續代碼
+        graph.file_num_nodes = g.nodes;
+        graph.file_num_edges = g.edges;
+        graph.max_node_id = g.nodes - 1;
+        std::cout << "Read .egr file using ECLgraph" << std::endl;
+    } else if (file_extension == "txt" || file_extension == "bin") {
+        // 使用 CSRGraph 讀取 .txt 或 .bin 文件
+        graph.buildFromTxtFile(filename, false);
+        std::cout << "build from " << file_extension << " file" << std::endl;
+        std::cout << filename << " is zero based: " << graph.is_zero_based << std::endl;
+        graph.transfromToECLGraph(g);
+    } else {
+        std::cerr << "Error: Unsupported file format '" << file_extension << "'. Supported formats: .egr, .txt, .bin" << std::endl;
+        return 1;
+    }
     
     // 顯示設置信息
     printf("Input file: %s\n", filename.c_str());
     printf("Algorithm: %s\n", algo_name.c_str());
     printf("RGC θ: %d\n", fuzzy_number);
+    printf("File num nodes: %d\n", graph.file_num_nodes);
+    printf("File num edges: %d\n", graph.file_num_edges);
     printf("Nodes: %d\n", g.nodes);
     printf("Edges: %d\n", g.edges);
+    printf("Max node id: %d\n", graph.max_node_id);
     printf("Average degree: %.2f\n", 1.0 * g.edges / g.nodes);
     
     setParameters<<<1, 1>>>(fuzzy_number);
+
     
     // GPU INFO
     cudaSetDevice(Device);
@@ -173,6 +214,66 @@ int main(int argc, char* argv[])
 
     DevPtr d;
     allocAndInit(g, d);
+
+    // Analyze the degree distribution of the graph
+    int max_degree = 0;
+    int max_degree_node = 0;
+    unsigned int sum_degree = 0;
+    for (int i = 0; i < g.nodes; i++) {
+        int deg = g.nindex[i+1] - g.nindex[i];
+        sum_degree += deg;
+        if (deg > max_degree) {
+            max_degree = deg;
+            max_degree_node = i;
+        }
+        if (deg < 0) printf("[%d]'s Degree is negative: %d\n", i, deg);
+    }
+    printf("Max degree: %d, Max degree node: %d\n", max_degree, max_degree_node);
+
+    // Check if sum_degree is 2*edges
+    // if (sum_degree != 2*g.edges) {
+    //     printf("Sum of degree is not 2*edges: %d %d\n", sum_degree, 2*g.edges);
+    //     exit(-1);
+    // }
+
+    // Finding if there is 0 id node
+    // for (int v = 0; v < g.edges; v++) {
+    //     if (g.nlist[v] == 0) {
+    //         printf("Found 0 id node: %d\n", v);
+    //         exit(-1);
+    //     }
+    // }
+
+    // Finding self-loop
+    // for (int v = 0; v < g.nodes; v++) {
+    //     for (int i = g.nindex[v]; i < g.nindex[v + 1]; i++) {
+    //         int u = g.nlist[i];
+    //         if (u == (v+1) {
+    //             printf("Found self-loop: %d %d\n", v, u);
+    //             exit(-1);
+    //         }
+    //     }
+    // }
+
+
+    // Check if the graph is undirected
+    // for (int v = 0; v < g.nodes; v++) {
+    //     for (int i = g.nindex[v]; i < g.nindex[v + 1]; i++) {
+    //         int u = g.nlist[i];
+    //         bool found = false;
+    //         for (int j = g.nindex[u]; j < g.nindex[u + 1]; j++) {
+    //             int w = g.nlist[j];
+    //             if (w == (v+1)) {
+    //                 found = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (!found) {
+    //             printf("(%d, %d) is not undirected\n", v, u);
+    //         }
+    //     }
+    // }
+
 
     GPUTimer timer;
     timer.start();

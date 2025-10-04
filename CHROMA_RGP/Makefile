@@ -1,9 +1,9 @@
 # ---- 使用者可調 ----------------------------------
-ARCH      ?= sm_89
+ARCH      ?= sm_86
 PARTITIONER_FLAG := -DHAVE_METIS
 PARTITIONER_FLAG += -DHAVE_KAHIP # Open this if you want to use KaHIP
-CXXFLAGS  := -O3 -std=c++17 -arch=$(ARCH) $(PARTITIONER_FLAG) -Xcompiler -fopenmp
-DC_FLAGS  := -dc $(CXXFLAGS) 
+CXXFLAGS  := -O3 -std=c++17 -I../lib/io
+DC_FLAGS  := -dc -arch=$(ARCH) $(PARTITIONER_FLAG) -Xcompiler -fopenmp $(CXXFLAGS) 
 # 加入 METIS 與 OpenMP 的連結參數
 
 # METIS (保持原有的 ~/local 路徑)
@@ -27,7 +27,8 @@ TARGET    := CHROMA_RGP
 
 # ---- 原始檔清單 -----------------------------------
 SRCS := CHROMA_RGP.cu
-OBJS := $(SRCS:.cu=.o)
+CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
+OBJS := $(SRCS:.cu=.o) $(CPP_SRCS:.cpp=.o)
 
 # ---- 目標 ----------------------------------------
 all: $(TARGET)
@@ -35,10 +36,16 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "== Linking $(TARGET) (ARCH=$(ARCH)) =="
 	nvcc $(LDFLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) $^ -o $@
+	@rm -f $(OBJS)
 
 %.o: %.cu
 	@echo "== Compiling $< (ARCH=$(ARCH)) =="
 	nvcc $(DC_FLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) -c $< -o $@
+
+%.o: %.cpp
+	@echo "== Compiling $< =="
+	g++ $(CXXFLAGS) -c $< -o $@
+
 
 clean:
 	@echo "== Clean =="
