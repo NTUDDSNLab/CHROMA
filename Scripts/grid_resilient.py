@@ -8,6 +8,8 @@ best run (smallest colors, ties by fastest runtime), and write a compact JSON:
 
   {
     "datasetA.egr": {
+      "vertices" : 1000000,
+      "edges" : 10000000,
       "8": {"color": 23, "runtime_ms": 12.345},
       "9": {"color": 22, "runtime_ms": 12.111}
     },
@@ -16,7 +18,7 @@ best run (smallest colors, ties by fastest runtime), and write a compact JSON:
 
 Usage example:
   python3 grid_resilient.py \
-    --dataset-dir Datasets --pattern "*.egr" \
+    --dataset-dir Datasets --pattern "*.egr or *.txt" \
     --binary CHROMA/CHROMA --algorithm P_SL_WBR \
     --res-start 5 --res-end 12 \
     --out results_resilient_grid.json
@@ -39,12 +41,16 @@ from typing import Dict, List, Optional
 # Reuse parsing patterns consistent with batch_test.py
 RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
+NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
+EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 
 
 @dataclass
 class RunResult:
     runtime_ms: float
     colors_used: int
+    nodes: Optional[int] = None
+    edges: Optional[int] = None
     ok: bool = True
     error: Optional[str] = None
 
@@ -52,6 +58,8 @@ class RunResult:
 def parse_output(stdout: str) -> RunResult:
     runtime_ms: Optional[float] = None
     colors_used: Optional[int] = None
+    nodes: Optional[int] = None
+    edges: Optional[int] = None
 
     m = RUNTIME_RE.search(stdout)
     if m:
@@ -61,10 +69,18 @@ def parse_output(stdout: str) -> RunResult:
     if m:
         colors_used = int(m.group(1))
 
-    if runtime_ms is None or colors_used is None:
-        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error="parse-failed")
+    m = NODES_RE.search(stdout)
+    if m:
+        nodes = int(m.group(1))
 
-    return RunResult(runtime_ms=runtime_ms, colors_used=colors_used, ok=True)
+    m = EDGES_RE.search(stdout)
+    if m:
+        edges = int(m.group(1))
+
+    if runtime_ms is None or colors_used is None:
+        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=nodes, edges=edges, ok=False, error="parse-failed")
+
+    return RunResult(runtime_ms=runtime_ms, colors_used=colors_used, nodes=nodes, edges=edges, ok=True)
 
 
 def run_chroma(binary: str, dataset: str, algorithm: str, resilient: int,
@@ -82,9 +98,9 @@ def run_chroma(binary: str, dataset: str, algorithm: str, resilient: int,
             timeout=timeout_sec,
         )
     except subprocess.TimeoutExpired:
-        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error="timeout")
+        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=None, edges=None, ok=False, error="timeout")
     except FileNotFoundError:
-        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error="binary-not-found")
+        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=None, edges=None, ok=False, error="binary-not-found")
 
     res = parse_output(proc.stdout)
     if proc.returncode != 0:
@@ -119,7 +135,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--binary", default=os.path.join("CHROMA", "CHROMA"),
                     help="Path to CHROMA binary (default: CHROMA/CHROMA)")
     ap.add_argument("--algorithm", "-a", default="P_SL_WBR",
-                    help="Algorithm passed to CHROMA -a (default: P_SL_WBR)")
+                    help="Algorithm passed to CHROMA -a. Available algorithms: "
+                         "0 or P_SL_WBR (default), 1 or P_SL_WBR_SDC")
     ap.add_argument("--res-start", type=int, required=True,
                     help="Start resilient number (inclusive)")
     ap.add_argument("--res-end", type=int, required=True,
@@ -146,13 +163,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     ts = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path = args.out or f"results_resilient_grid_{ts}.json"
 
-    results: Dict[str, Dict[str, Dict[str, float]]] = {}
+    results: Dict[str, Dict[str, any]] = {}
 
     # Outer loop per dataset: finish all resilient numbers before next dataset
     for ds_path in datasets:
         ds_name = os.path.basename(ds_path)
         print(f"Dataset: {ds_name}")
-        ds_entry: Dict[str, Dict[str, float]] = {}
+        ds_entry: Dict[str, any] = {}
+        
+        # Store vertices and edges info (will be set from first successful run)
+        vertices: Optional[int] = None
+        edges: Optional[int] = None
 
         for r in range(int(args.res_start), int(args.res_end) + 1):
             print(f"  θ={r} ...", flush=True)
@@ -175,7 +196,18 @@ def main(argv: Optional[List[str]] = None) -> int:
                 ds_entry[str(r)] = {"color": None, "runtime_ms": None}
             else:
                 ds_entry[str(r)] = {"color": best.colors_used, "runtime_ms": round(best.runtime_ms, 6)}
+                # Store vertices and edges from first successful run
+                if vertices is None and best.nodes is not None:
+                    vertices = best.nodes
+                if edges is None and best.edges is not None:
+                    edges = best.edges
 
+        # Add vertices and edges info to dataset entry
+        if vertices is not None:
+            ds_entry["vertices"] = vertices
+        if edges is not None:
+            ds_entry["edges"] = edges
+            
         results[ds_name] = ds_entry
 
     with open(out_path, "w", encoding="utf-8") as f:
