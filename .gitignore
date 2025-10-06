@@ -1,6 +1,7 @@
 *.csv
 *.out
 *.o
+*.json
 
 # Datasets
 Datasets/*.egr
