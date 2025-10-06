@@ -16,6 +16,11 @@
 
 // namespace cg = cooperative_groups;
 
+#ifdef PRED_MODEL
+extern double score(double *input);
+#endif
+
+
 enum GraphFormat {
     ECLGraph,
     SNAPGraph,
@@ -36,12 +41,14 @@ void print_help(const char* program_name) {
     std::cout << "                            0 or P_SL_WBR     : P_SL_WBR algorithm\n";
     std::cout << "                            1 or P_SL_WBR_SDC : P_SL_WBR_SDC algorithm\n";
     std::cout << "                            (default: P_SL_WBR)\n";
-    std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 10)\n";
+    std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 0)\n";
+    std::cout << "  -p, --predict             Use prediction model for resilient parameter\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
     std::cout << "  " << program_name << " --file graph.egr -a P_SL_WBR_SDC\n";
     std::cout << "  " << program_name << " -f graph.bin --algorithm 1 --resilient 15\n";
+    std::cout << "  " << program_name << " -f graph.egr --predict\n";
 }
 
 // 解析算法參數
@@ -106,9 +113,10 @@ int main(int argc, char* argv[])
 {
     // 默認設置
     std::string filename;
-    int fuzzy_number = 10;  // RGC θ 默認值為 10
+    int fuzzy_number = 0;  // RGC θ 默認值為 0
     void* kernel_to_launch = (void*)P_SL_WBR;
     std::string algo_name = "P_SL_WBR";
+    bool use_predicted_resilient = false;  // 標記是否使用預測的 resilient 值
 
     // 解析命令行參數
     for (int i = 1; i < argc; i++) {
@@ -135,6 +143,7 @@ int main(int argc, char* argv[])
             if (i + 1 < argc) {
                 try {
                     fuzzy_number = std::stoi(argv[++i]);
+                    use_predicted_resilient = false;  // 手動指定時不使用預測
                 } catch (const std::exception& e) {
                     std::cerr << "Error: Invalid RGC value '" << argv[i] << "'.\n";
                     return 1;
@@ -144,6 +153,8 @@ int main(int argc, char* argv[])
                 print_help(argv[0]);
                 return 1;
             }
+        } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
+            use_predicted_resilient = true;
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -189,10 +200,33 @@ int main(int argc, char* argv[])
         return 1;
     }
     
+    // 如果啟用預測模型，使用 score function 預測 resilient parameter
+    #ifdef PRED_MODEL
+    if (use_predicted_resilient) {
+        // 使用圖形的節點數和邊數作為預測模型的輸入
+        double input[2] = {(double)g.nodes, (double)g.edges};
+        double score_result = score(input);
+        fuzzy_number = (int)round(score_result);
+        // printf("Using prediction model for resilient parameter\n");
+        // printf("Input to model: nodes=%d, edges=%d\n", g.nodes, g.edges);
+        // printf("Predicted score: %f\n", score_result);
+        // printf("Predicted RGC θ: %d\n", fuzzy_number);
+    }
+    #else
+    if (use_predicted_resilient) {
+        std::cerr << "Error: Prediction model is not compiled. Please compile with PRED_MODEL flag.\n";
+        return 1;
+    }
+    #endif
+
     // 顯示設置信息
     printf("Input file: %s\n", filename.c_str());
     printf("Algorithm: %s\n", algo_name.c_str());
-    printf("RGC θ: %d\n", fuzzy_number);
+    if (use_predicted_resilient) {
+        printf("RGC θ: %d (Predicted)\n", fuzzy_number);
+    } else {
+        printf("RGC θ: %d\n", fuzzy_number);
+    }
     printf("File num nodes: %d\n", graph.file_num_nodes);
     printf("File num edges: %d\n", graph.file_num_edges);
     printf("Nodes: %d\n", g.nodes);

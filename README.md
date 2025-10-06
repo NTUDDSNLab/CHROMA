@@ -51,19 +51,30 @@ Repository Organization:
 #### 1) Compile
 ```
 cd ./CHROMA
-make [ARCH=sm_xx(default sm_89)]
+make [ARCH=sm_xx(default sm_89)] [PRE_MODEL=1]
 ```
+* `ARCH`: GPU architecture
+* `PRE_MODEL`: Using predict model for resilient or not
+  * Make sure there is `model/model.cpp` generated from [m2cgen](https://github.com/BayesWitnesses/m2cgen)
+
 #### 2) Run
 ```
 Usage ./CHROMA [options]
 
+Usage: ./CHROMA [options]
+
 Options:
   -f, --file <path>         Input graph file path (required)
+                            Supported formats:
+                            .egr  : ECL graph format (binary)
+                            .txt  : Text format (CSR graph)
+                            .bin  : Binary format (CSR graph)
   -a, --algorithm <algo>    Select algorithm:
                             0 or P_SL_WBR     : P_SL_WBR algorithm
                             1 or P_SL_WBR_SDC : P_SL_WBR_SDC algorithm
                             (default: P_SL_WBR)
-  -r, --resilient <number>  Set resilient number θ value (default: 10)
+  -r, --resilient <number>  Set resilient number θ value (default: 0)
+  -p, --predict             Use prediction model for resilient parameter
   -h, --help                Show this help message
 ```
 
