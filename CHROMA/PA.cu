@@ -78,6 +78,9 @@ if(grid.thread_rank()==0){
   theta=g_minDegree;
   atomicExch(&g_minDegree, 0x7FFFFFFF);
   iteration=iteration+1+FuzzyNumber;
+  #ifdef PROFILE
+  iter_count++;
+  #endif
 }
 grid.sync();
 }while(worker!=nodes);
@@ -152,6 +155,9 @@ if(grid.thread_rank()==0){
   theta=g_minDegree;
   atomicExch(&g_minDegree, 0x7FFFFFFF);
   iteration=iteration+1+FuzzyNumber;
+  #ifdef PROFILE
+  iter_count++;
+  #endif
 }
 grid.sync();
 }while(worker!=nodes);

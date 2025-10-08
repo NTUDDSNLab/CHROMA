@@ -10,8 +10,8 @@ best run (smallest colors, ties by fastest runtime), and write a compact JSON:
     "datasetA.egr": {
       "vertices" : 1000000,
       "edges" : 10000000,
-      "8": {"color": 23, "runtime_ms": 12.345},
-      "9": {"color": 22, "runtime_ms": 12.111}
+      "8": {"color": 23, "runtime_ms": 12.345, "iter_count": 5},
+      "9": {"color": 22, "runtime_ms": 12.111, "iter_count": 6}
     },
     "datasetB.egr": { ... }
   }
@@ -47,12 +47,14 @@ RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
+ITER_COUNT_RE = re.compile(r"Iter\s+count:\s*(\d+)", re.IGNORECASE)
 
 
 @dataclass
 class RunResult:
     runtime_ms: float
     colors_used: int
+    iter_count: Optional[int] = None
     nodes: Optional[int] = None
     edges: Optional[int] = None
     ok: bool = True
@@ -62,6 +64,7 @@ class RunResult:
 def parse_output(stdout: str) -> RunResult:
     runtime_ms: Optional[float] = None
     colors_used: Optional[int] = None
+    iter_count: Optional[int] = None
     nodes: Optional[int] = None
     edges: Optional[int] = None
 
@@ -73,6 +76,10 @@ def parse_output(stdout: str) -> RunResult:
     if m:
         colors_used = int(m.group(1))
 
+    m = ITER_COUNT_RE.search(stdout)
+    if m:
+        iter_count = int(m.group(1))
+
     m = NODES_RE.search(stdout)
     if m:
         nodes = int(m.group(1))
@@ -82,9 +89,9 @@ def parse_output(stdout: str) -> RunResult:
         edges = int(m.group(1))
 
     if runtime_ms is None or colors_used is None:
-        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=nodes, edges=edges, ok=False, error="parse-failed")
+        return RunResult(runtime_ms=0.0, colors_used=-1, iter_count=iter_count, nodes=nodes, edges=edges, ok=False, error="parse-failed")
 
-    return RunResult(runtime_ms=runtime_ms, colors_used=colors_used, nodes=nodes, edges=edges, ok=True)
+    return RunResult(runtime_ms=runtime_ms, colors_used=colors_used, iter_count=iter_count, nodes=nodes, edges=edges, ok=True)
 
 
 def run_chroma(binary: str, dataset: str, algorithm: str, resilient: int,
@@ -102,9 +109,9 @@ def run_chroma(binary: str, dataset: str, algorithm: str, resilient: int,
             timeout=timeout_sec,
         )
     except subprocess.TimeoutExpired:
-        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=None, edges=None, ok=False, error="timeout")
+        return RunResult(runtime_ms=0.0, colors_used=-1, iter_count=None, nodes=None, edges=None, ok=False, error="timeout")
     except FileNotFoundError:
-        return RunResult(runtime_ms=0.0, colors_used=-1, nodes=None, edges=None, ok=False, error="binary-not-found")
+        return RunResult(runtime_ms=0.0, colors_used=-1, iter_count=None, nodes=None, edges=None, ok=False, error="binary-not-found")
 
     res = parse_output(proc.stdout)
     if proc.returncode != 0:
@@ -209,7 +216,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 )
                 run_results.append(res)
                 status = "ok" if res.ok else f"fail:{res.error}"
-                print(f"    run {i+1}/5: colors={res.colors_used} runtime_ms={res.runtime_ms:.3f} [{status}]")
+                iter_info = f" iter={res.iter_count}" if res.iter_count is not None else ""
+                print(f"    run {i+1}/5: colors={res.colors_used} runtime_ms={res.runtime_ms:.3f}{iter_info} [{status}]")
                 
                 # Check for timeout
                 if res.error == "timeout":
@@ -224,9 +232,13 @@ def main(argv: Optional[List[str]] = None) -> int:
 
             best = pick_best(run_results)
             if best is None:
-                ds_entry[str(r)] = {"color": None, "runtime_ms": None}
+                ds_entry[str(r)] = {"color": None, "runtime_ms": None, "iter_count": None}
             else:
-                ds_entry[str(r)] = {"color": best.colors_used, "runtime_ms": round(best.runtime_ms, 6)}
+                ds_entry[str(r)] = {
+                    "color": best.colors_used,
+                    "runtime_ms": round(best.runtime_ms, 6),
+                    "iter_count": best.iter_count
+                }
                 # Store vertices and edges from first successful run
                 if vertices is None and best.nodes is not None:
                     vertices = best.nodes

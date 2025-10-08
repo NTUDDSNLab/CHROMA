@@ -191,9 +191,14 @@ int main(int argc, char* argv[])
         std::cout << "Read .egr file using ECLgraph" << std::endl;
     } else if (file_extension == "txt" || file_extension == "bin") {
         // 使用 CSRGraph 讀取 .txt 或 .bin 文件
-        graph.buildFromTxtFile(filename, false);
+        if (file_extension == "bin") {
+            graph.loadFromBinary(filename);
+        } else {
+            graph.buildFromTxtFile(filename, false);
+        }
         std::cout << "build from " << file_extension << " file" << std::endl;
         std::cout << filename << " is zero based: " << graph.is_zero_based << std::endl;
+        // Transform to ECLgraph
         graph.transfromToECLGraph(g);
     } else {
         std::cerr << "Error: Unsupported file format '" << file_extension << "'. Supported formats: .egr, .txt, .bin" << std::endl;
@@ -207,10 +212,6 @@ int main(int argc, char* argv[])
         double input[2] = {(double)g.nodes, (double)g.edges};
         double score_result = score(input);
         fuzzy_number = (int)round(score_result);
-        // printf("Using prediction model for resilient parameter\n");
-        // printf("Input to model: nodes=%d, edges=%d\n", g.nodes, g.edges);
-        // printf("Predicted score: %f\n", score_result);
-        // printf("Predicted RGC θ: %d\n", fuzzy_number);
     }
     #else
     if (use_predicted_resilient) {
@@ -330,6 +331,12 @@ int main(int argc, char* argv[])
     const float runtime = timer.stop();
     if (cudaSuccess != cudaMemcpy(color, d.color_d, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
     verifyAndPrintStats(g, color, runtime);
+
+    #ifdef PROFILE
+    int host_iter_count = 0;
+    cudaMemcpyFromSymbol(&host_iter_count, iter_count, sizeof(int), 0, cudaMemcpyDeviceToHost);
+    printf("Iter count: %d\n", host_iter_count);
+    #endif
     
     cudaFree(d.wl_d);  cudaFree(d.color_d);  cudaFree(d.posscol2_d);  cudaFree(d.posscol_d);  cudaFree(d.nlist2_d);  cudaFree(d.nlist_d);  cudaFree(d.nidx_d);
     delete [] color;

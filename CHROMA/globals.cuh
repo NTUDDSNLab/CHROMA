@@ -14,6 +14,7 @@ extern __device__ int  remove_size;
 extern __device__ int  worker;
 extern __device__ int  theta;
 extern __device__ int  iteration;
+extern __device__ int  iter_count;
 
 // ── host-side 常數可以留在這裡（因為它們不是 __device__ 變數） ──
 static const int Device          = 0;

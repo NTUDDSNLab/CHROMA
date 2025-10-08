@@ -12,3 +12,4 @@ __device__ int  remove_size = 0;
 __device__ int  worker      = 0;
 __device__ int  theta       = 1;
 __device__ int  iteration   = 0;
+__device__ int  iter_count  = 0;

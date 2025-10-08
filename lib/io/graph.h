@@ -45,14 +45,14 @@ public:
     void printGraphStatus() const;
     bool transfromToECLGraph(ECLgraph &g);
 
-    int file_num_nodes;
-    int file_num_edges;
+    int file_num_nodes = 0;
+    int file_num_edges = 0;
     int num_nodes;
     int num_edges;
     int num_edges_processed;
-    int source_node; // For maximum flow - DIMACS
-    int sink_node; // For maximum flow - DIMACS
-    int max_node_id;
+    int source_node;    // For maximum flow - DIMACS
+    int sink_node;      // For maximum flow - DIMACS
+    int max_node_id;    // Record the max node id in the graph, zero based
     bool is_zero_based;
 
     std::vector<int> destinations;

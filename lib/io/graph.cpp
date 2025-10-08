@@ -41,6 +41,7 @@ void CSRGraph::buildFromTxtFile(const std::string &filename, bool single_edge) {
     this->max_node_id = 0;
     // check if the graph is zero based
     std::unordered_set<int> nodes;
+    unsigned int distinct_edges = 0;
     int cnt = 0;
     while (std::getline(file, line)) {
         std::stringstream ss(line);
@@ -56,8 +57,10 @@ void CSRGraph::buildFromTxtFile(const std::string &filename, bool single_edge) {
         nodes.insert(from);
         nodes.insert(to);
         adjacency_list[from].push_back(to);
+        distinct_edges++;
         if (!single_edge) {
             adjacency_list[to].push_back(from);
+            distinct_edges++;
         }
         cnt++;
         if (from > max_node_id) max_node_id = from;
@@ -66,6 +69,9 @@ void CSRGraph::buildFromTxtFile(const std::string &filename, bool single_edge) {
     // Check if the graph is zero based
     std::cout << "distinct nodes: " << nodes.size() << std::endl;
     std::cout << "file_num_nodes: " << file_num_nodes << std::endl;
+    std::cout << "distinct edges: " << distinct_edges << std::endl;
+    std::cout << "file_num_edges: " << file_num_edges << std::endl;
+
     if (nodes.count(0) == 1) {
         is_zero_based = true;
     } else if (nodes.size() + 1 == file_num_nodes) {
@@ -76,8 +82,7 @@ void CSRGraph::buildFromTxtFile(const std::string &filename, bool single_edge) {
     
     // Generate CSR format
     offsets.push_back(0);
-    // FIXME: Current way will not find some nodes if the graph is not continuous
-    // Should iterate throught adjacency_list to find all nodes
+
     for (int i = 0; i < max_node_id + 1; ++i) {
         // some nodes have no out edges
         if (adjacency_list.count(i)==0) {
@@ -93,7 +98,7 @@ void CSRGraph::buildFromTxtFile(const std::string &filename, bool single_edge) {
     }
 
     num_edges_processed = cnt;
-    if (!single_edge) num_edges = file_num_edges * 2;
+    if (!single_edge) num_edges = distinct_edges;
     num_nodes = max_node_id + 1;
 }
 
