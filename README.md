@@ -1,210 +1,87 @@
 # CHROMA: Coloring with High-Quality Resilient Optimized Multi-GPU Allocation
-## Getting started Instructions
-+  🖥️ Hardware
-    - `CPU`: Intel Core i9-14900 (32 cores) @ 5.5GHz
-    - `Memory`: 128 GB
-    - `GPU`: NVIDIA GeForce RTX 4090  (each with 24 GB VRAM)
-    - `GPU Arch`: `sm_90` (Ada Lovelace, compute capability 8.9)
 
-+ 🧰 OS & Compiler
-    - `OS`: Ubuntu 22.04.4 LTS (x86_64)
-    - `Kernel`: 6.8.0-52-generic
-    - `CUDA`: 12.6
-    - `nvcc`: 12.6
-    - `NVIDIA Driver`: 560.35.03
-    - `Open-MP`(For RGP)
-    - `METIS`(For RGP)
-+ Important Files/Directories
-```
-Repository Organization:
-    |-- CHROMA
-        |-- Source files of CHROMA
-    |-- CHROMA_RGP
-        |-- Distributed version of CHROMA with resilient graph partition (RGP) 
-    |-- JP_Series
-        |-- Other ordering heuristic implmented in CUDA on GPUs
-    |-- CPU
-        |-- Sequential
-          |-- Sequential heuristic implmented in CPU
-        |-- Parallel
-          |-- Parallel heuristic implmented in CPU      
-    |-- Dataset
-        |-- Experiment datasets
-```
+## Overview
+CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU backends. The project couples CUDA kernels with resilient graph partitioning (RGP) and CPU heuristics to explore state-of-the-art MIS and SGR strategies on large graphs stored under `Datasets/`.
 
-## State-of-the-art Design Sources
-### MIS
-1. JP-SL (in /JP-Series)
-2. JP-SLL (in /JP-Series)
-3. JP-ADG (in /JP-Series)
-4. JP-LF([ECL-GC](https://userweb.cs.txstate.edu/~burtscher/research/ECL-GC/))
-### SGR
-1. [Csrcolor](https://github.com/chenxuhao/csrcolor)
-2. [data_pq](https://github.com/chenxuhao/csrcolor)
-3. [data_wlc](https://github.com/chenxuhao/csrcolor)
-4. [kokkos VB-BIT](https://github.com/kokkos/kokkos-kernels)
+## Repository Layout
+- `CHROMA/` – CUDA single-GPU implementation (`CHROMA.cu`, `Makefile`, optional `model/model.cpp`).
+- `CHROMA_RGP/` – Multi-GPU extension with resilient graph partitioning; depends on METIS (and optionally KaHIP).
+- `JP-Series/` – Additional CUDA heuristics (JP-SL, JP-ADG, JP-SLL) with dedicated `Makefile`.
+- `CPU/Sequential`, `CPU/Parallel` – CPU algorithms built via local Makefiles; orchestrated by `CPU/run.py`.
+- `Datasets/` – Input graphs in `.egr`, `.txt`, or `.bin` formats; test sets live under `Datasets/test/`.
+- `Scripts/` – Batch and grid evaluators (`batch_test.py`, `grid_resilient.py`).
+- `lib/io/` – Shared I/O helpers (`graph.cpp`, `mmio.cpp`).
+- `External/` – Vendored third-party libraries (METIS, KaHIP, GKlib).
 
+## Requirements
+- Linux host with CUDA 12.x toolchain (`nvcc`) and an Ada-class GPU (`ARCH=sm_89` or `sm_90`).
+- OpenMP for CHROMA_RGP build; METIS installed under `$HOME/local` or update `INCLUDES_METIS`/`LIBS_METIS`.
+- Optional: KaHIP (multi-cut partitioning) and Kokkos if building `CPU/Parallel` Kokkos targets.
 
-## How to Run?
+## Build & Run
+### CHROMA (single GPU)
+- **Build**
+  ```bash
+  cd CHROMA
+  make ARCH=sm_89 [PRE_MODEL=1]
+  ```
+  Use `PRE_MODEL=1` when `model/model.cpp` (generated via `m2cgen`) is present for θ prediction.
+- **Run**
+  ```bash
+  CHROMA/CHROMA -f Datasets/facebook.egr -a P_SL_WBR -r 10
+  ```
+  Running from inside `CHROMA/` works with `./CHROMA -f ../Datasets/...`. Expect `result verification passed`, `colors used:`, and `runtime:` in the output.
 
-### 1. CHROMA
-#### 1) Compile
-```
-cd ./CHROMA
-make [ARCH=sm_xx(default sm_89)] [PRE_MODEL=1]
-```
-* `ARCH`: GPU architecture
-* `PRE_MODEL`: Using predict model for resilient or not
-  * Make sure there is `model/model.cpp` generated from [m2cgen](https://github.com/BayesWitnesses/m2cgen)
+### CHROMA_RGP (multi GPU + RGP)
+- **Pre-requisite**: Install METIS; adjust `CHROMA_RGP/Makefile` if headers/libraries reside outside `$HOME/local`.
+- **Build**
+  ```bash
+  cd CHROMA_RGP
+  make ARCH=sm_89
+  ```
+- **Run**
+  ```bash
+  CHROMA_RGP/CHROMA_RGP -f Datasets/facebook.egr -p 2 -r 10
+  ```
+  `-p` selects partition count; θ defaults to 10 when omitted.
 
-#### 2) Run
-```
-Usage ./CHROMA [options]
+### JP-Series CUDA Heuristics
+- **Build**
+  ```bash
+  cd JP-Series
+  make ARCH=sm_89
+  ```
+- **Run**
+  ```bash
+  JP-Series/JP-Series -f Datasets/facebook.egr -a JP-SL
+  ```
+  Switch algorithms with `-a JP-ADG` or `-a JP-SLL` as needed.
 
-Usage: ./CHROMA [options]
+### CPU Implementations
+- **Sequential**
+  ```bash
+  cd CPU/Sequential
+  make            # builds cpu_Dstura, cpu_greedy, cpu_SDL
+  ./cpu_greedy ../Datasets/test/facebook.egr
+  ```
+- **Parallel (OpenMP/Kokkos)**
+  ```bash
+  cd CPU/Parallel
+  make            # builds OpenMP targets (cpu_ADG, cpu_SL, cpu_SLL, cpu_ecl)
+  # make kokkos   # builds cpu_greedy_kokkos when Kokkos is configured
+  ./cpu_SL ../Datasets/test/facebook.egr
+  ```
+- **Batch runner**
+  ```bash
+  cd CPU
+  python3 run.py
+  ```
+  The runner executes compiled `cpu_*` binaries five times per dataset and stores results in `CPU/CPU_result.json`.
 
-Options:
-  -f, --file <path>         Input graph file path (required)
-                            Supported formats:
-                            .egr  : ECL graph format (binary)
-                            .txt  : Text format (CSR graph)
-                            .bin  : Binary format (CSR graph)
-  -a, --algorithm <algo>    Select algorithm:
-                            0 or P_SL_WBR     : P_SL_WBR algorithm
-                            1 or P_SL_WBR_SDC : P_SL_WBR_SDC algorithm
-                            (default: P_SL_WBR)
-  -r, --resilient <number>  Set resilient number θ value (default: 0)
-  -p, --predict             Use prediction model for resilient parameter
-  -h, --help                Show this help message
-```
+## Utility Scripts
+- `python3 Scripts/batch_test.py --dataset-dir Datasets --binary CHROMA/CHROMA --runs 5 --out results.json`
+- `python3 Scripts/grid_resilient.py --dataset-dir Datasets --res-start 5 --res-end 12`
+Capture sample output (colors, runtime) alongside the dataset for reproducibility.
 
-#### 3) check the result
-You will get result like:
-```
-input: ../Datasets/facebook.egr
-nodes: 4039
-edges: 176468
-avg degree: 43.69
-runtime:    1.349632 ms
-result verification passed
-colors used: 75
-```
-### 2. CHROMA(RGP)
-
-### 0) Install Essentials 
-
-Install [METIS](https://github.com/KarypisLab/METIS). Just follow the instruction of the repository.
-The default path, header file, and shared libary paths of METIS are:
-```
-$(HOME)/local/
-$(HOME)/local/include
-$(HOME)/local/lib
-```
-If you want to install METIS in different path, change the `INCLUDES_METIS` and `LIBS_METIS` in CHROMA_RGP/Makefile
-
-#### 1) Compile
-```
-cd ./CHROMA_RGP
-make [ARCH=sm_xx(default sm_89)]
-```
-#### 2) Run
-```
-Usage: ./CHROMA_RGP [options]
-
-Options:
-  -f, --file <path>         Input graph file path (required)
-  -r, --resilient <number>  Set resilient number θ value (default: 10)
-  -p, --parts <number>      Number of partitions (default: 2)
-  -h, --help                Show this help message
-```
-
-#### 3) check the result
-You will get result like:
-```
-Enter input filename: ../Datasets/facebook.egr
-Enter RGC (default θ=10): 0
-Using RGC θ = 0
-nPart: 2
-Devide to = 2graphs
-input: ../Datasets/facebook.egr
-nodes: 4039
-edges: 176468
-avg degree: 43.69
-Boundary node count = 184
-Partition 0 => subgraph has 2040 nodes, 51650 edges
-Partition 1 => subgraph has 2183 nodes, 126886 edges
-Boundary graph has 184 nodes, 2068 edges
-h_nodes 184 
-[GPU 0] final iteration = 28, final theta = 2147483647
-INIT FINISH
-RUN LARGE FINISH
-RUN SMALL FINISH
-runtime:    7.244800 ms
-throughput: 0.557503 Mnodes/s
-throughput: 24.357884 Medges/s
-result verification passed
-colors used: 73
-
-```
-### 3. Other Ordering Heursitic in JP Algorithm
-#### 1) Compile
-```
-cd ./JP-Series
-make [ARCH=sm_xx(default sm_89)]
-```
-#### 2) Run
-```
-Usage: ./JP-Series [options]
-
-Options:
-  -f, --file <path>         Input graph file path (required)
-  -a, --algorithm <algo>    Select algorithm:
-                            0 or JP-SL  : JP-SL algorithm
-                            1 or JP-ADG : JP-ADG algorithm
-                            2 or JP-SLL : JP-SLL algorithm
-                            (default: JP-SL)
-  -r, --resilient <number>  Set resilient number θ value (default: 0)
-  -h, --help                Show this help message
-```
-#### 3) Check the result
-You will get result like:
-```
-Using JP-SL
-input: ../Datasets/facebook.egr
-nodes: 4039
-edges: 176468
-avg degree: 43.69
-runtime:    12.476577 ms
-result verification passed
-colors used: 74
-```
-
-### 1. Sequential Algorithm
-#### 1) Compile
-```
-cd ./CPU/Sequential
-g++ -O3 -std=c++17 <source_file>.cpp -o <output_binary> [extra_flags]
-```
-#### 2) Run
-```
-./<output_binary> [arguments]
-
-example: ./<output_binary> ../dataset/facebook.egr
-```
-### 1. Parallel Algorithm
-#### 1) Compile
-```
-cd ./CPU/Parallel
-g++ -O3 -std=c++17 -fopenmp <source_file>.cpp -o <output_binary> [extra_flags]
-```
-#### 2) Run
-```
-./<output_binary> [arguments]
-
-example: ./<output_binary> ../dataset/facebook.egr
-```
-
-
-
-## APPENDIX
-### You can get datasets [here](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html)
+## Datasets & References
+Download additional graphs from the [ECL collection](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html). Algorithmic baselines include JP-SL/JP-SLL/JP-ADG (MIS) and CSRColor/Kokkos VB-BIT (SGR) for comparative studies.
