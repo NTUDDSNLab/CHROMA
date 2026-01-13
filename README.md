@@ -112,6 +112,7 @@ Capture sample output (colors, runtime) alongside the dataset for reproducibilit
     - `--binary`: Path to CHROMA binary (default `CHROMA/CHROMA`).
     - `--algorithm/-a`: Algorithm for `-a` flag (default `P_SL_WBR`).
     - `--resilient`: θ passed via `-r` (default `10`).
+    - `--predict`: Enable prediction model (in /model/model.cpp)to auto-select θ (`PRE_MODEL=1`).
     - `--runs`: Repetitions per dataset (default `5`).
     - `--timeout`: Seconds before aborting a single run (optional).
     - `--extra -- <args>`: Additional CHROMA arguments appended after `--` sentinel.

@@ -52,6 +52,11 @@ def prepare_train_data(file_path):
             #print("Appending X: ", data[dataset]['vertices'], data[dataset]['edges'])
             #print("Appending y: ", max_theta)
         
+            # Skip datasets without vertices/edges information
+            if 'vertices' not in data[dataset] or 'edges' not in data[dataset]:
+                print(f"Skipping {dataset}: missing vertices/edges information")
+                continue
+            
             train_X.append([data[dataset]['vertices'], data[dataset]['edges'], data[dataset]['vertices']/data[dataset]['edges']])
             train_y.append(int(max_theta))
 

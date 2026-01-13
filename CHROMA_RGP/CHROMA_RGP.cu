@@ -64,6 +64,27 @@ struct GPUTimer
   float stop() {cudaEventRecord(end, 0);  cudaEventSynchronize(end);  float ms;  cudaEventElapsedTime(&ms, beg, end);  return 0.001f * ms;}
 };
 
+// =====================================
+// ||                                 ||
+// ||          MEM INFO               ||
+// ||                                 ||
+// =====================================
+void printMemInfo(const char* label, int deviceId) {
+    size_t free_byte;
+    size_t total_byte;
+    cudaSetDevice(deviceId);
+    cudaError_t cuda_status = cudaMemGetInfo(&free_byte, &total_byte);
+    if (cudaSuccess != cuda_status){
+        printf("Error: cudaMemGetInfo fails, %s \n", cudaGetErrorString(cuda_status));
+        return;
+    }
+    double free_db = (double)free_byte ;
+    double total_db = (double)total_byte ;
+    double used_db = total_db - free_db ;
+    printf("[MemInfo] [GPU %d] %s: Used %.2f MB / Total %.2f MB\n", 
+           deviceId, label, used_db / 1024.0 / 1024.0, total_db / 1024.0 / 1024.0);
+}
+
 // *=======================[DEVICE]=====================*
 // =====================================
 // ||                                 ||
@@ -237,28 +258,7 @@ void init_degree(const int nodes, const int* const __restrict__ nidx, const int*
         degree_list1[vertex_id] = deg;
     }
 }
-// =====================================
-// ||                                 ||
-// ||          MERGE PRIOLITY         ||
-// ||                                 ||
-// =====================================
-__global__
-void mergeIterListOnGPU(
-    int subSize,
-    const int* __restrict__ localToGlobal,
-    const unsigned int* __restrict__ partialColorList,
-    int* __restrict__ colorList,
-    const unsigned int* __restrict__ partialIterList,
-    unsigned int* __restrict__ iterationList
-)
-{
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < subSize) {
-        int globalID = localToGlobal[i];
-        iterationList[globalID] += partialIterList[i]& 0x3FFFFFFF;
-        colorList[globalID] = partialColorList[i];
-    }
-}
+
 
 
 // =====================================
@@ -579,6 +579,7 @@ void runBoundaryGC(
         init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d_nidx, d_nlist, d_degree);
         cudaDeviceSynchronize();
     }
+    printMemInfo("After Allocations (runBoundaryGC)", deviceID);
     cudaDeviceSynchronize();
     {
       int h_nodes = g.nodes;
@@ -624,6 +625,7 @@ void runBoundaryGC(
     runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
     cudaDeviceSynchronize();
     printf("RUN SMALL FINISH\n");
+    printMemInfo("After Kernels (runBoundaryGC)", deviceID);
     // Stop timer and optionally report
     float boundary_secs = gpu_timer_boundary.stop();
     if (elapsed_ms_out) { *elapsed_ms_out = boundary_secs * 1000.0f; }
@@ -722,6 +724,7 @@ void runOnGPU(
       init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d_nidx, d_nlist, d_degree);
       cudaDeviceSynchronize();
   }
+  printMemInfo("After Allocations (runOnGPU)", deviceID);
 
   cudaDeviceSynchronize();
   {
@@ -793,6 +796,7 @@ void runOnGPU(
 
   runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
   cudaDeviceSynchronize();
+  printMemInfo("After Kernels (runOnGPU)", deviceID);
   // Stop timer and optionally report
   float part_secs = gpu_timer_partition.stop();
   if (elapsed_ms_out) { *elapsed_ms_out = part_secs * 1000.0f; }
@@ -1156,64 +1160,52 @@ int main(int argc, char* argv[]) {
       if (per_gpu_parts[d] > 0) {
         printf("[GPU %d] partitions: %d, compute time: %.3f ms\n", d, per_gpu_parts[d], per_gpu_ms[d]);
       }
+      printMemInfo("Final Summary", d);
     }
     if (boundary_ms > 0.0f) {
       printf("[GPU 0] boundary phase time: %.3f ms\n", boundary_ms);
     }
-    cudaSetDevice(Device);
-    cudaGetLastError(); 
-    unsigned int* d_color_list     = nullptr;
-    unsigned int* d_iteration_list = nullptr;
-    cudaMalloc(&d_color_list,     g.nodes*sizeof(unsigned int));
-    cudaMalloc(&d_iteration_list, g.nodes*sizeof(unsigned int));
-    cudaMemset(d_color_list,     0, g.nodes*sizeof(unsigned int));
-    cudaMemset(d_iteration_list, 0, g.nodes*sizeof(unsigned int));
+    // CPU-based merge
+    // No need to allocate d_color_list/d_iteration_list on GPU 0
+    // We merge specifically into the 'color' array on host
+
+    // 'color' was allocated via: int* const color = new int [g.nodes];
+    // We also have partialColorVec[i] which is float* or int*? -> it is unsigned int*
+    
+    // Initialize color array to 0 just in case
+    std::fill(color, color + g.nodes, 0);
+
     for (int i = 0; i < nParts; i++) {
-      int subSize = (int)sub_localToGlobal[i].size();
-      int* d_localToGlobal = nullptr;
-      cudaMalloc(&d_localToGlobal, subSize * sizeof(int));
-      cudaMemcpy(d_localToGlobal,
-                 sub_localToGlobal[i].data(),
-                 subSize * sizeof(int),
-                 cudaMemcpyHostToDevice);
-  
-      unsigned int* d_partialColor = nullptr;
-      cudaMalloc(&d_partialColor, subSize * sizeof(unsigned int));
-      cudaMemcpy(d_partialColor,
-                 partialColorVec[i],
-                 subSize * sizeof(unsigned int),
-                 cudaMemcpyHostToDevice);
-  
-      unsigned int* d_partialIter = nullptr;
-      cudaMalloc(&d_partialIter, subSize * sizeof(unsigned int));
-      cudaMemcpy(d_partialIter,
-                 partialIterVec[i],
-                 subSize * sizeof(unsigned int),
-                 cudaMemcpyHostToDevice);
-  
-      int gridSize = (subSize + ThreadsPerBlock - 1) / ThreadsPerBlock;
-      mergeIterListOnGPU<<<gridSize, ThreadsPerBlock>>>(
-          subSize,
-          d_localToGlobal,
-          d_partialColor,
-          (int*)d_color_list,
-          d_partialIter,
-          d_iteration_list
-      );
-      cudaDeviceSynchronize();
-  
-      // Free device copies
-      cudaFree(d_localToGlobal);
-      cudaFree(d_partialColor);
-      cudaFree(d_partialIter);
-  }
+        // We have sub_localToGlobal[i] mapping: localID -> globalID
+        const std::vector<int>& l2g = sub_localToGlobal[i];
+        unsigned int* pColor = partialColorVec[i];
+        
+        if (pColor == nullptr) continue; // Should not happen if run successfully
+
+        // Parallel merge might be possible but linear is fine for now
+        // #pragma omp parallel for
+        for (size_t localId = 0; localId < l2g.size(); localId++) {
+             int globalId = l2g[localId];
+             // In the kernel it was: colorList[globalID] = partialColorList[i];
+             // The original code seemed to assume disjoint writes or last-writer-wins?
+             // Actually partitioning implies disjoint ownership usually, or ghosts.
+             // But original kernel did: colorList[globalID] = partialColorList[i];
+             // We do the same.
+             color[globalId] = (int)pColor[localId];
+        }
+        
+        // Cleanup partial buffers
+        if (pColor) delete[] pColor;
+        if (partialIterVec[i]) delete[] partialIterVec[i];
+    }
+
   
     const float runtime = timer.stop();
   
     printf("runtime:    %.6f ms\n", runtime*1000);
     printf("throughput: %.6f Mnodes/s\n", g.nodes * 0.000001 / runtime);
     printf("throughput: %.6f Medges/s\n", g.edges * 0.000001 / runtime);
-    if (cudaSuccess != cudaMemcpy(color, d_color_list, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
+
 
     for (int v = 0; v < g.nodes; v++) {
       if (color[v] < 0) {printf("ERROR: found unprocessed node in graph (node %d with deg %d)\n\n", v, g.nindex[v + 1] - g.nindex[v]);  exit(-1);}
@@ -1236,7 +1228,7 @@ int main(int argc, char* argv[]) {
 
     delete [] color;
 
-    cudaFree(d_color_list);
+
     freeECLgraph(g);  // 釋放圖資源
     return 0;
 }
