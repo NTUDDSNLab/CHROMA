@@ -4,7 +4,7 @@
 #include <cooperative_groups.h>
 namespace cg = cooperative_groups;
 
-// ── device 全域變數：只宣告，不初始化 ───────────────────
+// ── device global variables: declare only, do not initialize ───────────────────
 extern __device__ int  wlsize;
 extern __device__ int* remove_list;
 extern __device__ unsigned int* random_vals_d;
@@ -16,7 +16,7 @@ extern __device__ int  theta;
 extern __device__ int  iteration;
 extern __device__ int  iter_count;
 
-// ── host-side 常數可以留在這裡（因為它們不是 __device__ 變數） ──
+// ── host-side constants can stay here (since they are not __device__ variables) ──
 static const int Device          = 0;
 static const int ThreadsPerBlock = 512;
 static const unsigned int Warp   = 0xffffffff;

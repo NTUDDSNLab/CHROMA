@@ -15,7 +15,7 @@ namespace cg = cooperative_groups;
 
 #include <cuda_runtime.h>
 #ifndef MAXCOLOR
-#define MAXCOLOR 1024  // 假設我們容許的最大顏色編號 (可依情況調整)
+#define MAXCOLOR 1024  // Assume max allowed color number (adjustable as needed)
 #endif
 static const int Device = 0;
 static const int ThreadsPerBlock = 512;
@@ -172,9 +172,9 @@ __global__ void CHROMA(
 {
 const int tid     = blockIdx.x * blockDim.x + threadIdx.x;
 const int threads = gridDim.x * blockDim.x;
-const int lane    = threadIdx.x & 31;                 // 0‥31
+const int lane    = threadIdx.x & 31;                 // 0..31
 const int warpId  = (blockIdx.x * blockDim.x + threadIdx.x) >> 5;
-const int numWarp = (gridDim.x * blockDim.x) >> 5;    // 全 Grid warp 數
+const int numWarp = (gridDim.x * blockDim.x) >> 5;    // Total Grid warp count
 cg::grid_group grid = cg::this_grid();
 
 do {
@@ -521,7 +521,7 @@ void init_random_values(int nodes) {
     cudaMalloc((void**)&random_vals_device, nodes * sizeof(unsigned int));
     cudaMemcpy(random_vals_device, random_vals, nodes * sizeof(unsigned int), cudaMemcpyHostToDevice);
   
-    cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // 使用 cudaMemcpyToSymbol 复制指针
+    cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // Use cudaMemcpyToSymbol to copy pointer
     
     delete[] random_vals;
   }
@@ -913,7 +913,7 @@ void createMergeWithCopies(
   }
 }
 
-// 添加幫助函數
+// Add helper function
 void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
@@ -929,13 +929,13 @@ void print_help(const char* program_name) {
 }
 
 int main(int argc, char* argv[]) {
-    // 默認設置
+    // Default settings
     std::string filename;
-    int fuzzy_number = 10;  // RGC θ 默認值為 10
-    int nParts = 2;         // 默認分割為 2 個子圖
-    std::string partitioner_name = "metis"; // 默認使用 METIS 分割
+    int fuzzy_number = 10;  // RGC θ default is 10
+    int nParts = 2;         // Default partition into 2 subgraphs
+    std::string partitioner_name = "metis"; // Default use METIS for partitioning
 
-    // 解析命令行參數
+    // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_help(argv[0]);
@@ -993,14 +993,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // 檢查是否提供了圖形文件
+    // Check if graph file is provided
     if (filename.empty()) {
         std::cerr << "Error: No graph file specified. Use -f or --file to specify input file.\n";
         print_help(argv[0]);
         return 1;
     }
 
-    // 讀取圖形文件
+    // Read graph file
     ECLgraph g = readECLgraph(filename.c_str());
 
     if (nParts < 1) {
@@ -1008,7 +1008,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
     
-    // 顯示設置信息
+    // Display settings
     printf("Input file: %s\n", filename.c_str());
     printf("Resilient number θ: %d\n", fuzzy_number);
     printf("Number of partitions: %d\n", nParts);
@@ -1020,7 +1020,7 @@ int main(int argc, char* argv[]) {
     setParameters<<<1, 1>>>(fuzzy_number);
   
     cudaSetDevice(Device);
-    cudaGetLastError(); // 立刻 check，有錯就 exit
+    cudaGetLastError(); // Check immediately, exit if error
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
     if ((deviceProp.major == 9999) && (deviceProp.minor == 9999)) {printf("ERROR: there is no CUDA capable device\n\n");  exit(-1);}
@@ -1229,6 +1229,6 @@ int main(int argc, char* argv[]) {
     delete [] color;
 
 
-    freeECLgraph(g);  // 釋放圖資源
+    freeECLgraph(g);  // Free graph resources
     return 0;
 }

@@ -1,10 +1,10 @@
-# ================== 使用方法 ==================
-# $ make                   生成執行檔 CHROMA
-# $ make PRE_MODEL=1       啟用 predict model
-# $ make clean             刪除 *.o 及 CHROMA
+# ================== Usage ==================
+# $ make                   Generate executable CHROMA
+# $ make PRE_MODEL=1       Enable predict model
+# $ make clean             Remove *.o and CHROMA
 # =================================================
 
-# ---- 使用者可調參數 ----------------------------------
+# ---- User Configurable Parameters ----------------------------------
 ARCH      ?= sm_86
 PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
 PROF      ?= 0       # 0: not use profiler, 1: use profiler
@@ -14,7 +14,7 @@ LINKFLAGS := -O3 -arch=$(ARCH) -rdc=true -diag-suppress=177
 TARGET    := CHROMA
 
 
-# ---- 原始檔清單 --------------------------------------
+# ---- Source File List --------------------------------------
 SRCS := globals.cu chroma_utils.cu ECLGC.cu PA.cu CHROMA.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
 
@@ -31,16 +31,16 @@ endif
 
 OBJS := $(SRCS:.cu=.o) $(CPP_SRCS:.cpp=.o)
 
-# ---- 預設目標 ----------------------------------------
+# ---- Default Target ----------------------------------------
 all: $(TARGET)
 
-# ---- 可執行檔 ----------------------------------------
+# ---- Executable ----------------------------------------
 $(TARGET): $(OBJS)
 	@echo "== Linking $(TARGET) =="
 	nvcc $(LINKFLAGS) $^ -o $@
 	@rm -f $(OBJS)
 
-# ---- 個別物件 ----------------------------------------
+# ---- Individual Objects ----------------------------------------
 %.o: %.cu
 	@echo "== Compiling $< =="
 	nvcc $(DC_FLAGS) $< -o $@
@@ -49,7 +49,7 @@ $(TARGET): $(OBJS)
 	@echo "== Compiling $< =="
 	g++ $(CXXFLAGS) -c $< -o $@
 
-# ---- 清理 -------------------------------------------
+# ---- Clean -------------------------------------------
 clean:
 	rm -f  $(TARGET)
 

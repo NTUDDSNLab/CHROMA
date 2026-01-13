@@ -1,5 +1,5 @@
 // =============================================================================
-//  SDL + Greedy  (CPU, min-heap version, 無 CUDA)
+//  SDL + Greedy  (CPU, min-heap version, No CUDA)
 //  build : g++ -O3 -std=c++17 sdl_heap.cpp -o sdl_heap
 // =============================================================================
 #include "ECLgraph.h"
@@ -31,12 +31,12 @@ static void peel_smallest_last_heap(const ECLgraph& g,
     {
         int v;
         // int v; unsigned int d;
-        do {                                 // 取尚未移除且度數最新的
+        do {                                 // Get not removed and latest degree
             // d = pq.top().first;
             pq.top().first;
             v = pq.top().second;
             pq.pop();
-        } while (removed[v]);                // 若過期 (已移/度數降) 就丟掉
+        } while (removed[v]);                // If expired (removed/degree dropped), discard
 
         removed[v] = 1;
         iter_out[v] = itr + 1;
@@ -45,7 +45,7 @@ static void peel_smallest_last_heap(const ECLgraph& g,
             int nei = g.nlist[e];
             if (removed[nei]) continue;
             --deg[nei];
-            pq.emplace(deg[nei], nei);       // push 新鍵值，舊的留待之後丟
+            pq.emplace(deg[nei], nei);       // push new key, leave old one to be discarded later
         }
     }
 }

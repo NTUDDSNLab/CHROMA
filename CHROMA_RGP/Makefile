@@ -1,36 +1,36 @@
-# ---- 使用者可調 ----------------------------------
+# ---- User Configurable ----------------------------------
 ARCH      ?= sm_86
 PARTITIONER_FLAG := -DHAVE_METIS
 PARTITIONER_FLAG += -DHAVE_KAHIP # Open this if you want to use KaHIP
 CXXFLAGS  := -O3 -std=c++17 -I../lib/io
 DC_FLAGS  := -dc -arch=$(ARCH) $(PARTITIONER_FLAG) -Xcompiler -fopenmp $(CXXFLAGS) 
-# 加入 METIS 與 OpenMP 的連結參數
+# Add METIS and OpenMP linking parameters
 
-# METIS (保持原有的 ~/local 路徑)
+# METIS (Keep original ~/local path)
 INCLUDES_METIS := -I$(HOME)/local/include
 LIBS_METIS := -L$(HOME)/local/lib
 
-# KaHIP (修改為 External 目錄)
+# KaHIP (Modified to External directory)
 INCLUDES_KAHIP := -I../External/KaHIP/deploy
 LIBS_KAHIP := -L../External/KaHIP/deploy
 
-# 寫入 rpath，讓執行檔自帶庫的搜尋路徑（免 LD_LIBRARY_PATH）
+# Write rpath, let executable carry library search path (avoid LD_LIBRARY_PATH)
 RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib \
                -Xlinker -rpath -Xlinker $(abspath ../External/KaHIP/deploy) \
                -Xlinker --enable-new-dtags
 
-# 統一使用 LDFLAGS，移除冗餘的註釋行
+# Unify LDFLAGS, remove redundant comment lines
 LDFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
            $(LIBS_METIS) $(LIBS_KAHIP) -lmetis -lGKlib -lkahip $(RPATH_FLAGS)
 
 TARGET    := CHROMA_RGP
 
-# ---- 原始檔清單 -----------------------------------
+# ---- Source File List -----------------------------------
 SRCS := CHROMA_RGP.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
 OBJS := $(SRCS:.cu=.o) $(CPP_SRCS:.cpp=.o)
 
-# ---- 目標 ----------------------------------------
+# ---- Target ----------------------------------------
 all: $(TARGET)
 
 $(TARGET): $(OBJS)

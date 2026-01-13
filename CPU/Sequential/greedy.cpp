@@ -3,10 +3,10 @@
 //  author : 吳建賢  (2025-06-18)
 //  build  : g++ -O3 -std=c++17 greedy_cpu.cpp ECLgraph.cpp -o greedy_cpu
 //
-//  兩種走訪次序：
-//    • NATURAL   —— 0,1,2,…      （原本輸入順序）
-//    • DEG_DESC  —— 先把頂點依度數由高到低排序再上色（常見改良）
-//  在 main() 中用 `ORDER_TYPE` 巨集切換，預設 DEG_DESC。
+//  Two traversal orders:
+//    • NATURAL   —— 0,1,2,…      (Original input order)
+//    • DEG_DESC  —— Sort vertices by degree descending then color (Common improvement)
+//  Switch via `ORDER_TYPE` macro in main(), default DEG_DESC.
 // =============================================================================
 #include "ECLgraph.h"
 #include <vector>
@@ -22,7 +22,7 @@
 using clk = std::chrono::high_resolution_clock;
 
 // -----------------------------------------------------------------------------
-//  Greedy coloring  (返回顏色數)
+//  Greedy coloring  (Returns number of colors)
 // -----------------------------------------------------------------------------
 static int greedy_color(const ECLgraph& g,
                         const std::vector<int>& order,
@@ -32,7 +32,7 @@ static int greedy_color(const ECLgraph& g,
     color_out.assign(N, -1);
     int maxColor = -1;
 
-    // work array：鄰居已用顏色集合，動態長度
+    // work array: Set of colors used by neighbors, dynamic length
     std::vector<int> used;
 
     for (int idx = 0; idx < N; ++idx) {
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     printf("nodes: %d  edges: %d  avg_deg: %.2f\n",
            g.nodes, g.edges, 1.0 * g.edges / g.nodes);
 
-    // -------- 建立走訪順序 (order) --------
+    // -------- Build traversal order (order) --------
     std::vector<int> order(g.nodes);
     for (int v = 0; v < g.nodes; ++v) order[v] = v;
 
@@ -75,14 +75,14 @@ int main(int argc, char* argv[])
               [&](int a, int b) {
                   int da = g.nindex[a+1] - g.nindex[a];
                   int db = g.nindex[b+1] - g.nindex[b];
-                  return da > db;            // 度數高者先
+                  return da > db;            // Higher degree first
               });
     printf("order  : degree-descending greedy\n");
 #else
     printf("order  : natural (0…N-1) greedy\n");
 #endif
 
-    // -------- 執行並計時 --------
+    // -------- Execute and time --------
     std::vector<int> color;
     auto t0 = clk::now();
     int colors_used = greedy_color(g, order, color);
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     printf("runtime:    %.6f ms\n", ms);
     printf("colors used: %d\n", colors_used);
 
-    // -------- 驗證 --------
+    // -------- Verify --------
     for (int v = 0; v < g.nodes; ++v)
         for (int e = g.nindex[v]; e < g.nindex[v + 1]; ++e)
             if (color[v] == color[g.nlist[e]] && v != g.nlist[e]) {
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
             }
     printf("verify ok\n");
 
-    // -------- 前 16 色統計 --------
+    // -------- Top 16 color statistics --------
     const int SHOW = 16; std::vector<int> hist(SHOW, 0); int cum = 0;
     for (int c : color) if (c < SHOW) ++hist[c];
     for (int i = 0; i < std::min(SHOW, colors_used); ++i) {

@@ -11,7 +11,7 @@ __global__ void JP_SL(
   const int tid     = blockIdx.x * blockDim.x + threadIdx.x;
   const int threads = gridDim.x * blockDim.x;
   cg::grid_group grid = cg::this_grid();
-  /*--------------- Phase-1: stride 走訪所有頂點 -------------------*/
+  /*--------------- Phase-1: stride traverse all vertices -------------------*/
   do {
     int add_num=0;
     unsigned int localMin = 0x7FFFFFFF;
@@ -75,7 +75,7 @@ const int threads = gridDim.x * blockDim.x;
 
 cg::grid_group grid = cg::this_grid();
 
-/*--------------- Phase-1: stride 走訪所有頂點 -------------------*/
+/*--------------- Phase-1: stride traverse all vertices -------------------*/
 do {
 int add_num=0;
 grid.sync();
@@ -128,7 +128,7 @@ const int threads = gridDim.x * blockDim.x;
 
 cg::grid_group grid = cg::this_grid();
 
-/*--------------- Phase-1: stride 走訪所有頂點 -------------------*/
+/*--------------- Phase-1: stride traverse all vertices -------------------*/
 do {
 int add_num=0;
 // unsigned int localMin = 0x7FFFFFFF;

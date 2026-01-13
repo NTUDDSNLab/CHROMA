@@ -1,7 +1,7 @@
 // globals.cu
 #include "globals.cuh"
 
-// 這裡才真正 allocate & 初始化
+// This is where real allocation & initialization happens
 __device__ int  wlsize      = 0;
 __device__ int* remove_list = nullptr;
 __device__ unsigned int* random_vals_d = nullptr;

@@ -28,7 +28,7 @@ enum GraphFormat {
 };
 
 
-// 添加幫助函數
+// Add helper function
 void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
@@ -51,7 +51,7 @@ void print_help(const char* program_name) {
     std::cout << "  " << program_name << " -f graph.egr --predict\n";
 }
 
-// 解析算法參數
+// Parse algorithm parameters
 void* select_algorithm(const std::string& algo_str, std::string& algo_name) {
     if (algo_str == "0" || algo_str == "P_SL_WBR") {
         algo_name = "P_SL_WBR";
@@ -92,7 +92,7 @@ void init_random_values(int nodes) {
   cudaMalloc((void**)&random_vals_device, nodes * sizeof(unsigned int));
   cudaMemcpy(random_vals_device, random_vals, nodes * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-  cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // 使用 cudaMemcpyToSymbol 复制指针
+  cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // Use cudaMemcpyToSymbol to copy pointer
   
   delete[] random_vals;
 }
@@ -111,14 +111,14 @@ struct GPUTimer
 
 int main(int argc, char* argv[])
 {
-    // 默認設置
+    // Default settings
     std::string filename;
-    int fuzzy_number = 0;  // RGC θ 默認值為 0
+    int fuzzy_number = 0;  // RGC θ default value is 0
     void* kernel_to_launch = (void*)P_SL_WBR;
     std::string algo_name = "P_SL_WBR";
-    bool use_predicted_resilient = false;  // 標記是否使用預測的 resilient 值
+    bool use_predicted_resilient = false;  // Mark whether to use predicted resilient value
 
-    // 解析命令行參數
+    // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_help(argv[0]);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
             if (i + 1 < argc) {
                 try {
                     fuzzy_number = std::stoi(argv[++i]);
-                    use_predicted_resilient = false;  // 手動指定時不使用預測
+                    use_predicted_resilient = false;  // Do not use prediction when manually specified
                 } catch (const std::exception& e) {
                     std::cerr << "Error: Invalid RGC value '" << argv[i] << "'.\n";
                     return 1;
@@ -166,31 +166,30 @@ int main(int argc, char* argv[])
         }
     }
 
-    // 檢查是否提供了圖形文件
+    // Check if graph file is provided
     if (filename.empty()) {
         std::cerr << "Error: No graph file specified. Use -f or --file to specify input file.\n";
         print_help(argv[0]);
         return 1;
     }
 
-    // 讀取圖形文件
-    // 讀取圖形文件
+    // Read graph file
     ECLgraph g;
     CSRGraph graph;
     
-    // 根據文件擴展名決定使用哪種格式
+    // Determine format based on file extension
     std::string file_extension = filename.substr(filename.find_last_of(".") + 1);
     
     if (file_extension == "egr") {
-        // 使用 ECLgraph 讀取 .egr 文件
+        // Use ECLgraph to read .egr file
         g = readECLgraph(filename.c_str());
-        // 創建一個空的 CSRGraph 用於兼容後續代碼
+        // Create an empty CSRGraph for compatibility with subsequent code
         graph.file_num_nodes = g.nodes;
         graph.file_num_edges = g.edges;
         graph.max_node_id = g.nodes - 1;
         std::cout << "Read .egr file using ECLgraph" << std::endl;
     } else if (file_extension == "txt" || file_extension == "bin") {
-        // 使用 CSRGraph 讀取 .txt 或 .bin 文件
+        // Use CSRGraph to read .txt or .bin file
         if (file_extension == "bin") {
             graph.loadFromBinary(filename);
         } else {
@@ -205,10 +204,10 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // 如果啟用預測模型，使用 score function 預測 resilient parameter
+    // If prediction model is enabled, use score function to predict resilient parameter
     #ifdef PRED_MODEL
     if (use_predicted_resilient) {
-        // 使用圖形的節點數和邊數作為預測模型的輸入
+        // Use graph nodes and edges as input for prediction model
         double input[2] = {(double)g.nodes, (double)g.edges};
         double score_result = score(input);
         fuzzy_number = (int)round(score_result);
@@ -220,7 +219,7 @@ int main(int argc, char* argv[])
     }
     #endif
 
-    // 顯示設置信息
+    // Display setting information
     printf("Input file: %s\n", filename.c_str());
     printf("Algorithm: %s\n", algo_name.c_str());
     if (use_predicted_resilient) {
@@ -318,7 +317,7 @@ int main(int argc, char* argv[])
     int blkPerSM;
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
       kernel_to_launch, ThreadsPerBlock, 0);
-    int gridDim = blkPerSM * SMs;      // 一定能同時常駐
+    int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
     int *out_d;  cudaMalloc(&out_d, g.nodes * sizeof(int));
     void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
       &d.degree_list, &d.iteration_list_d };

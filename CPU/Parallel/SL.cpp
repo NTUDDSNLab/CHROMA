@@ -19,7 +19,7 @@
    return (val >> 16) ^ val;
  }
  
- /* 16-bit 雜湊：只取低 16 bit 即可 */
+ /* 16-bit hash: only take the lower 16 bits */
  static inline uint16_t hash16(uint32_t x)
  {
      return hash(x) & 0xffffu;
@@ -277,13 +277,13 @@
                  }
              }
  
-             /* 本執行緒扣度數 */
+             /* Thread decrements degree */
              for (int nei : bucket) {
                  #pragma omp atomic
                  --deg[nei];
              }
  
-             /* 累計移除數到共享變數 */
+             /* Accumulate removed count to shared variable */
              #pragma omp atomic update
              removed_round += removed_local;
  
@@ -294,7 +294,7 @@
          }
      }
  
-     /* 處理極少數殘存頂點 */
+     /* Process very few remaining vertices */
      #pragma omp parallel for num_threads(threads) schedule(static)
      for (int v = 0; v < N; ++v)
          if (active[v])

@@ -9,7 +9,7 @@
 #include <utility>
 #include <cstdio>
 
-#include <chrono>  // 引入 <chrono> 標頭檔案
+#include <chrono>  // Include <chrono> header
 #include <set>
 using namespace std;
  
@@ -118,7 +118,7 @@ void Graph::addEdge(int v, int w)
             }
     }
 
-    // 檢查顏色衝突
+    // Check color conflict
     bool conflict_found = false;
     for (int u = 0; u < V; u++)
     {
@@ -220,15 +220,15 @@ int main(int argc, char** argv)
 
     cout << "Coloring of graph 1\n";
     
-    // 開始計時
+    // Start timing
     auto start = std::chrono::high_resolution_clock::now();
 
-    g1.greedyColoring();  // 執行著色算法
+    g1.greedyColoring();  // Execute coloring algorithm
 
-    // 結束計時
+    // End timing
     auto end = std::chrono::high_resolution_clock::now();
 
-    // 計算執行時間（以秒為單位）
+    // Calculate execution time (in seconds)
     std::chrono::duration<double> elapsed = end - start;
     printf("runtime:    %.6f ms\n", elapsed.count()*1000);
 

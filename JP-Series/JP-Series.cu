@@ -15,7 +15,7 @@
 
 // namespace cg = cooperative_groups;
 
-// 添加幫助函數
+// Add helper function
 void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
@@ -33,7 +33,7 @@ void print_help(const char* program_name) {
     std::cout << "  " << program_name << " -f graph.txt --algorithm 1 --resilient 5\n";
 }
 
-// 解析算法參數
+// Parse algorithm parameters
 void* select_algorithm(const std::string& algo_str, std::string& algo_name) {
     if (algo_str == "0" || algo_str == "JP-SL") {
         algo_name = "JP-SL";
@@ -76,7 +76,7 @@ void init_random_values(int nodes) {
   cudaMalloc((void**)&random_vals_device, nodes * sizeof(unsigned int));
   cudaMemcpy(random_vals_device, random_vals, nodes * sizeof(unsigned int), cudaMemcpyHostToDevice);
 
-  cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // 使用 cudaMemcpyToSymbol 复制指针
+  cudaMemcpyToSymbol(random_vals_d, &random_vals_device, sizeof(unsigned int*)); // Use cudaMemcpyToSymbol to copy pointer
   
   delete[] random_vals;
 }
@@ -95,14 +95,14 @@ struct GPUTimer
 
 int main(int argc, char* argv[])
 {
-    // 默認設置
+    // Default settings
     std::string filename;
     std::string algorithm = "JP-SL";
     int fuzzy_number = 0;
     void* kernel_to_launch = (void*)JP_SL;
     std::string algo_name = "JP-SL";
 
-    // 解析命令行參數
+    // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_help(argv[0]);
@@ -147,17 +147,17 @@ int main(int argc, char* argv[])
         }
     }
 
-    // 檢查是否提供了圖形文件
+    // Check if graph file is provided
     if (filename.empty()) {
         std::cerr << "Error: No graph file specified. Use -f or --file to specify input file.\n";
         print_help(argv[0]);
         return 1;
     }
 
-    // 讀取圖形文件
+    // Read graph file
     ECLgraph g = readECLgraph(filename.c_str());
     
-    // 顯示設置信息
+    // Display settings
     printf("Input file: %s\n", filename.c_str());
     printf("Algorithm: %s\n", algo_name.c_str());
     printf("Resilient number: %d\n", fuzzy_number);
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
     int blkPerSM;
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
       kernel_to_launch, ThreadsPerBlock, 0);
-    int gridDim = blkPerSM * SMs;      // 一定能同時常駐
+    int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
     int *out_d;  cudaMalloc(&out_d, g.nodes * sizeof(int));
     void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
       &d.degree_list, &d.iteration_list_d };

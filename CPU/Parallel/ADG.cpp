@@ -19,7 +19,7 @@
    return (val >> 16) ^ val;
  }
  
- /* 16-bit 雜湊：只取低 16 bit 即可 */
+ /* 16-bit hash: only take the lower 16 bits */
  static inline uint16_t hash16(uint32_t x)
  {
      return hash(x) & 0xffffu;
@@ -279,7 +279,7 @@
   *                (thread-local bucket, ZERO atomic)
   *
   * priority[v] = (iter << 16) | (deg & 0xffff)
-  * eps          – 建議 0.0 ~ 0.1；0 表嚴格「≤ avg」，越大越快但色數可能多 1~2。
+  * eps          – Recommended 0.0 ~ 0.1; 0 means strict "≤ avg", larger is faster but color count may increase by 1~2.
   ********************************************************************/
  void compute_ADG(const ECLgraph& g,
      int threads,
@@ -288,7 +288,7 @@
  {
  const int N = g.nodes;
  
- /* 初始度數與活躍集合 ----------------------------------------- */
+ /* Initial degrees and active set ----------------------------------------- */
  std::vector<int>  deg(N);
  std::vector<char> active(N, 1);
  
@@ -303,11 +303,11 @@
  /* ---------------- parallel region ---------------------------- */
  #pragma omp parallel num_threads(threads) shared(deg,active,priority,iter,sum,cnt)
  {
- std::vector<int> bucket;          // thread-local 鄰居遞減暫存
+ std::vector<int> bucket;          // thread-local neighbor decrements buffer
  bucket.reserve(256);
  
  while (true) {
- /* (1) 重新計算 Σdeg 與活躍數量 |U| */
+ /* (1) Recompute Σdeg and active count |U| */
  #pragma omp single
  { sum = 0; cnt = 0; }
  
@@ -319,11 +319,11 @@
  #pragma omp single
  { avg = cnt ? double(sum) / cnt : 0.0; }
  
- if (cnt == 0) break;          // 全部剝完
+ if (cnt == 0) break;          // All peeled
  
  const double threshold = (1.0 + eps) * avg;
  
- /* (2) 剝皮 + 收集鄰居到 bucket（無 atomic） */
+ /* (2) Peel + collect neighbors to bucket (no atomic) */
  bucket.clear();
  int local_removed = 0;        // thread-local
  
@@ -343,20 +343,20 @@
     }
  }
  
- /* (3) barrier 後，批次把 bucket 裡的鄰居度數 –1 */
+ /* (3) After barrier, batch decrement neighbor degrees in bucket */
  #pragma omp barrier
  #pragma omp for schedule(static,1024)
  for (size_t i = 0; i < bucket.size(); ++i)
     --deg[bucket[i]];
  
- /* (4) 下一回合 */
+ /* (4) Next round */
  #pragma omp single
  { ++iter; }
  #pragma omp barrier
  } /* while */
  }     /* end parallel */
  
- /* (5) 補上最後仍 active 頂點的 priority（極少數） */
+ /* (5) Fill priority for remaining active vertices (very few) */
  #pragma omp parallel for num_threads(threads) schedule(static)
  for (int v = 0; v < N; ++v)
  if (priority[v] == 0){
