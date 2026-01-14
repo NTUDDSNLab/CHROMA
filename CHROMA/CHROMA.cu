@@ -180,6 +180,7 @@ int main(int argc, char* argv[])
     // Determine format based on file extension
     std::string file_extension = filename.substr(filename.find_last_of(".") + 1);
     
+    
     if (file_extension == "egr") {
         // Use ECLgraph to read .egr file
         g = readECLgraph(filename.c_str());
@@ -189,13 +190,47 @@ int main(int argc, char* argv[])
         graph.max_node_id = g.nodes - 1;
         std::cout << "Read .egr file using ECLgraph" << std::endl;
     } else if (file_extension == "txt" || file_extension == "bin") {
-        // Use CSRGraph to read .txt or .bin file
+        std::string binary_filename = filename.substr(0, filename.find_last_of(".")) + ".bin";
+        
+        bool loaded_from_binary = false;
         if (file_extension == "bin") {
-            graph.loadFromBinary(filename);
+             if (graph.loadFromBinary(filename)) {
+                loaded_from_binary = true;
+             }
         } else {
-            graph.buildFromTxtFile(filename, false);
+            // Check if binary file exists
+            FILE* f = fopen(binary_filename.c_str(), "rb");
+            if (f != NULL) {
+                fclose(f);
+                std::cout << "Found binary cache: " << binary_filename << ", loading..." << std::endl;
+                if (graph.loadFromBinary(binary_filename)) {
+                    loaded_from_binary = true;
+                }
+            }
         }
-        std::cout << "build from " << file_extension << " file" << std::endl;
+
+        if (!loaded_from_binary) {
+             std::cout << "Binary cache not found or failed to load. Reading from text file..." << std::endl;
+             graph.buildFromTxtFile(filename, false);
+             
+             std::cout << "Saving to binary file: " << binary_filename << std::endl;
+             graph.saveToBinary(binary_filename);
+             
+             // Verify consistency
+             std::cout << "Verifying binary file consistency..." << std::endl;
+             CSRGraph check_graph;
+             if (check_graph.loadFromBinary(binary_filename)) {
+                 if (graph == check_graph) {
+                     std::cout << "Verification SUCCESS: Binary file matches original graph." << std::endl;
+                 } else {
+                     std::cerr << "Verification FAILED: Binary file does not match original graph!" << std::endl;
+                 }
+             } else {
+                 std::cerr << "Verification FAILED: Could not load generated binary file!" << std::endl;
+             }
+        }
+
+        std::cout << "build from " << (loaded_from_binary ? "binary" : "text") << " file" << std::endl;
         std::cout << filename << " is zero based: " << graph.is_zero_based << std::endl;
         // Transform to ECLgraph
         graph.transfromToECLGraph(g);
@@ -233,6 +268,7 @@ int main(int argc, char* argv[])
     printf("Edges: %d\n", g.edges);
     printf("Max node id: %d\n", graph.max_node_id);
     printf("Average degree: %.2f\n", 1.0 * g.edges / g.nodes);
+    
     
     setParameters<<<1, 1>>>(fuzzy_number);
 
@@ -325,8 +361,10 @@ int main(int argc, char* argv[])
             (void*)kernel_to_launch,
             dim3(gridDim), dim3(ThreadsPerBlock), args);
     cudaDeviceSynchronize();
+    std::cout << "Finish PA " << std::endl;
     // ================CA===================
     ECL_GC_run(blocks, g, d);
+    std::cout << "Finish CA " << std::endl;
     const float runtime = timer.stop();
     if (cudaSuccess != cudaMemcpy(color, d.color_d, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
     verifyAndPrintStats(g, color, runtime);

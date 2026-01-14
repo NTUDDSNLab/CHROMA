@@ -24,9 +24,10 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
 - **Build**
   ```bash
   cd CHROMA
-  make ARCH=sm_89 [PRE_MODEL=1]
+  make ARCH=<GPU_ARCH> [PRE_MODEL=1]
   ```
-  Use `PRE_MODEL=1` when `model/model.cpp` (generated via `m2cgen`) is present for θ prediction.
+  * Use `PRE_MODEL=1` when `model/model.cpp` (generated via `m2cgen`) is present for θ prediction.
+  * Please use your own GPU architecture to replace `<GPU_ARCH>`.
 - **Run**
   ```bash
   CHROMA/CHROMA -f Datasets/facebook.egr -a P_SL_WBR -r 10
@@ -44,8 +45,9 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
 - **Build**
   ```bash
   cd CHROMA_RGP
-  make ARCH=sm_89
+  make ARCH=sm_89 [PRE_MODEL=1]
   ```
+  Use `PRE_MODEL=1` when `model/model.cpp` is present for θ prediction.
 - **Run**
   ```bash
   CHROMA_RGP/CHROMA_RGP -f Datasets/facebook.egr -p 2 -r 10
@@ -55,6 +57,7 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
     - `-f, --file <path>`: Input graph (required).
     - `-r, --resilient <θ>`: Target resilient number (default `10`).
     - `-p, --parts <count>`: Number of partitions for RGP (default `2`).
+    - `--predict`: Enable prediction model to auto-select θ (`PRE_MODEL=1`).
     - `--partitioner <name>`: Partitioning strategy `metis` (default), `round_robinm`, `random`, `ldg`, or `kahip`.
     - `-h, --help`: Print usage summary and exit.
 

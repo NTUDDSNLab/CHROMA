@@ -340,14 +340,14 @@ bool CSRGraph::loadFromBinary(const std::string &filename) {
     file.read(reinterpret_cast<char *>(&num_edges), sizeof(num_edges));
     file.read(reinterpret_cast<char *>(&num_edges_processed),
                 sizeof(num_edges_processed));
-    destinations.resize(num_edges_processed);
+    destinations.resize(num_edges);
     offsets.resize(num_nodes + 1);
     file.read(reinterpret_cast<char *>(destinations.data()),
                 destinations.size() * sizeof(int));
     file.read(reinterpret_cast<char *>(offsets.data()),
                 offsets.size() * sizeof(int));
     // Initialize capacities
-    capacities.resize(num_edges_processed, 1);
+    capacities.resize(num_edges, 1);
     std::cout << "nodes: " << num_nodes << std::endl;
     std::cout << "edges: " << num_edges << std::endl;
     std::cout << "num_edges_processed: " << num_edges_processed << std::endl;

@@ -62,7 +62,7 @@ for (int k = warpId; k < remove_size; k += numWarp){
       unsigned int iter = __ldg(iteration_list + nei);
 
       if (!(iter & 0x40000000u)) { 
-          warpMin = min(warpMin, atomicSub(&degree_list[nei], 1));
+          warpMin = min(warpMin, atomicSub(&degree_list[nei], 1) - 1);
       }
   }
     warpMin = warpReduceMin(warpMin);

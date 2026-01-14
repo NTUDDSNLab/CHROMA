@@ -1,6 +1,7 @@
 # ================== Usage ==================
 # $ make                   Generate executable CHROMA
 # $ make PRE_MODEL=1       Enable predict model
+# $ make DEBUG=1         Enable debug mode (-lineinfo -O0)
 # $ make clean             Remove *.o and CHROMA
 # =================================================
 
@@ -8,9 +9,19 @@
 ARCH      ?= sm_86
 PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
 PROF      ?= 0       # 0: not use profiler, 1: use profiler
-CXXFLAGS  := -O3 -std=c++17 -I../lib/io
-DC_FLAGS  := -dc -arch=$(ARCH) -rdc=true $(CXXFLAGS) # -lineinfo -Xptxas=-v
-LINKFLAGS := -O3 -arch=$(ARCH) -rdc=true -diag-suppress=177
+DEBUG     ?= 0       # 0: release mode, 1: debug mode
+
+ifeq ($(DEBUG), 1)
+	OPT_FLAGS := -O0
+	DC_DEBUG  := -lineinfo
+else
+	OPT_FLAGS := -O3
+	DC_DEBUG  :=
+endif
+
+CXXFLAGS  := $(OPT_FLAGS) -std=c++17 -I../lib/io
+DC_FLAGS  := -dc -arch=$(ARCH) -rdc=true $(CXXFLAGS) $(DC_DEBUG) # -lineinfo -Xptxas=-v
+LINKFLAGS := $(OPT_FLAGS) -arch=$(ARCH) -rdc=true -diag-suppress=177
 TARGET    := CHROMA
 
 
