@@ -1,5 +1,6 @@
 # ---- User Configurable ----------------------------------
 ARCH      ?= sm_86
+PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
 PARTITIONER_FLAG := -DHAVE_METIS
 PARTITIONER_FLAG += -DHAVE_KAHIP # Open this if you want to use KaHIP
 CXXFLAGS  := -O3 -std=c++17 -I../lib/io
@@ -28,6 +29,12 @@ TARGET    := CHROMA_RGP
 # ---- Source File List -----------------------------------
 SRCS := CHROMA_RGP.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
+
+ifeq ($(PRE_MODEL), 1)
+	CPP_SRCS += ../model/model.cpp
+	DC_FLAGS += -DPRED_MODEL
+	CXXFLAGS += -DPRED_MODEL
+endif
 OBJS := $(SRCS:.cu=.o) $(CPP_SRCS:.cpp=.o)
 
 # ---- Target ----------------------------------------

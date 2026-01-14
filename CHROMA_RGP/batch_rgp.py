@@ -59,11 +59,19 @@ class RunResult:
     ok: bool = True
     error: Optional[str] = None
     stdout: Optional[str] = None
+    gpu_stats: Optional[List[Dict[str, float]]] = None
 
+
+# Regex for the per-GPU table rows:
+# | GPU ID | Partitions | Exec Time (ms) | Mem Used (MB) | Mem Total (MB) |
+GPU_STATS_RE = re.compile(
+    r"\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*([\d\.]+)\s*\|\s*([\d\.]+)\s*\|\s*([\d\.]+)\s*\|"
+)
 
 def parse_output(stdout: str) -> RunResult:
     runtime_ms: Optional[float] = None
     colors_used: Optional[int] = None
+    gpu_stats: List[Dict[str, float]] = []
 
     m = RUNTIME_RE.search(stdout)
     if m:
@@ -73,6 +81,23 @@ def parse_output(stdout: str) -> RunResult:
     if m:
         colors_used = int(m.group(1))
 
+    # Parse GPU table lines
+    for line in stdout.split("\n"):
+        gm = GPU_STATS_RE.search(line)
+        if gm:
+            gpu_id = int(gm.group(1))
+            parts = int(gm.group(2))
+            exec_time = float(gm.group(3))
+            mem_used = float(gm.group(4))
+            mem_total = float(gm.group(5))
+            gpu_stats.append({
+                "gpu_id": gpu_id,
+                "partitions": parts,
+                "exec_time_ms": exec_time,
+                "mem_used_mb": mem_used,
+                "mem_total_mb": mem_total,
+            })
+
     if runtime_ms is None or colors_used is None:
         return RunResult(
             runtime_ms=0.0,
@@ -80,6 +105,7 @@ def parse_output(stdout: str) -> RunResult:
             ok=False,
             error="Failed to parse runtime and/or colors",
             stdout=stdout,
+            gpu_stats=[],
         )
 
     return RunResult(
@@ -87,6 +113,7 @@ def parse_output(stdout: str) -> RunResult:
         colors_used=colors_used,
         ok=True,
         stdout=stdout,
+        gpu_stats=gpu_stats,
     )
 
 
@@ -115,9 +142,9 @@ def run_rgp(
             timeout=timeout_sec,
         )
     except subprocess.TimeoutExpired:
-        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error=f"Timeout after {timeout_sec}s")
+        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error=f"Timeout after {timeout_sec}s", gpu_stats=[])
     except FileNotFoundError:
-        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error=f"Binary not found: {binary}")
+        return RunResult(runtime_ms=0.0, colors_used=-1, ok=False, error=f"Binary not found: {binary}", gpu_stats=[])
 
     res = parse_output(proc.stdout)
     if proc.returncode != 0:
@@ -178,8 +205,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     # Partitioners to evaluate
     partitioners: List[str] = args.partitioners if args.partitioners else [args.partitioner]
 
-    # Output structure: partitioner -> dataset -> parts -> {color, runtime}
-    out_data: Dict[str, Dict[str, Dict[str, Dict[str, float]]]] = {}
+    # Output structure: partitioner -> dataset -> parts -> {color, runtime, gpu_stats}
+    out_data: Dict[str, Dict[str, Dict[str, Dict[str, mixed]]]] = {}
 
     for part_method in partitioners:
         print(f"Partitioner: {part_method}")
@@ -225,6 +252,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 out_data[part_method][dname][str(parts)] = {
                     "color": int(best.colors_used),
                     "runtime": float(round(best.runtime_ms, 6)),  # ms
+                    "gpu_stats": best.gpu_stats,
                 }
                 print(
                     f"      best => color={best.colors_used}, "

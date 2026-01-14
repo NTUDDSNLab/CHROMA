@@ -11,7 +11,13 @@
 #include <math.h>
 #include <cooperative_groups.h>
 #include <cstring>
+#include "graph.h"
+#include <chrono>
 namespace cg = cooperative_groups;
+
+#ifdef PRED_MODEL
+extern double score(double *input);
+#endif
 
 #include <cuda_runtime.h>
 #ifndef MAXCOLOR
@@ -55,13 +61,35 @@ struct GPUState {
 // ||                                 ||
 // =====================================
 
+static void checkCuda(cudaError_t result, const char * file, const int line) {
+  if (result != cudaSuccess) {
+    fprintf(stderr, "%s at %s:%d\n", cudaGetErrorString(result), file, line);
+    exit(-1);
+  }
+}
+#define CHECK_CUDA(x) checkCuda(x, __FILE__, __LINE__)
+
 struct GPUTimer
 {
   cudaEvent_t beg, end;
-  GPUTimer() {cudaEventCreate(&beg);  cudaEventCreate(&end);}
-  ~GPUTimer() {cudaEventDestroy(beg);  cudaEventDestroy(end);}
-  void start() {cudaEventRecord(beg, 0);}
-  float stop() {cudaEventRecord(end, 0);  cudaEventSynchronize(end);  float ms;  cudaEventElapsedTime(&ms, beg, end);  return 0.001f * ms;}
+  GPUTimer() {
+    CHECK_CUDA(cudaEventCreate(&beg));
+    CHECK_CUDA(cudaEventCreate(&end));
+  }
+  ~GPUTimer() {
+    CHECK_CUDA(cudaEventDestroy(beg));
+    CHECK_CUDA(cudaEventDestroy(end));
+  }
+  void start() {
+    CHECK_CUDA(cudaEventRecord(beg, 0));
+  }
+  float stop() {
+    CHECK_CUDA(cudaEventRecord(end, 0));
+    CHECK_CUDA(cudaEventSynchronize(end));
+    float ms;
+    CHECK_CUDA(cudaEventElapsedTime(&ms, beg, end));
+    return 0.001f * ms;
+  }
 };
 
 // =====================================
@@ -184,14 +212,12 @@ do {
   if(v>=nodes) break;
   int iteration_list_v=iteration_list[v];
   unsigned int prio = (iteration_list_v >> 29) & 0x1;
-  unsigned int iteration_v = iteration_list_v & 0x0FFFFFFF;
+
   unsigned int degree=degree_list1[v];
   if(prio==0){
       if(degree<=(state->theta+FuzzyNumber)){
         prio=1;
         add_num++;
-        int beg = nidx[v];
-        int end = nidx[v + 1];
         remove_list[atomicAdd(&(state->remove_size), 1)] = v;
       }else{
         if (degree < localMin) localMin = degree;
@@ -926,6 +952,7 @@ void print_help(const char* program_name) {
     std::cout << "  " << program_name << " -f graph.txt\n";
     std::cout << "  " << program_name << " --file graph.txt --resilient 15\n";
     std::cout << "  " << program_name << " -f graph.txt --parts 4 --resilient 8 --partitioner ldg\n";
+    std::cout << "  " << program_name << " -f graph.txt --predict\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -934,6 +961,7 @@ int main(int argc, char* argv[]) {
     int fuzzy_number = 10;  // RGC θ default is 10
     int nParts = 2;         // Default partition into 2 subgraphs
     std::string partitioner_name = "metis"; // Default use METIS for partitioning
+    bool use_predicted_resilient = false;  // Mark whether to use predicted resilient value
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -952,6 +980,7 @@ int main(int argc, char* argv[]) {
             if (i + 1 < argc) {
                 try {
                     fuzzy_number = std::stoi(argv[++i]);
+                    use_predicted_resilient = false;  // Do not use prediction when manually specified
                 } catch (const std::exception& e) {
                     std::cerr << "Error: Invalid resilient number '" << argv[i] << "'.\n";
                     return 1;
@@ -982,6 +1011,8 @@ int main(int argc, char* argv[]) {
                 print_help(argv[0]);
                 return 1;
             }
+        } else if (strcmp(argv[i], "--predict") == 0) {
+            use_predicted_resilient = true;
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -1001,16 +1032,90 @@ int main(int argc, char* argv[]) {
     }
 
     // Read graph file
-    ECLgraph g = readECLgraph(filename.c_str());
+    ECLgraph g;
+    CSRGraph graph;
+
+    // Determine format based on file extension
+    std::string file_extension = filename.substr(filename.find_last_of(".") + 1);
+
+    if (file_extension == "egr") {
+        g = readECLgraph(filename.c_str());
+    } else if (file_extension == "txt" || file_extension == "bin") {
+        std::string binary_filename = filename.substr(0, filename.find_last_of(".")) + ".bin";
+        
+        bool loaded_from_binary = false;
+        if (file_extension == "bin") {
+             if (graph.loadFromBinary(filename)) {
+                loaded_from_binary = true;
+             }
+        } else {
+            // Check if binary file exists
+            FILE* f = fopen(binary_filename.c_str(), "rb");
+            if (f != NULL) {
+                fclose(f);
+                std::cout << "Found binary cache: " << binary_filename << ", loading..." << std::endl;
+                if (graph.loadFromBinary(binary_filename)) {
+                    loaded_from_binary = true;
+                }
+            }
+        }
+
+        if (!loaded_from_binary) {
+             std::cout << "Binary cache not found or failed to load. Reading from text file..." << std::endl;
+             graph.buildFromTxtFile(filename, false);
+             
+             std::cout << "Saving to binary file: " << binary_filename << std::endl;
+             graph.saveToBinary(binary_filename);
+             
+             // Verify consistency
+             std::cout << "Verifying binary file consistency..." << std::endl;
+             CSRGraph check_graph;
+             if (check_graph.loadFromBinary(binary_filename)) {
+                 if (graph == check_graph) {
+                     std::cout << "Verification SUCCESS: Binary file matches original graph." << std::endl;
+                 } else {
+                     std::cerr << "Verification FAILED: Binary file does not match original graph!" << std::endl;
+                 }
+             } else {
+                 std::cerr << "Verification FAILED: Could not load generated binary file!" << std::endl;
+             }
+        }
+
+         std::cout << "build from " << (loaded_from_binary ? "binary" : "text") << " file" << std::endl;
+         std::cout << filename << " is zero based: " << graph.is_zero_based << std::endl;
+         graph.transfromToECLGraph(g);
+    } else {
+         std::cerr << "Error: Unsupported file format '" << file_extension << "'. Supported formats: .egr, .txt, .bin" << std::endl;
+         return 1;
+    }
 
     if (nParts < 1) {
         printf("ERROR: nParts must be >= 1\n");
         exit(-1);
     }
     
+    // If prediction model is enabled, use score function to predict resilient parameter
+    #ifdef PRED_MODEL
+    if (use_predicted_resilient) {
+        // Use graph nodes and edges as input for prediction model
+        double input[2] = {(double)g.nodes, (double)g.edges};
+        double score_result = score(input);
+        fuzzy_number = (int)round(score_result);
+    }
+    #else
+    if (use_predicted_resilient) {
+        std::cerr << "Error: Prediction model is not compiled. Please compile with PRED_MODEL=1.\n";
+        return 1;
+    }
+    #endif
+
     // Display settings
     printf("Input file: %s\n", filename.c_str());
-    printf("Resilient number θ: %d\n", fuzzy_number);
+    if (use_predicted_resilient) {
+        printf("Resilient number θ: %d (Predicted)\n", fuzzy_number);
+    } else {
+        printf("Resilient number θ: %d\n", fuzzy_number);
+    }
     printf("Number of partitions: %d\n", nParts);
     printf("Nodes: %d\n", g.nodes);
     printf("Edges: %d\n", g.edges);
@@ -1024,10 +1129,10 @@ int main(int argc, char* argv[]) {
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
     if ((deviceProp.major == 9999) && (deviceProp.minor == 9999)) {printf("ERROR: there is no CUDA capable device\n\n");  exit(-1);}
-    const int SMs = deviceProp.multiProcessorCount;
-    const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
+
   
     // ===================================== Partitioning =====================================
+    auto partition_start = std::chrono::high_resolution_clock::now();
     partitioning::Method part_method;
     if (!partitioning::parse_method(partitioner_name, part_method)) {
         std::cerr << "Error: Unknown partitioner '" << partitioner_name
@@ -1095,6 +1200,8 @@ int main(int argc, char* argv[]) {
       printf("Partition %d => subgraph has %d nodes, %d edges\n",
              i, subGraphs[i].nodes, subGraphs[i].edges);
   }
+    auto partition_end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> partition_duration = partition_end - partition_start;
     // Build a single boundary graph
     createMergeWithCopies(
       g,
@@ -1113,8 +1220,9 @@ int main(int argc, char* argv[]) {
     unsigned int* boundaryColor_d    = nullptr;
     unsigned int* boundaryPosColor_d = nullptr;
     unsigned int* boundaryIterList_d = nullptr;
-    GPUTimer timer;
-    timer.start();
+    // GPUTimer timer;
+    // timer.start();
+    auto start_time = std::chrono::high_resolution_clock::now();
 
     float boundary_ms = 0.0f;
     runBoundaryGC(0, boundaryGraph,
@@ -1130,6 +1238,9 @@ int main(int argc, char* argv[]) {
     // Accumulate per-GPU compute time across its assigned partitions
     std::vector<float> per_gpu_ms(deviceCount, 0.0f);
     std::vector<int> per_gpu_parts(deviceCount, 0);
+    std::vector<size_t> per_gpu_used_mem(deviceCount, 0);
+    std::vector<size_t> per_gpu_total_mem(deviceCount, 0);
+
 
     std::cout << "**** DeviceCount: " << deviceCount << std::endl;
     #pragma omp parallel num_threads(deviceCount)
@@ -1154,7 +1265,14 @@ int main(int argc, char* argv[]) {
         }
         per_gpu_ms[threadID] = local_accum_ms;
         per_gpu_parts[threadID] = local_parts;
+        
+        size_t free_byte, total_byte;
+        cudaSetDevice(threadID);
+        cudaMemGetInfo(&free_byte, &total_byte);
+        per_gpu_used_mem[threadID] = total_byte - free_byte;
+        per_gpu_total_mem[threadID] = total_byte;
     }
+
     // Report per-GPU timings
     for (int d = 0; d < deviceCount; ++d) {
       if (per_gpu_parts[d] > 0) {
@@ -1200,11 +1318,16 @@ int main(int argc, char* argv[]) {
     }
 
   
-    const float runtime = timer.stop();
+  
+    // const float runtime = timer.stop();
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = end_time - start_time;
+    const float runtime = duration.count(); // seconds
   
     printf("runtime:    %.6f ms\n", runtime*1000);
     printf("throughput: %.6f Mnodes/s\n", g.nodes * 0.000001 / runtime);
     printf("throughput: %.6f Medges/s\n", g.edges * 0.000001 / runtime);
+
 
 
     for (int v = 0; v < g.nodes; v++) {
@@ -1227,6 +1350,28 @@ int main(int argc, char* argv[]) {
     printf("colors used: %d\n", cols);
 
     delete [] color;
+
+    // ===================================== Summary Table =====================================
+    printf("\n");
+    printf("================================================================================================\n");
+    printf("                                  EXECUTION SUMMARY                                             \n");
+    printf("================================================================================================\n");
+    printf("%-30s: %10.4f ms\n", "Partition Time", partition_duration.count() * 1000.0f);
+    printf("%-30s: %10.4f ms\n", "Total Kernel Runtime", runtime * 1000.0f); // runtime is in seconds, print as ms
+    printf("------------------------------------------------------------------------------------------------\n");
+    printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Mem Used (MB)", "Mem Total (MB)");
+    printf("|--------|-----------------|------------------|----------------------|----------------------|\n");
+    for (int d = 0; d < deviceCount; ++d) {
+        if (per_gpu_parts[d] > 0) {
+            printf("| %-6d | %-15d | %16.4f | %20.2f | %20.2f |\n", 
+                d, 
+                per_gpu_parts[d], 
+                per_gpu_ms[d], 
+                per_gpu_used_mem[d] / 1024.0 / 1024.0, 
+                per_gpu_total_mem[d] / 1024.0 / 1024.0);
+        }
+    }
+    printf("================================================================================================\n");
 
 
     freeECLgraph(g);  // Free graph resources
