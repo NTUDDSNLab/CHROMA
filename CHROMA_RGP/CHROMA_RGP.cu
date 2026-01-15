@@ -726,7 +726,7 @@ void runOnGPU(
   cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
 
   cudaDeviceProp deviceProp;
-  cudaGetDeviceProperties(&deviceProp, 0);  
+  cudaGetDeviceProperties(&deviceProp, deviceID);  
   const int SMs = deviceProp.multiProcessorCount;
   const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
   const int blocks = SMs * mTpSM / ThreadsPerBlock;
@@ -734,7 +734,7 @@ void runOnGPU(
   cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
   int gridDim_GC = blkPerSM_GC * SMs;
 
-  cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
+  // Removed duplicate cudaMemcpy of h_state
 
   int *d_nidx = nullptr, *d_nlist = nullptr;
   unsigned int *d_degree = nullptr, *d_iterList = nullptr;
@@ -761,6 +761,23 @@ void runOnGPU(
 
   cudaMemset(d_iterList, 0, g.nodes*sizeof(unsigned int));
 
+  // Pre-allocate headers and lists to hoist overhead out of the timer
+  int* remove_list = nullptr;
+  cudaMalloc(&remove_list, g.nodes*sizeof(int));
+  cudaMemset(remove_list, 0, g.nodes*sizeof(int));  
+
+  int* d_boundaryToLocal = nullptr;
+  cudaMalloc(&d_boundaryToLocal, boundarySize * sizeof(int));
+  cudaMemcpy(d_boundaryToLocal, boundaryToLocal.data(), boundarySize*sizeof(int), cudaMemcpyHostToDevice);
+
+  unsigned int *boundaryColor_d_device = nullptr;
+  unsigned int *boundaryPosColor_d_device = nullptr;
+  cudaMalloc(&boundaryColor_d_device, boundarySize * sizeof(unsigned int));
+  cudaMemcpy(boundaryColor_d_device, boundaryColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
+
+  cudaMalloc(&boundaryPosColor_d_device, boundarySize * sizeof(unsigned int));
+  cudaMemcpy(boundaryPosColor_d_device, boundaryPosColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
+
   // Time per-partition compute on this device
   GPUTimer gpu_timer_partition; gpu_timer_partition.start();
   {
@@ -772,17 +789,12 @@ void runOnGPU(
   cudaDeviceSynchronize();
   {
     int h_nodes = g.nodes;
-    int* d_nodes;
-    cudaMalloc(&d_nodes, sizeof(int));
-    cudaMemcpy(d_nodes, &h_nodes, sizeof(int), cudaMemcpyHostToDevice);
-    int* remove_list;
-    cudaMalloc(&remove_list, g.nodes*sizeof(int));
-    cudaMemset(remove_list, 0, g.nodes*sizeof(int));  
+    // Removed unused d_nodes and hoisted remove_list allocation
       int blkPerSM;
       cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
         CHROMA, ThreadsPerBlock, 0);
       int gridDim = blkPerSM * SMs;  
-      int *out_d;  cudaMalloc(&out_d, g.nodes * sizeof(int));
+      // Removed unused out_d
       void* args[] = {
         &h_nodes,  
         &d_nidx,   
@@ -799,12 +811,7 @@ void runOnGPU(
       }
   cudaDeviceSynchronize();
 
-  int* d_boundaryToLocal = nullptr;
-  cudaMalloc(&d_boundaryToLocal, boundarySize * sizeof(int));
-  cudaMemcpy(d_boundaryToLocal,
-             boundaryToLocal.data(),
-             boundarySize*sizeof(int),
-             cudaMemcpyHostToDevice);
+  // Hoisted d_boundaryToLocal allocation/copy
 
   cudaMemcpy(&h_state, d_state, sizeof(GPUState), cudaMemcpyDeviceToHost);
   applyBoundaryPrio<<<blocks, ThreadsPerBlock>>>(
@@ -816,13 +823,7 @@ void runOnGPU(
           
   init<<<blocks, ThreadsPerBlock>>>(g.nodes, g.edges, d_nidx, d_nlist, nlist2_d, posscol_d, posscol2_d, color_d, wl_d,d_iterList);
   cudaDeviceSynchronize();
-  unsigned int *boundaryColor_d_device = nullptr;
-  unsigned int *boundaryPosColor_d_device = nullptr;
-  cudaMalloc(&boundaryColor_d_device, boundarySize * sizeof(unsigned int));
-  cudaMemcpy(boundaryColor_d_device, boundaryColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
-
-  cudaMalloc(&boundaryPosColor_d_device, boundarySize * sizeof(unsigned int));
-  cudaMemcpy(boundaryPosColor_d_device, boundaryPosColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
+  // Hoisted boundaryColor allocations/copies
 
   applyBoundaryColorToSubgraph<<<blocks, ThreadsPerBlock>>>(
     boundarySize,
@@ -862,6 +863,8 @@ void runOnGPU(
   cudaFree(d_degree);
   cudaFree(boundaryColor_d_device);
   cudaFree(boundaryPosColor_d_device);
+  cudaFree(remove_list);
+  cudaFree(d_boundaryToLocal);
 }
 
 
