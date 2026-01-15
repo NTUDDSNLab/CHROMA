@@ -179,6 +179,10 @@ void applyBoundaryPrio(
 // ||                                 ||
 // =====================================
 
+__global__ void warmup_kernel() {
+    // Empty kernel to force module loading
+}
+
 __global__ void setParameters(int fuzzy_number) {
   FuzzyNumber = fuzzy_number;
 }
@@ -1149,6 +1153,19 @@ int main(int argc, char* argv[]) {
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
     if ((deviceProp.major == 9999) && (deviceProp.minor == 9999)) {printf("ERROR: there is no CUDA capable device\n\n");  exit(-1);}
+
+    // ===================================== Warmup =====================================
+    int deviceCount = 0;
+    cudaGetDeviceCount(&deviceCount);
+    printf("Warming up %d GPUs...\n", deviceCount);
+    #pragma omp parallel for num_threads(deviceCount)
+    for (int i = 0; i < deviceCount; ++i) {
+        cudaSetDevice(i);
+        cudaFree(0); // Initialize context
+        warmup_kernel<<<1, 1>>>(); // Trigger kernel loading
+        cudaDeviceSynchronize();
+    }
+    printf("Warmup complete.\n");
 
   
     // ===================================== Partitioning =====================================
