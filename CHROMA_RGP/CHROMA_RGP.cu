@@ -831,7 +831,7 @@ void runOnGPU(
   );
   cudaDeviceSynchronize();
 
-  runLarge<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, nlist2_d, posscol_d, posscol2_d, color_d, wl_d);
+  runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes, d_nidx, nlist2_d, posscol_d, posscol2_d, color_d, wl_d);
   cudaDeviceSynchronize();
 
   runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
