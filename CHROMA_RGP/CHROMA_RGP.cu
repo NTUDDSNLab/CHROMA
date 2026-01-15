@@ -730,6 +730,9 @@ void runOnGPU(
   const int SMs = deviceProp.multiProcessorCount;
   const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
   const int blocks = SMs * mTpSM / ThreadsPerBlock;
+  int blkPerSM_GC;
+  cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+  int gridDim_GC = blkPerSM_GC * SMs;
 
   cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
 
