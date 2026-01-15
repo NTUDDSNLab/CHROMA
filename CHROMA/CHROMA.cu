@@ -282,6 +282,8 @@ int main(int argc, char* argv[])
     const int blocks = SMs * mTpSM / ThreadsPerBlock;
     int* const color = new int [g.nodes];
 
+
+
     DevPtr d;
     allocAndInit(g, d);
 
@@ -299,6 +301,12 @@ int main(int argc, char* argv[])
         if (deg < 0) printf("[%d]'s Degree is negative: %d\n", i, deg);
     }
     printf("Max degree: %d, Max degree node: %d\n", max_degree, max_degree_node);
+
+    printf("----- [GPU INFO] -----\n");
+    printf("SMs: %d\n", SMs);
+    printf("mTpSM: %d\n", mTpSM);
+    printf("blocks: %d\n", blocks);
+    printf("----- [GPU INFO] -----\n");
 
     // Check if sum_degree is 2*edges
     // if (sum_degree != 2*g.edges) {

@@ -582,6 +582,20 @@ void runBoundaryGC(
     const int SMs = deviceProp.multiProcessorCount;
     const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
     const int blocks = SMs * mTpSM / ThreadsPerBlock;
+    int blkPerSM_GC;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+    int gridDim_GC = blkPerSM_GC * SMs;
+    cudaFuncSetCacheConfig(init, cudaFuncCachePreferL1);
+    cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
+    cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
+
+    std::cout << "----- [GPU INFO] -----\n";
+    std::cout << "SMs: " << SMs << "\n";
+    std::cout << "mTpSM: " << mTpSM << "\n";
+    std::cout << "blocks: " << blocks << "\n";
+    std::cout << "runLarge blocks: " << gridDim_GC << "\n";
+    std::cout << "----- [GPU INFO] -----\n";
+    
     cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
     int *d_nidx = nullptr, *d_nlist = nullptr;
     unsigned int *d_degree = nullptr, *d_iterList = nullptr;
@@ -644,7 +658,7 @@ void runBoundaryGC(
     cudaDeviceSynchronize();
     printf("INIT FINISH\n");
 
-    runLarge<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, nlist2_d, posscol_d, posscol2_d, color_d, wl_d);
+    runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes, d_nidx, nlist2_d, posscol_d, posscol2_d, color_d, wl_d);
     cudaDeviceSynchronize();
     printf("RUN LARGE FINISH\n");
 
