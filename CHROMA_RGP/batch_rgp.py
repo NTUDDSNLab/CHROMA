@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Batch runner for CHROMA_RGP (multi-GPU resilient graph partitioning).
+Batch runner for CHROMA_RGP (multi-GPU robust graph partitioning).
 
 Runs CHROMA_RGP across multiple datasets and partition counts, repeats each
 configuration N times (default 5), and records the best run per
@@ -121,12 +121,12 @@ def run_rgp(
     binary: str,
     dataset_path: str,
     parts: int,
-    resilient: int,
+    elastic: int,
     partitioner: str,
     extra_args: Optional[List[str]] = None,
     timeout_sec: Optional[int] = None,
 ) -> RunResult:
-    cmd = [binary, "-f", dataset_path, "-p", str(parts), "-r", str(resilient)]
+    cmd = [binary, "-f", dataset_path, "-p", str(parts), "-e", str(elastic)]
     if partitioner:
         cmd.extend(["--partitioner", partitioner])
     if extra_args:
@@ -175,8 +175,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Path to CHROMA_RGP binary (default: CHROMA_RGP/CHROMA_RGP)")
     ap.add_argument("--parts", "-p", type=int, nargs="+", required=False, default=[2],
                     help="Partition counts to test, e.g. -p 2 4 8 (default: 2)")
-    ap.add_argument("--resilient", "-r", type=int, default=10,
-                    help="Resilient θ value passed as -r (default: 10)")
+    ap.add_argument("--elastic", "-e", type=int, default=10,
+                    help="Elastic θ value passed as -e (default: 10)")
     ap.add_argument("--partitioners", "-P", nargs="+", default=None,
                     help="Partitioner methods to test: metis, round_robin, random, ldg, kahip")
     ap.add_argument("--partitioner", default="metis",
@@ -226,7 +226,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                         binary=binary,
                         dataset_path=dpath_abs,
                         parts=int(parts),
-                        resilient=int(args.resilient),
+                        elastic=int(args.elastic),
                         partitioner=str(part_method),
                         extra_args=args.extra or [],
                         timeout_sec=args.timeout,

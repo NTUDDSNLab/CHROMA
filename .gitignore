@@ -8,6 +8,13 @@ Datasets/*.egr
 Datasets/SNAP/*.txt
 Datasets/SNAP/*.bin
 Datasets/SNAP/snap2ecl
+Datasets/0929/
+Datasets/SNAP/p10/
+Datasets/SNAP/p20/
+Datasets/SNAP/p5/
+Datasets/SSMC/
+Datasets/fail/
+Datasets/test/
 
 *_pycache_*
 cpu_*

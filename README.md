@@ -1,15 +1,15 @@
-# CHROMA: Coloring with High-Quality Resilient Optimized Multi-GPU Allocation
+# CHROMA: Coloring with High-Quality Robust Optimized Multi-GPU Allocation
 
 ## Overview
-CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU backends. The project couples CUDA kernels with resilient graph partitioning (RGP) and CPU heuristics to explore state-of-the-art MIS and SGR strategies on large graphs stored under `Datasets/`.
+CHROMA delivers elastic graph coloring across single-GPU, multi-GPU, and CPU backends. The project couples CUDA kernels with robust graph partitioning (RGP) and CPU heuristics to explore state-of-the-art MIS and SGR strategies on large graphs stored under `Datasets/`.
 
 ## Repository Layout
 - `CHROMA/` – CUDA single-GPU implementation (`CHROMA.cu`, `Makefile`, optional `model/model.cpp`).
-- `CHROMA_RGP/` – Multi-GPU extension with resilient graph partitioning; depends on METIS (and optionally KaHIP).
+- `CHROMA_RGP/` – Multi-GPU extension with robust graph partitioning; depends on METIS (and optionally KaHIP).
 - `JP-Series/` – Additional CUDA heuristics (JP-SL, JP-ADG, JP-SLL) with dedicated `Makefile`.
 - `CPU/Sequential`, `CPU/Parallel` – CPU algorithms built via local Makefiles; orchestrated by `CPU/run.py`.
 - `Datasets/` – Input graphs in `.egr`, `.txt`, or `.bin` formats; test sets live under `Datasets/test/`.
-- `Scripts/` – Batch and grid evaluators (`batch_test.py`, `grid_resilient.py`).
+- `scripts/` – Batch and grid evaluators (`batch_test.py`, `grid_elastic.py`).
 - `lib/io/` – Shared I/O helpers (`graph.cpp`, `mmio.cpp`).
 - `model/` – Optional prediction artifacts (`model.cpp`, generators) used when enabling `PRE_MODEL=1`.
 - `External/` – Vendored third-party libraries (METIS, KaHIP, GKlib).
@@ -30,13 +30,13 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
   * Please use your own GPU architecture to replace `<GPU_ARCH>`.
 - **Run**
   ```bash
-  CHROMA/CHROMA -f Datasets/facebook.egr -a P_SL_WBR -r 10
+  CHROMA/CHROMA -f Datasets/facebook.egr -a P_SL_ELS -e 10
   ```
   Running from inside `CHROMA/` works with `./CHROMA -f ../Datasets/...`. Expect `result verification passed`, `colors used:`, and `runtime:` in the output.
   - **Flags**
     - `-f, --file <path>`: Input graph (required); supports `.egr`, `.txt`, `.bin`.
-    - `-a, --algorithm <id>`: Choose `0`/`P_SL_WBR` (default) or `1`/`P_SL_WBR_SDC`.
-    - `-r, --resilient <θ>`: Manually set resilient parameter (default `0`).
+    - `-a, --algorithm <id>`: Choose `0`/`P_SL_ELS` (default) or `1`/`P_SL_ELS_SDC`.
+    - `-e, --elastic <θ>`: Manually set elastic parameter (default `0`).
     - `-p, --predict`: Enable prediction model to auto-select θ (`PRE_MODEL=1`).
     - `-h, --help`: Print usage summary and exit.
 
@@ -50,12 +50,12 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
   Use `PRE_MODEL=1` when `model/model.cpp` is present for θ prediction.
 - **Run**
   ```bash
-  CHROMA_RGP/CHROMA_RGP -f Datasets/facebook.egr -p 2 -r 10
+  CHROMA_RGP/CHROMA_RGP -f Datasets/facebook.egr -p 2 -e 10
   ```
   `-p` selects partition count; θ defaults to 10 when omitted.
   - **Flags**
     - `-f, --file <path>`: Input graph (required).
-    - `-r, --resilient <θ>`: Target resilient number (default `10`).
+    - `-e, --elastic <θ>`: Target elastic number (default `10`).
     - `-p, --parts <count>`: Number of partitions for RGP (default `2`).
     - `--predict`: Enable prediction model to auto-select θ (`PRE_MODEL=1`).
     - `--partitioner <name>`: Partitioning strategy `metis` (default), `round_robinm`, `random`, `ldg`, or `kahip`.
@@ -75,7 +75,7 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
   - **Flags**
     - `-f, --file <path>`: Input graph (required).
     - `-a, --algorithm <id>`: `0`/`JP-SL` (default), `1`/`JP-ADG`, `2`/`JP-SLL`.
-    - `-r, --resilient <θ>`: Optional resilient number (default `0`).
+    - `-e, --elastic <θ>`: Optional elastic number (default `0`).
     - `-h, --help`: Print usage summary and exit.
 
 ### CPU Implementations
@@ -106,31 +106,31 @@ CHROMA delivers resilient graph coloring across single-GPU, multi-GPU, and CPU b
 
 ## Utility Scripts
 - `python3 Scripts/batch_test.py --dataset-dir Datasets --binary CHROMA/CHROMA --runs 5 --out results.json`
-- `python3 Scripts/grid_resilient.py --dataset-dir Datasets --res-start 5 --res-end 12`
+- `python3 Scripts/grid_elastic.py --dataset-dir Datasets --elastic-start 5 --elastic-end 12`
 Capture sample output (colors, runtime) alongside the dataset for reproducibility.
   - **batch_test.py Flags**
     - `--dataset-dir/-d`: Dataset directory (default `Datasets`).
     - `--pattern`: Glob for dataset filenames (default `*.egr`).
     - `--recursive`: Recurse into subdirectories.
     - `--binary`: Path to CHROMA binary (default `CHROMA/CHROMA`).
-    - `--algorithm/-a`: Algorithm for `-a` flag (default `P_SL_WBR`).
-    - `--resilient`: θ passed via `-r` (default `10`).
+    - `--algorithm/-a`: Algorithm for `-a` flag (default `P_SL_ELS`).
+    - `--elastic`: θ passed via `-e` (default `10`).
     - `--predict`: Enable prediction model (in /model/model.cpp)to auto-select θ (`PRE_MODEL=1`).
     - `--runs`: Repetitions per dataset (default `5`).
     - `--timeout`: Seconds before aborting a single run (optional).
     - `--extra -- <args>`: Additional CHROMA arguments appended after `--` sentinel.
     - `--out`: Output JSON path (default timestamped file).
-  - **grid_resilient.py Flags**
+  - **grid_elastic.py Flags**
     - `--dataset-dir/-d`: Dataset directory (default `Datasets`).
     - `--pattern`: Glob for dataset filenames (default `*.egr`).
     - `--recursive`: Recurse into subdirectories.
     - `--binary`: Path to CHROMA binary (default `CHROMA/CHROMA`).
-    - `--algorithm/-a`: Algorithm string passed to CHROMA (default `P_SL_WBR`).
-    - `--res-start`: Starting θ (inclusive, required).
-    - `--res-end`: Ending θ (inclusive, required).
+    - `--algorithm/-a`: Algorithm string passed to CHROMA (default `P_SL_ELS`).
+    - `--elastic-start`: Starting θ (inclusive, required).
+    - `--elastic-end`: Ending θ (inclusive, required).
     - `--timeout`: Seconds before aborting a single run (optional).
     - `--extra -- <args>`: Additional CHROMA arguments appended after `--` sentinel.
-    - `--out`: Output JSON path (default `results_resilient_grid_<timestamp>.json`).
+    - `--out`: Output JSON path (default `results_elastic_grid_<timestamp>.json`).
 
 ## Other State-of-the-art Repositories
 

@@ -39,14 +39,14 @@ unsigned int warpReduceMin(unsigned int val)
     return val;
 }
 
-__global__ void P_SL_WBR(
+__global__ void P_SL_ELS(
     const int  nodes,
     const int* __restrict__ nidx,
     const int* __restrict__ nlist,
     unsigned int* __restrict__ degree_list,
     unsigned int* __restrict__ iteration_list);
 
-__global__ void P_SL_WBR_SDC(
+__global__ void P_SL_ELS_SDC(
     const int  nodes,
     const int* __restrict__ nidx,
     const int* __restrict__ nlist,

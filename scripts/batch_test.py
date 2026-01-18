@@ -11,7 +11,7 @@ Examples:
     --dataset-dir Datasets \
     --pattern "*.egr" \
     --binary CHROMA/CHROMA \
-    --algorithm P_SL_WBR \
+    --algorithm P_SL_ELS \
     --resilient 10 \
     --runs 5 \
     --out results_chroma.json
@@ -21,7 +21,7 @@ Examples:
     --dataset-dir Datasets \
     --pattern "*.egr" \
     --binary CHROMA/CHROMA \
-    --algorithm P_SL_WBR \
+    --algorithm P_SL_ELS \
     --predict \
     --runs 5 \
     --out results_chroma_pred.json
@@ -45,7 +45,7 @@ RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
-THETA_RE = re.compile(r"^RGC\s*θ:\s*(\d+)(?:.*)$", re.IGNORECASE | re.MULTILINE)
+THETA_RE = re.compile(r"^EGC\s*θ:\s*(\d+)(?:.*)$", re.IGNORECASE | re.MULTILINE)
 
 
 @dataclass
@@ -84,7 +84,7 @@ def parse_output(stdout: str) -> RunResult:
     if m:
         edges = int(m.group(1))
 
-    # Parse theta (RGC θ) and whether it was predicted
+    # Parse theta (EGC θ) and whether it was predicted
     m = THETA_RE.search(stdout)
     if m:
         try:
@@ -193,12 +193,12 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Recurse into subdirectories while matching datasets")
     ap.add_argument("--binary", default=os.path.join("CHROMA", "CHROMA"),
                     help="Path to CHROMA binary (default: CHROMA/CHROMA)")
-    ap.add_argument("--algorithm", "-a", default="P_SL_WBR",
-                    help="Algorithm spec passed to CHROMA -a (e.g., P_SL_WBR, 0)")
+    ap.add_argument("--algorithm", "-a", default="P_SL_ELS",
+                    help="Algorithm spec passed to CHROMA -a (e.g., P_SL_ELS, 0)")
     ap.add_argument("--resilient", "-r", type=int, default=10,
                     help="Resilient θ value passed to CHROMA -r (default: 10)")
     ap.add_argument("--predict", action="store_true", default=False,
-                    help="Use prediction model for resilient parameter (adds --predict to CHROMA and omits -r)")
+                    help="Use prediction model for elastic parameter (adds --predict to CHROMA and omits -r)")
     ap.add_argument("--runs", type=int, default=5,
                     help="Number of runs per dataset (default: 5)")
     ap.add_argument("--timeout", type=int, default=None,

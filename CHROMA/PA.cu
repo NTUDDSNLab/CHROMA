@@ -1,7 +1,7 @@
 #include "globals.cuh"
 #include <cuda.h>
 
-__global__ void P_SL_WBR_SDC(
+__global__ void P_SL_ELS_SDC(
     const int  nodes,
     const int* __restrict__ nidx,
     const int* __restrict__ nlist,
@@ -87,7 +87,7 @@ grid.sync();
 }while(worker!=nodes);
 }
 
-__global__ void P_SL_WBR(
+__global__ void P_SL_ELS(
     const int  nodes,
     const int* __restrict__ nidx,
     const int* __restrict__ nlist,

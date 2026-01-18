@@ -962,14 +962,14 @@ void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
-    std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 10)\n";
+    std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
     std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip (default: metis)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
-    std::cout << "  " << program_name << " --file graph.txt --resilient 15\n";
-    std::cout << "  " << program_name << " -f graph.txt --parts 4 --resilient 8 --partitioner ldg\n";
+    std::cout << "  " << program_name << " --file graph.txt --elastic 15\n";
+    std::cout << "  " << program_name << " -f graph.txt --parts 4 --elastic 8 --partitioner ldg\n";
     std::cout << "  " << program_name << " -f graph.txt --predict\n";
 }
 
@@ -979,7 +979,7 @@ int main(int argc, char* argv[]) {
     int fuzzy_number = 10;  // RGC θ default is 10
     int nParts = 2;         // Default partition into 2 subgraphs
     std::string partitioner_name = "metis"; // Default use METIS for partitioning
-    bool use_predicted_resilient = false;  // Mark whether to use predicted resilient value
+    bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -994,17 +994,17 @@ int main(int argc, char* argv[]) {
                 print_help(argv[0]);
                 return 1;
             }
-        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--resilient") == 0) {
+        } else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--elastic") == 0) {
             if (i + 1 < argc) {
                 try {
                     fuzzy_number = std::stoi(argv[++i]);
-                    use_predicted_resilient = false;  // Do not use prediction when manually specified
+                    use_predicted_elastic = false;  // Do not use prediction when manually specified
                 } catch (const std::exception& e) {
-                    std::cerr << "Error: Invalid resilient number '" << argv[i] << "'.\n";
+                    std::cerr << "Error: Invalid elastic number '" << argv[i] << "'.\n";
                     return 1;
                 }
             } else {
-                std::cerr << "Error: Resilient option requires an argument.\n";
+                std::cerr << "Error: Elastic option requires an argument.\n";
                 print_help(argv[0]);
                 return 1;
             }
@@ -1030,7 +1030,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         } else if (strcmp(argv[i], "--predict") == 0) {
-            use_predicted_resilient = true;
+            use_predicted_elastic = true;
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -1112,16 +1112,16 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
     
-    // If prediction model is enabled, use score function to predict resilient parameter
+    // If prediction model is enabled, use score function to predict elastic parameter
     #ifdef PRED_MODEL
-    if (use_predicted_resilient) {
+    if (use_predicted_elastic) {
         // Use graph nodes and edges as input for prediction model
         double input[2] = {(double)g.nodes, (double)g.edges};
         double score_result = score(input);
         fuzzy_number = (int)round(score_result);
     }
     #else
-    if (use_predicted_resilient) {
+    if (use_predicted_elastic) {
         std::cerr << "Error: Prediction model is not compiled. Please compile with PRED_MODEL=1.\n";
         return 1;
     }
@@ -1129,10 +1129,10 @@ int main(int argc, char* argv[]) {
 
     // Display settings
     printf("Input file: %s\n", filename.c_str());
-    if (use_predicted_resilient) {
-        printf("Resilient number θ: %d (Predicted)\n", fuzzy_number);
+    if (use_predicted_elastic) {
+        printf("Elastic number θ: %d (Predicted)\n", fuzzy_number);
     } else {
-        printf("Resilient number θ: %d\n", fuzzy_number);
+        printf("Elastic number θ: %d\n", fuzzy_number);
     }
     printf("Number of partitions: %d\n", nParts);
     printf("Nodes: %d\n", g.nodes);
