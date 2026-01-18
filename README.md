@@ -132,5 +132,14 @@ Capture sample output (colors, runtime) alongside the dataset for reproducibilit
     - `--extra -- <args>`: Additional CHROMA arguments appended after `--` sentinel.
     - `--out`: Output JSON path (default `results_resilient_grid_<timestamp>.json`).
 
+## Other State-of-the-art Repositories
+
+### Speculative Greedy (SGR)
+1. [Csrcolor](https://github.com/chenxuhao/csrcolor)
+2. [data_pq](https://github.com/chenxuhao/csrcolor)
+3. [data_wlc](https://github.com/chenxuhao/csrcolor)
+4. [kokkos VB-BIT](https://github.com/kokkos/kokkos-kernels)
+
+
 ## Datasets & References
 Download additional graphs from the [ECL collection](https://userweb.cs.txstate.edu/~burtscher/research/ECLgraph/index.html). Algorithmic baselines include JP-SL/JP-SLL/JP-ADG (MIS) and CSRColor/Kokkos VB-BIT (SGR) for comparative studies.
