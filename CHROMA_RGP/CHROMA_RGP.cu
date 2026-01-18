@@ -210,7 +210,7 @@ const int numWarp = (gridDim.x * blockDim.x) >> 5;    // Total Grid warp count
 cg::grid_group grid = cg::this_grid();
 
 do {
-  int add_num=0;
+  // int add_num=0;
   unsigned int localMin = 0x7FFFFFFF;
   for (int v = tid; v < nodes; v += threads) {
   if(v>=nodes) break;
@@ -221,7 +221,7 @@ do {
   if(prio==0){
       if(degree<=(state->theta+FuzzyNumber)){
         prio=1;
-        add_num++;
+        // add_num++;
         remove_list[atomicAdd(&(state->remove_size), 1)] = v;
       }else{
         if (degree < localMin) localMin = degree;
@@ -230,7 +230,7 @@ do {
   }
   }
   if (localMin < 0x7FFFFFFF)atomicMin(&(state->g_minDegree), localMin);
-  if (add_num != 0) atomicAdd(&(state->worker), add_num);
+  // if (add_num != 0) atomicAdd(&(state->worker), add_num);
 
   grid.sync();
   unsigned int warpMin;
@@ -253,7 +253,7 @@ do {
       unsigned int iter = __ldg(iteration_list + nei);
 
       if (!(iter & 0x20000000u)) {
-          warpMin = min(warpMin, atomicSub(&degree_list1[nei], 1));
+          warpMin = min(warpMin, atomicSub(&degree_list1[nei], 1) - 1);
       }
   }
     warpMin = warpReduceMin(warpMin);
@@ -265,6 +265,7 @@ do {
   grid.sync();
 
   if(grid.thread_rank()==0){
+    state->worker+=state->remove_size;
     state->remove_size=0;
     state->theta=state->g_minDegree;
     atomicExch(&state->g_minDegree, 0x7FFFFFFF);
@@ -592,13 +593,6 @@ void runBoundaryGC(
     cudaFuncSetCacheConfig(init, cudaFuncCachePreferL1);
     cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
     cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
-
-    std::cout << "----- [GPU INFO] -----\n";
-    std::cout << "SMs: " << SMs << "\n";
-    std::cout << "mTpSM: " << mTpSM << "\n";
-    std::cout << "blocks: " << blocks << "\n";
-    std::cout << "runLarge blocks: " << gridDim_GC << "\n";
-    std::cout << "----- [GPU INFO] -----\n";
     
     cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
     int *d_nidx = nullptr, *d_nlist = nullptr;
@@ -1152,6 +1146,20 @@ int main(int argc, char* argv[]) {
     cudaGetLastError(); // Check immediately, exit if error
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
+    const int SMs = deviceProp.multiProcessorCount;
+    const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
+    const int blocks = SMs * mTpSM / ThreadsPerBlock;
+    int blkPerSM_GC;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+    int gridDim_GC = blkPerSM_GC * SMs;
+
+    std::cout << "----- [GPU INFO] -----\n";
+    std::cout << "SMs: " << SMs << "\n";
+    std::cout << "mTpSM: " << mTpSM << "\n";
+    std::cout << "blocks: " << blocks << "\n";
+    std::cout << "runLarge blocks: " << gridDim_GC << "\n";
+    std::cout << "----- [GPU INFO] -----\n";    
+
     if ((deviceProp.major == 9999) && (deviceProp.minor == 9999)) {printf("ERROR: there is no CUDA capable device\n\n");  exit(-1);}
 
     // ===================================== Warmup =====================================
@@ -1268,16 +1276,17 @@ int main(int argc, char* argv[]) {
                   &boundaryIterList_d,
                   &boundary_ms);
     cudaDeviceSynchronize();
-    int deviceCount = 0;
     cudaGetDeviceCount(&deviceCount);
     std::vector<unsigned int*> partialColorVec(nParts, nullptr);
     std::vector<unsigned int*> partialIterVec(nParts,  nullptr);
+    
     // Accumulate per-GPU compute time across its assigned partitions
     std::vector<float> per_gpu_ms(deviceCount, 0.0f);
     std::vector<int> per_gpu_parts(deviceCount, 0);
     std::vector<size_t> per_gpu_used_mem(deviceCount, 0);
     std::vector<size_t> per_gpu_total_mem(deviceCount, 0);
 
+    std::cout << "Finish boundary graph!!!" << std::endl;
 
     std::cout << "**** DeviceCount: " << deviceCount << std::endl;
     #pragma omp parallel num_threads(deviceCount)

@@ -16,7 +16,7 @@ const int numWarp = (gridDim.x * blockDim.x) >> 5;
 cg::grid_group grid = cg::this_grid();
 
 do {
-int add_num=0;
+// int add_num=0;
 unsigned int localMin = 0x7FFFFFFF;
 for (int v = tid; v < nodes; v += threads) {
   int iteration_list_v=iteration_list[v];
@@ -27,7 +27,7 @@ for (int v = tid; v < nodes; v += threads) {
   if(prio==0){
       if(degree<=(theta+FuzzyNumber)){
       prio=1;
-      add_num++;
+      // add_num++;
       int beg = nidx[v];
       int end = nidx[v + 1];
       if((end-beg)>=WS)large_deg=1;
@@ -40,7 +40,7 @@ for (int v = tid; v < nodes; v += threads) {
   }
 }
 if (localMin < 0x7FFFFFFF)atomicMin(&g_minDegree, localMin);
-if (add_num!=0) atomicAdd(&worker, add_num);
+// if (add_num!=0) atomicAdd(&worker, add_num);
 
 grid.sync();
 unsigned int warpMin;
@@ -74,6 +74,7 @@ for (int k = warpId; k < remove_size; k += numWarp){
 grid.sync();
 
 if(grid.thread_rank()==0){
+  worker+=remove_size;
   remove_size=0;
   theta=g_minDegree;
   atomicExch(&g_minDegree, 0x7FFFFFFF);
@@ -101,7 +102,7 @@ const int numWarp = (gridDim.x * blockDim.x) >> 5;
 cg::grid_group grid = cg::this_grid();
 
 do {
-int add_num=0;
+// int add_num=0;
 unsigned int localMin = 0x7FFFFFFF;
 for (int v = tid; v < nodes; v += threads) {
   int iteration_list_v=iteration_list[v];
@@ -112,7 +113,7 @@ for (int v = tid; v < nodes; v += threads) {
   if(prio==0){
       if(degree<=(theta+FuzzyNumber)){
       prio=1;
-      add_num++;
+      // add_num++;
       int beg = nidx[v];
       int end = nidx[v + 1];
       if((end-beg)>=WS)large_deg=1;
@@ -125,7 +126,7 @@ for (int v = tid; v < nodes; v += threads) {
   }
 }
 if (localMin < 0x7FFFFFFF)atomicMin(&g_minDegree, localMin);
-if (add_num!=0) atomicAdd(&worker, add_num);
+// if (add_num!=0) atomicAdd(&worker, add_num);
 
 grid.sync();
 for (int k = warpId; k < remove_size; k += numWarp){
@@ -151,6 +152,7 @@ for (int k = warpId; k < remove_size; k += numWarp){
 grid.sync();
 
 if(grid.thread_rank()==0){
+  worker+=remove_size;
   remove_size=0;
   theta=g_minDegree;
   atomicExch(&g_minDegree, 0x7FFFFFFF);

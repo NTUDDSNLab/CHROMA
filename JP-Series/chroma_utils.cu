@@ -2,6 +2,8 @@
 #include "globals.cuh"
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
+#include <stdio.h>
 
 /* ----------------- allocAndInit ----------------- */
 void allocAndInit(const ECLgraph& g, DevPtr& d)
@@ -27,28 +29,66 @@ void allocAndInit(const ECLgraph& g, DevPtr& d)
     cudaMalloc(&remove_list_ptr, g.nodes * sizeof(int));
     cudaMemcpyToSymbol(remove_list,
                        &remove_list_ptr, sizeof(int*));
+
+    // Initialize nlist2 to -1
+    cudaMemset(d.nlist2_d, -1, g.edges * sizeof(int));
 }
+
+
+
 
 /* ----------------- ECL_GC_run ------------------- */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d)
 {
+    cudaFuncSetCacheConfig(init, cudaFuncCachePreferL1);
+    cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
+    cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
+    
+    cudaSetDevice(Device);
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, Device);
+    const int SMs = deviceProp.multiProcessorCount;
+    int blkPerSM_GC;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+    int gridDim_GC = blkPerSM_GC * SMs;
+
     init<<<blocks, ThreadsPerBlock>>>(g.nodes, g.edges,
               d.nidx_d, d.nlist_d, d.nlist2_d,
               d.posscol_d, d.posscol2_d,
               d.color_d, d.wl_d,
               d.iteration_list_d);
 
-    runLarge<<<blocks, ThreadsPerBlock>>>(g.nodes,
+    cudaError_t err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error synchronizing device after init: %s\n",
+                cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    // NOTE: use too many blocks may cause OCCUPANCY DEADLOCK in runLarge
+    runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes,
               d.nidx_d, d.nlist2_d,
               d.posscol_d, d.posscol2_d,
               d.color_d, d.wl_d);
+
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error synchronizing device after runLarge: %s\n",
+                cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 
     runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes,
               d.nidx_d, d.nlist_d,
               d.posscol_d,
               d.color_d);
 
-    cudaDeviceSynchronize();
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error synchronizing device after runSmall: %s\n",
+                cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
 }
 
 /* --------------- verify & stats ----------------- */
