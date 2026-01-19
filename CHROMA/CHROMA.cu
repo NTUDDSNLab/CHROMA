@@ -353,9 +353,11 @@ int main(int argc, char* argv[])
     // }
 
 
-    GPUTimer timer;
-    timer.start();
+    GPUTimer timer_PA;
+    GPUTimer timer_CA;
+    
     // ================PA===================
+    timer_PA.start();
     init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d.nidx_d, d.nlist_d,d.degree_list);
     cudaDeviceSynchronize();
     int blkPerSM;
@@ -369,13 +371,27 @@ int main(int argc, char* argv[])
             (void*)kernel_to_launch,
             dim3(gridDim), dim3(ThreadsPerBlock), args);
     cudaDeviceSynchronize();
+    float runtime_PA = timer_PA.stop();
     std::cout << "Finish PA " << std::endl;
+    
     // ================CA===================
+    timer_CA.start();
     ECL_GC_run(blocks, g, d);
+    float runtime_CA = timer_CA.stop();
     std::cout << "Finish CA " << std::endl;
-    const float runtime = timer.stop();
+
+    float total_runtime = runtime_PA + runtime_CA;
+    
+    printf("PA runtime: %.6f ms\n", runtime_PA * 1000); // GPUTimer returns seconds? No, wait.
+    // Let's double check GPUTimer::stop() implementation in line 108.
+    // float stop() {cudaEventRecord(end, 0);  cudaEventSynchronize(end);  float ms;  cudaEventElapsedTime(&ms, beg, end);  return 0.001f * ms;}
+    // It returns seconds (0.001f * ms).
+    
+    printf("CA runtime: %.6f ms\n", runtime_CA * 1000);
+    printf("Total runtime: %.6f ms\n", total_runtime * 1000);
+
     if (cudaSuccess != cudaMemcpy(color, d.color_d, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
-    verifyAndPrintStats(g, color, runtime);
+    verifyAndPrintStats(g, color, total_runtime);
 
     #ifdef PROFILE
     int host_iter_count = 0;
