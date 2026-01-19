@@ -55,6 +55,25 @@ struct GPUState {
     int g_minDegree;
     int  remove_size;
 };
+
+struct DeviceGraphContext {
+    int* d_nidx;
+    int* d_nlist;
+    unsigned int* d_degree;
+    unsigned int* d_iterList;
+    int* nlist2_d;
+    int* posscol_d;
+    int* posscol2_d;
+    int* color_d;
+    int* wl_d;
+    GPUState* d_state;
+    int* remove_list;
+    
+    // Boundary mappings
+    int* d_boundaryToLocal;
+    unsigned int* boundaryColor_d_device;
+    unsigned int* boundaryPosColor_d_device;
+};
 // =====================================
 // ||                                 ||
 // ||              TIMER              ||
@@ -676,11 +695,13 @@ void runBoundaryGC(
         
         std::vector<unsigned int> hostIterList(g.nodes);
         cudaMemcpy(hostIterList.data(), d_iterList, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
-        *partialColor_d_out = new unsigned int[g.nodes];        
+        cudaMallocHost((void**)partialColor_d_out, g.nodes*sizeof(unsigned int));
         memcpy(*partialColor_d_out, hostColor.data(), g.nodes*sizeof(unsigned int));
-        *partialPosColor_d_out = new unsigned int[g.nodes];
+        
+        cudaMallocHost((void**)partialPosColor_d_out, g.nodes*sizeof(unsigned int));
         memcpy(*partialPosColor_d_out, hostPosColor.data(), g.nodes*sizeof(unsigned int));
-        *partialIterList_d_out = new unsigned int[g.nodes];
+        
+        cudaMallocHost((void**)partialIterList_d_out, g.nodes*sizeof(unsigned int));
         memcpy(*partialIterList_d_out, hostIterList.data(), g.nodes*sizeof(unsigned int));
 
     }
@@ -690,179 +711,194 @@ void runBoundaryGC(
     cudaFree(d_degree);
 }
 
-void runOnGPU(
-  int deviceID,
-  const ECLgraph &g,
-  std::vector<int> &boundaryToLocal,
-  unsigned int** partialColor_d_out,
-  unsigned int** partialIterList_d_out,
-  unsigned int* boundaryColor_d,
-  unsigned int* boundaryPosColor_d,
-  float* elapsed_ms_out
+void preloadGraph(
+    int deviceID,
+    const ECLgraph &g,
+    const std::vector<int> &boundaryToLocal,
+    DeviceGraphContext* ctx,
+    int fuzzy_number
+) {
+    cudaSetDevice(deviceID);
+    checkCuda(cudaGetLastError(), __FILE__, __LINE__);
+    
+    // Initialize parameters on this device
+    setParameters<<<1, 1>>>(fuzzy_number);
 
-){
-  cudaSetDevice(deviceID);
-  
-  cudaGetLastError(); 
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess) {
-      printf("GPU %d ERROR: cudaSetDevice failed: %s\n", deviceID, cudaGetErrorString(err));
-      exit(-1);
-  }
-  int boundarySize = boundaryToLocal.size();
+    // Initialize context
+    ctx->d_state = nullptr;
+    checkCuda(cudaMalloc(&ctx->d_state, sizeof(GPUState)), __FILE__, __LINE__);
 
-  GPUState* d_state = nullptr;
-  cudaMalloc(&d_state, sizeof(GPUState));
+    GPUState h_state;
+    h_state.worker      = 0;
+    h_state.theta       = 1;
+    h_state.iteration   = 0;
+    h_state.g_minDegree = INT_MAX;
+    h_state.remove_size = 0;
+    checkCuda(cudaMemcpy(ctx->d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  GPUState h_state;
-  h_state.worker      = 0;
-  h_state.theta       = 1;
-  h_state.iteration   = 0;
-  h_state.g_minDegree = INT_MAX;
-  h_state.remove_size = 0;
+    // Allocate graph topology
+    checkCuda(cudaMalloc(&ctx->d_nidx, (g.nodes + 1) * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc(&ctx->d_nlist, g.edges * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc(&ctx->d_degree, g.nodes * sizeof(unsigned int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc(&ctx->d_iterList, g.nodes * sizeof(unsigned int)), __FILE__, __LINE__);
 
-  cudaMemcpy(d_state, &h_state, sizeof(GPUState), cudaMemcpyHostToDevice);
+    // Allocate working buffers
+    checkCuda(cudaMalloc((void **)&ctx->nlist2_d, g.edges * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc((void **)&ctx->posscol_d, g.nodes * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc((void **)&ctx->posscol2_d, (g.edges / WS + 1) * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc((void **)&ctx->color_d, g.nodes * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc((void **)&ctx->wl_d, g.nodes * sizeof(int)), __FILE__, __LINE__);
+    
+    // Allocate remove_list
+    checkCuda(cudaMalloc(&ctx->remove_list, g.nodes * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMemset(ctx->remove_list, 0, g.nodes * sizeof(int)), __FILE__, __LINE__);
 
-  cudaDeviceProp deviceProp;
-  cudaGetDeviceProperties(&deviceProp, deviceID);  
-  const int SMs = deviceProp.multiProcessorCount;
-  const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
-  const int blocks = SMs * mTpSM / ThreadsPerBlock;
-  int blkPerSM_GC;
-  cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
-  int gridDim_GC = blkPerSM_GC * SMs;
+    // Copy topology
+    checkCuda(cudaMemcpy(ctx->d_nidx, g.nindex, (g.nodes + 1) * sizeof(int), cudaMemcpyHostToDevice), __FILE__, __LINE__);
+    checkCuda(cudaMemcpy(ctx->d_nlist, g.nlist, g.edges * sizeof(int), cudaMemcpyHostToDevice), __FILE__, __LINE__);
+    checkCuda(cudaMemset(ctx->d_iterList, 0, g.nodes * sizeof(unsigned int)), __FILE__, __LINE__);
 
-  // Removed duplicate cudaMemcpy of h_state
+    // Copy boundary mapping
+    int boundarySize = boundaryToLocal.size();
+    checkCuda(cudaMalloc(&ctx->d_boundaryToLocal, boundarySize * sizeof(int)), __FILE__, __LINE__);
+    checkCuda(cudaMemcpy(ctx->d_boundaryToLocal, boundaryToLocal.data(), boundarySize * sizeof(int), cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  int *d_nidx = nullptr, *d_nlist = nullptr;
-  unsigned int *d_degree = nullptr, *d_iterList = nullptr;
+    // Allocate boundary color buffers
+    checkCuda(cudaMalloc(&ctx->boundaryColor_d_device, boundarySize * sizeof(unsigned int)), __FILE__, __LINE__);
+    checkCuda(cudaMalloc(&ctx->boundaryPosColor_d_device, boundarySize * sizeof(unsigned int)), __FILE__, __LINE__);
 
-  cudaMalloc(&d_nidx,     (g.nodes + 1)*sizeof(int));
-  cudaMalloc(&d_nlist,    g.edges*sizeof(int));
-  cudaMalloc(&d_degree,   g.nodes*sizeof(unsigned int));
-  cudaMalloc(&d_iterList, g.nodes*sizeof(unsigned int));
-  
-  int *nlist2_d, *posscol_d, *posscol2_d, *color_d, *wl_d;
+    // Init degree (can be done now)
+    init_degree<<<ceil(g.nodes / 512.0), 512>>>(g.nodes, ctx->d_nidx, ctx->d_nlist, ctx->d_degree);
+    checkCuda(cudaDeviceSynchronize(), __FILE__, __LINE__);
+    
+    printMemInfo("After Preload", deviceID);
+}
 
-  cudaError_t err2 = cudaMalloc((void **)&nlist2_d, g.edges * sizeof(int));
-  if (err2 != cudaSuccess) {
-      printf("GPU %d ERROR: cudaMalloc(nlist2_d) failed: %s\n", deviceID, cudaGetErrorString(err2));
-      exit(-1);
-  }
-  if (cudaSuccess != cudaMalloc((void **)&posscol_d, g.nodes * sizeof(int))) {printf("ERROR: could not allocate posscol_d\n\n");  exit(-1);}
-  if (cudaSuccess != cudaMalloc((void **)&posscol2_d, (g.edges / WS + 1) * sizeof(int))) {printf("ERROR: could not allocate posscol2_d\n\n");  exit(-1);}
-  if (cudaSuccess != cudaMalloc((void **)&color_d, g.nodes * sizeof(int))) {printf("ERROR: could not allocate color_d\n\n");  exit(-1);}
-  if (cudaSuccess != cudaMalloc((void **)&wl_d, g.nodes * sizeof(int))) {printf("ERROR: could not allocate wl_d\n\n");  exit(-1);}
+void runPartition(
+    int deviceID,
+    const ECLgraph &g,
+    DeviceGraphContext* ctx,
+    unsigned int* boundaryColor_d,      // Host Pinned Memory
+    unsigned int* boundaryPosColor_d,   // Host Pinned Memory
+    unsigned int** partialColor_d_out,
+    unsigned int** partialIterList_d_out,
+    float* elapsed_ms_out
+) {
+    cudaSetDevice(deviceID);
+    checkCuda(cudaGetLastError(), __FILE__, __LINE__);
+    
 
-  cudaMemcpy(d_nidx,  g.nindex, (g.nodes+1)*sizeof(int), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_nlist, g.nlist,   g.edges   *sizeof(int), cudaMemcpyHostToDevice);
+}
 
-  cudaMemset(d_iterList, 0, g.nodes*sizeof(unsigned int));
+// Re-writing runPartition properly:
+void runPartition(
+    int deviceID, 
+    const ECLgraph &g,
+    int boundarySize,
+    DeviceGraphContext* ctx,
+    unsigned int* boundaryColor_h, 
+    unsigned int* boundaryPosColor_h,
+    unsigned int** partialColor_d_out,
+    unsigned int** partialIterList_d_out,
+    float* elapsed_ms_out
+) {
+    cudaSetDevice(deviceID);
 
-  // Pre-allocate headers and lists to hoist overhead out of the timer
-  int* remove_list = nullptr;
-  cudaMalloc(&remove_list, g.nodes*sizeof(int));
-  cudaMemset(remove_list, 0, g.nodes*sizeof(int));  
+    // Copy boundary data from Pinned Host Memory to Device
+    checkCuda(cudaMemcpy(ctx->boundaryColor_d_device, boundaryColor_h, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice), __FILE__, __LINE__);
+    checkCuda(cudaMemcpy(ctx->boundaryPosColor_d_device, boundaryPosColor_h, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice), __FILE__, __LINE__);
 
-  int* d_boundaryToLocal = nullptr;
-  cudaMalloc(&d_boundaryToLocal, boundarySize * sizeof(int));
-  cudaMemcpy(d_boundaryToLocal, boundaryToLocal.data(), boundarySize*sizeof(int), cudaMemcpyHostToDevice);
+    // Setup Grid
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, deviceID);
+    const int SMs = deviceProp.multiProcessorCount;
+    const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
+    const int blocks = SMs * mTpSM / ThreadsPerBlock;
+    int blkPerSM_GC;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+    int gridDim_GC = blkPerSM_GC * SMs;
 
-  unsigned int *boundaryColor_d_device = nullptr;
-  unsigned int *boundaryPosColor_d_device = nullptr;
-  cudaMalloc(&boundaryColor_d_device, boundarySize * sizeof(unsigned int));
-  cudaMemcpy(boundaryColor_d_device, boundaryColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
+    GPUTimer gpu_timer_partition; gpu_timer_partition.start();
 
-  cudaMalloc(&boundaryPosColor_d_device, boundarySize * sizeof(unsigned int));
-  cudaMemcpy(boundaryPosColor_d_device, boundaryPosColor_d, boundarySize * sizeof(unsigned int), cudaMemcpyHostToDevice);
-
-  // Time per-partition compute on this device
-  GPUTimer gpu_timer_partition; gpu_timer_partition.start();
-  {
-      init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d_nidx, d_nlist, d_degree);
-      cudaDeviceSynchronize();
-  }
-  printMemInfo("After Allocations (runOnGPU)", deviceID);
-
-  cudaDeviceSynchronize();
-  {
+    // CHROMA Kernel
     int h_nodes = g.nodes;
-    // Removed unused d_nodes and hoisted remove_list allocation
-      int blkPerSM;
-      cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
-        CHROMA, ThreadsPerBlock, 0);
-      int gridDim = blkPerSM * SMs;  
-      // Removed unused out_d
-      void* args[] = {
-        &h_nodes,  
-        &d_nidx,   
-        &d_nlist,  
-        &d_degree,
-        &d_iterList,
-        &d_state,
-        &remove_list
+    void* args[] = {
+        &h_nodes,
+        &ctx->d_nidx,
+        &ctx->d_nlist,
+        &ctx->d_degree,
+        &ctx->d_iterList,
+        &ctx->d_state,
+        &ctx->remove_list
     };
-      cudaLaunchCooperativeKernel(
-              (void*)CHROMA,
-              dim3(gridDim), dim3(ThreadsPerBlock), args);
-              
-      }
-  cudaDeviceSynchronize();
+    int blkPerSM;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM, CHROMA, ThreadsPerBlock, 0);
+    int gridDim = blkPerSM * SMs;
+    
+    cudaLaunchCooperativeKernel((void*)CHROMA, dim3(gridDim), dim3(ThreadsPerBlock), args);
+    cudaDeviceSynchronize();
 
-  // Hoisted d_boundaryToLocal allocation/copy
+    // Update state and apply boundary mapping
+    GPUState h_state;
+    cudaMemcpy(&h_state, ctx->d_state, sizeof(GPUState), cudaMemcpyDeviceToHost);
+    
+    applyBoundaryPrio<<<blocks, ThreadsPerBlock>>>(
+        boundarySize,
+        ctx->d_boundaryToLocal,
+        ctx->d_iterList
+    );
+    cudaDeviceSynchronize();
 
-  cudaMemcpy(&h_state, d_state, sizeof(GPUState), cudaMemcpyDeviceToHost);
-  applyBoundaryPrio<<<blocks, ThreadsPerBlock>>>(
-    boundarySize,
-    d_boundaryToLocal,
-    d_iterList
-  );
-  cudaDeviceSynchronize();
-          
-  init<<<blocks, ThreadsPerBlock>>>(g.nodes, g.edges, d_nidx, d_nlist, nlist2_d, posscol_d, posscol2_d, color_d, wl_d,d_iterList);
-  cudaDeviceSynchronize();
-  // Hoisted boundaryColor allocations/copies
+    init<<<blocks, ThreadsPerBlock>>>(g.nodes, g.edges, ctx->d_nidx, ctx->d_nlist, ctx->nlist2_d, ctx->posscol_d, ctx->posscol2_d, ctx->color_d, ctx->wl_d, ctx->d_iterList);
+    cudaDeviceSynchronize();
 
-  applyBoundaryColorToSubgraph<<<blocks, ThreadsPerBlock>>>(
-    boundarySize,
-    d_boundaryToLocal,
-    boundaryColor_d_device,
-    (unsigned int*) color_d,
-    boundaryPosColor_d_device,
-    (unsigned int*) posscol_d
-  );
-  cudaDeviceSynchronize();
+    applyBoundaryColorToSubgraph<<<blocks, ThreadsPerBlock>>>(
+        boundarySize,
+        ctx->d_boundaryToLocal,
+        ctx->boundaryColor_d_device,
+        (unsigned int*)ctx->color_d,
+        ctx->boundaryPosColor_d_device,
+        (unsigned int*)ctx->posscol_d
+    );
+    cudaDeviceSynchronize();
 
-  runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes, d_nidx, nlist2_d, posscol_d, posscol2_d, color_d, wl_d);
-  cudaDeviceSynchronize();
+    runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes, ctx->d_nidx, ctx->nlist2_d, ctx->posscol_d, ctx->posscol2_d, ctx->color_d, ctx->wl_d);
+    cudaDeviceSynchronize();
 
-  runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, d_nidx, d_nlist, posscol_d, color_d);
-  cudaDeviceSynchronize();
-  printMemInfo("After Kernels (runOnGPU)", deviceID);
-  // Stop timer and optionally report
-  float part_secs = gpu_timer_partition.stop();
-  if (elapsed_ms_out) { *elapsed_ms_out = part_secs * 1000.0f; }
-  {
-      std::vector<unsigned int> hostColor(g.nodes);
-      cudaMemcpy(hostColor.data(), color_d, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
-      std::vector<unsigned int> hostIterList(g.nodes);
-      cudaMemcpy(hostIterList.data(), d_iterList, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
+    runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes, ctx->d_nidx, ctx->d_nlist, ctx->posscol_d, ctx->color_d);
+    cudaDeviceSynchronize();
 
-      *partialColor_d_out = new unsigned int[g.nodes];
-      memcpy(*partialColor_d_out, hostColor.data(), g.nodes*sizeof(unsigned int));
-      *partialIterList_d_out = new unsigned int[g.nodes];
-      memcpy(*partialIterList_d_out, hostIterList.data(), g.nodes*sizeof(unsigned int));
+    float part_secs = gpu_timer_partition.stop();
+    if (elapsed_ms_out) { *elapsed_ms_out = part_secs * 1000.0f; }
 
-  }
+    // Copy outcomes
+    {
+        std::vector<unsigned int> hostColor(g.nodes);
+        cudaMemcpy(hostColor.data(), ctx->color_d, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
+        std::vector<unsigned int> hostIterList(g.nodes);
+        cudaMemcpy(hostIterList.data(), ctx->d_iterList, g.nodes*sizeof(unsigned int), cudaMemcpyDeviceToHost);
 
-  cudaFree(d_state);
-  cudaFree(d_nidx);
-  cudaFree(d_nlist);
-  cudaFree(d_degree);
-  cudaFree(boundaryColor_d_device);
-  cudaFree(boundaryPosColor_d_device);
-  cudaFree(remove_list);
-  cudaFree(d_boundaryToLocal);
+        *partialColor_d_out = new unsigned int[g.nodes];
+        memcpy(*partialColor_d_out, hostColor.data(), g.nodes*sizeof(unsigned int));
+        *partialIterList_d_out = new unsigned int[g.nodes];
+        memcpy(*partialIterList_d_out, hostIterList.data(), g.nodes*sizeof(unsigned int));
+    }
+
+    // Free all resources
+    cudaFree(ctx->d_state);
+    cudaFree(ctx->d_nidx);
+    cudaFree(ctx->d_nlist);
+    cudaFree(ctx->d_degree);
+    cudaFree(ctx->d_iterList);
+    cudaFree(ctx->nlist2_d);
+    cudaFree(ctx->posscol_d);
+    cudaFree(ctx->posscol2_d);
+    cudaFree(ctx->color_d);
+    cudaFree(ctx->wl_d);
+    cudaFree(ctx->remove_list);
+    cudaFree(ctx->d_boundaryToLocal);
+    cudaFree(ctx->boundaryColor_d_device);
+    cudaFree(ctx->boundaryPosColor_d_device);
 }
 
 
@@ -965,6 +1001,7 @@ void print_help(const char* program_name) {
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
     std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip (default: metis)\n";
+    std::cout << "      --predict             Use prediction model to auto-select θ (default: false)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
@@ -1262,21 +1299,20 @@ int main(int argc, char* argv[]) {
     boundaryGraph.nlist  = boundary_nlist.data();
     printf("Boundary graph has %d nodes, %d edges\n",
            boundaryGraph.nodes, boundaryGraph.edges);
-    unsigned int* boundaryColor_d    = nullptr;
-    unsigned int* boundaryPosColor_d = nullptr;
-    unsigned int* boundaryIterList_d = nullptr;
+
     // GPUTimer timer;
     // timer.start();
     auto start_time = std::chrono::high_resolution_clock::now();
 
     float boundary_ms = 0.0f;
-    runBoundaryGC(0, boundaryGraph,
-                  &boundaryColor_d,
-                  &boundaryPosColor_d,
-                  &boundaryIterList_d,
-                  &boundary_ms);
-    cudaDeviceSynchronize();
-    cudaGetDeviceCount(&deviceCount);
+    // Pointers for boundary data (Host Pinned)
+    unsigned int* boundaryColor_h = nullptr;
+    unsigned int* boundaryPosColor_h = nullptr;
+    unsigned int* boundaryIterList_h = nullptr;
+
+    std::cout << "Finish boundary graph setup. Starting Parallel Execution..." << std::endl;
+    std::cout << "**** DeviceCount: " << deviceCount << std::endl;
+
     std::vector<unsigned int*> partialColorVec(nParts, nullptr);
     std::vector<unsigned int*> partialIterVec(nParts,  nullptr);
     
@@ -1286,29 +1322,84 @@ int main(int argc, char* argv[]) {
     std::vector<size_t> per_gpu_used_mem(deviceCount, 0);
     std::vector<size_t> per_gpu_total_mem(deviceCount, 0);
 
-    std::cout << "Finish boundary graph!!!" << std::endl;
-
-    std::cout << "**** DeviceCount: " << deviceCount << std::endl;
-    #pragma omp parallel num_threads(deviceCount)
+    #pragma omp parallel num_threads(deviceCount) 
     {
         int threadID = omp_get_thread_num();
         float local_accum_ms = 0.0f;
         int local_parts = 0;
+
+        // --- Phase 1: Boundary GC (GPU 0 only) & Preload First Partition (All GPUs) ---
+        
+        // We only preload the FIRST partition assigned to this GPU in parallel with Boundary GC
+        // to avoid excessive memory usage if nParts is huge.
+        // But for typical nParts <= deviceCount, this covers everything.
+        
+        int first_partition_idx = -1;
+        // Find the first partition for this thread
+        if (threadID < nParts) {
+            first_partition_idx = threadID; // Assuming round robin starting at threadID with stride deviceCount
+        }
+
+        DeviceGraphContext ctx; 
+
+        if (threadID == 0) {
+            // GPU 0: Run Boundary GC first
+            runBoundaryGC(0, boundaryGraph,
+                          &boundaryColor_h,
+                          &boundaryPosColor_h,
+                          &boundaryIterList_h,
+                          &boundary_ms);
+            cudaDeviceSynchronize();
+        }
+
+        // Overlapped Preload:
+        // All GPUs preload their first partition. 
+        // Note: GPU 0 does this AFTER Boundary GC finishes in this logic to be safe with context/resources,
+        // OR we can try to async stream it? 
+        // For simplicity and safety (context switching), GPU 0 does it sequentially.
+        // GPU 1..N do it concurrently with GPU 0's Boundary GC.
+        
+        if (first_partition_idx != -1) {
+             preloadGraph(threadID,
+                          subGraphs[first_partition_idx],
+                          sub_boundaryToLocal[first_partition_idx],
+                          &ctx,
+                          fuzzy_number);
+        }
+
+        // Barrier to ensure Boundary GC is done and Data is ready for everyone
+        #pragma omp barrier
+
+        // --- Phase 2: Execution Loop ---
         for (int i = threadID; i < nParts; i += deviceCount) {
             float part_ms = 0.0f;
             std::cout << "[GPU: " << threadID << "] is running on partition: " << i << std::endl;
-            runOnGPU(threadID,
-                     subGraphs[i],
-                     sub_boundaryToLocal[i],
-                     &partialColorVec[i],
-                     &partialIterVec[i],
-                     boundaryColor_d,
-                     boundaryPosColor_d,
-                     &part_ms);
+            
+            // If this is not the first partition (i.e. we have > deviceCount partitions),
+            // we need to preload it now.
+            if (i != first_partition_idx) {
+                 preloadGraph(threadID,
+                              subGraphs[i],
+                              sub_boundaryToLocal[i],
+                              &ctx,
+                              fuzzy_number);
+            }
+
+            runPartition(threadID,
+                         subGraphs[i],
+                         sub_boundaryToLocal[i].size(),
+                         &ctx,
+                         boundaryColor_h,
+                         boundaryPosColor_h,
+                         &partialColorVec[i],
+                         &partialIterVec[i],
+                         &part_ms);
+            
             cudaDeviceSynchronize();
             local_accum_ms += part_ms;
             local_parts += 1;
         }
+
         per_gpu_ms[threadID] = local_accum_ms;
         per_gpu_parts[threadID] = local_parts;
         
@@ -1394,6 +1485,10 @@ int main(int argc, char* argv[]) {
     }
     cols++;
     printf("colors used: %d\n", cols);
+
+    cudaFreeHost(boundaryColor_h);
+    cudaFreeHost(boundaryPosColor_h);
+    cudaFreeHost(boundaryIterList_h);
 
     delete [] color;
 
