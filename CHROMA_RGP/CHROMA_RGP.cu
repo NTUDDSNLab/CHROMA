@@ -1000,7 +1000,7 @@ void print_help(const char* program_name) {
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
-    std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip (default: metis)\n";
+    std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip, mt_kahip (default: metis)\n";
     std::cout << "      --predict             Use prediction model to auto-select θ (default: false)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";

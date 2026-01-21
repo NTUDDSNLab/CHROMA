@@ -1,28 +1,53 @@
 # ---- User Configurable ----------------------------------
+PARTITIONER_FLAG := 
 ARCH      ?= sm_86
 PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
-PARTITIONER_FLAG := -DHAVE_METIS
-PARTITIONER_FLAG += -DHAVE_KAHIP # Open this if you want to use KaHIP
-CXXFLAGS  := -O3 -std=c++17 -I../lib/io
+
+# Partitioners Selection (0 or 1)
+USE_METIS   ?= 1
+USE_KAHIP   ?= 0
+USE_MTKAHIP ?= 0
+# ---- Variable setup based on selection --------------------
+LDFLAGS_LIBS :=
+INCLUDES     := -I../lib/io
+
+# Common Libs (TBB, NUMA, etc needed for mt-KaHIP but also harmless if linked usually)
+COMMON_LIBS := -ltbb -ltbbmalloc -ltbbmalloc_proxy -latomic -ldl -lnuma
+
+# METIS
+ifeq ($(USE_METIS), 1)
+	PARTITIONER_FLAG += -DHAVE_METIS
+	INCLUDES += -I$(HOME)/local/include
+	RPATH_FLAGS += -Xlinker -rpath -Xlinker $(HOME)/local/lib
+	LDFLAGS_LIBS += -L$(HOME)/local/lib -lmetis -lGKlib
+endif
+
+# KaHIP (Sequential)
+ifeq ($(USE_KAHIP), 1)
+	PARTITIONER_FLAG += -DHAVE_KAHIP
+	INCLUDES += -I../External/KaHIP/deploy
+	RPATH_FLAGS += -Xlinker -rpath -Xlinker $(abspath ../External/KaHIP/deploy)
+	# Use static lib to avoid conflicts if possible, or dynamic
+	LDFLAGS_LIBS += ../External/KaHIP/deploy/libkahip.a
+endif
+
+# mt-KaHIP (Parallel)
+ifeq ($(USE_MTKAHIP), 1)
+	PARTITIONER_FLAG += -DHAVE_MTKAHIP
+	INCLUDES += -I../External/mt-KaHIP/deploy
+	RPATH_FLAGS += -Xlinker -rpath -Xlinker $(abspath ../External/mt-KaHIP/deploy)
+	LDFLAGS_LIBS += ../External/mt-KaHIP/deploy/libmtkahip.a $(COMMON_LIBS)
+endif
+
+
+RPATH_FLAGS += -Xlinker --enable-new-dtags
+
+CXXFLAGS  := -O3 -std=c++17 $(INCLUDES)
 DC_FLAGS  := -dc -arch=$(ARCH) $(PARTITIONER_FLAG) -Xcompiler -fopenmp $(CXXFLAGS) 
-# Add METIS and OpenMP linking parameters
 
-# METIS (Keep original ~/local path)
-INCLUDES_METIS := -I$(HOME)/local/include
-LIBS_METIS := -L$(HOME)/local/lib
-
-# KaHIP (Modified to External directory)
-INCLUDES_KAHIP := -I../External/KaHIP/deploy
-LIBS_KAHIP := -L../External/KaHIP/deploy
-
-# Write rpath, let executable carry library search path (avoid LD_LIBRARY_PATH)
-RPATH_FLAGS := -Xlinker -rpath -Xlinker $(HOME)/local/lib \
-               -Xlinker -rpath -Xlinker $(abspath ../External/KaHIP/deploy) \
-               -Xlinker --enable-new-dtags
-
-# Unify LDFLAGS, remove redundant comment lines
+# Unify LDFLAGS
 LDFLAGS := -O3 -arch=$(ARCH) -diag-suppress=177 -Xcompiler -fopenmp \
-           $(LIBS_METIS) $(LIBS_KAHIP) -lmetis -lGKlib -lkahip $(RPATH_FLAGS)
+           $(LDFLAGS_LIBS) $(RPATH_FLAGS)
 
 TARGET    := CHROMA_RGP
 
@@ -42,12 +67,12 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "== Linking $(TARGET) (ARCH=$(ARCH)) =="
-	nvcc $(LDFLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) $^ -o $@
+	nvcc $(LDFLAGS) $^ -o $@
 	@rm -f $(OBJS)
 
 %.o: %.cu
 	@echo "== Compiling $< (ARCH=$(ARCH)) =="
-	nvcc $(DC_FLAGS) $(INCLUDES_METIS) $(INCLUDES_KAHIP) -c $< -o $@
+	nvcc $(DC_FLAGS) -c $< -o $@
 
 %.o: %.cpp
 	@echo "== Compiling $< =="

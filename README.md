@@ -45,9 +45,10 @@ CHROMA delivers elastic graph coloring across single-GPU, multi-GPU, and CPU bac
 - **Build**
   ```bash
   cd CHROMA_RGP
-  make ARCH=sm_89 [PRE_MODEL=1]
+  make ARCH=sm_89 [PRE_MODEL=1] [USE_METIS=1 or 0] [USE_KAHIP=1 or 0] [USE_MTKAHIP=1 or 0]
   ```
   Use `PRE_MODEL=1` when `model/model.cpp` is present for θ prediction.
+  Use `USE_METIS=1` to enable METIS partitioner; `USE_KAHIP=1` to enable KaHIP partitioner; `USE_MTKAHIP=1` to enable mt-KaHIP partitioner.
 - **Run**
   ```bash
   CHROMA_RGP/CHROMA_RGP -f Datasets/facebook.egr -p 2 -e 10
@@ -132,13 +133,18 @@ Capture sample output (colors, runtime) alongside the dataset for reproducibilit
     - `--extra -- <args>`: Additional CHROMA arguments appended after `--` sentinel.
     - `--out`: Output JSON path (default `results_elastic_grid_<timestamp>.json`).
 
-## Other State-of-the-art Repositories
+## Reference Repositories
 
 ### Speculative Greedy (SGR)
 1. [Csrcolor](https://github.com/chenxuhao/csrcolor)
 2. [data_pq](https://github.com/chenxuhao/csrcolor)
 3. [data_wlc](https://github.com/chenxuhao/csrcolor)
 4. [kokkos VB-BIT](https://github.com/kokkos/kokkos-kernels)
+
+### Partitioners
+1. [METIS](https://github.com/KarypisLab/METIS)
+2. [KaHIP](https://github.com/KaHIP/KaHIP)
+3. [mt-KaHIP](https://github.com/KaHIP/mt-KaHIP)
 
 
 ## Datasets & References

@@ -21,9 +21,14 @@
 #include "kaHIP_interface.h"
 #endif
 
+#ifdef HAVE_MTKAHIP
+#include "mtkahip_interface.h"
+#include <omp.h>
+#endif
+
 namespace partitioning {
 
-enum class Method { Metis, RoundRobin, Random, LDG, KaHIP};
+enum class Method { Metis, RoundRobin, Random, LDG, KaHIP, MtKaHIP};
 
 inline std::string to_lower(std::string s) {
   for (char &c : s) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
@@ -40,6 +45,7 @@ inline bool parse_method(const std::string &name, Method &out) {
   if (nm == "random" || nm == "rand") { out = Method::Random; return true; }
   if (nm == "ldg") { out = Method::LDG; return true; }
   if (nm == "kahip") { out = Method::KaHIP; return true; }
+  if (nm == "mt_kahip" || nm == "mtkahip") { out = Method::MtKaHIP; return true; }
   return false;
 }
 
@@ -67,6 +73,42 @@ inline bool compute_partition_kahip(const ECLgraph &g, int nParts, std::vector<i
   std::cout << " - seed: " << seed << std::endl;
   std::cout << " - mode: " << mode << std::endl;
   std::cout << "--------------------------------" << std::endl;
+  
+  return true;
+}
+#endif
+
+#ifdef HAVE_MTKAHIP
+inline bool compute_partition_mtkahip(const ECLgraph &g, int nParts, std::vector<int> &part) {
+  int n = g.nodes;
+  // Casting const int* to int* because mtkahip signature is not const-correct
+  int *xadj = const_cast<int*>(g.nindex);
+  int *adjncy = const_cast<int*>(g.nlist);
+  int *adjwgt = const_cast<int*>(g.eweight); // Edge weights if available
+  int *vwgt = nullptr; // Vertex weights (nullptr = all 1)
+  
+  part.resize(g.nodes);
+
+  double imbalance = 0.03;
+  const bool suppress_output = false; // Enable output to see what's happening
+  const int seed = 42;
+  const int mode = FASTSOCIAL_PARALLEL; // Default to fast social parallel
+  int num_threads = 1;
+  #ifdef _OPENMP
+  num_threads = omp_get_max_threads();
+  #endif
+  
+  int edgecut = 0;
+
+  std::cout << "----------<Start mt-KaHIP>---------" << std::endl;
+  std::cout << "Threads: " << num_threads << ", Mode: " << mode << std::endl;
+  
+  mtkahip(&n, vwgt, xadj, adjwgt, adjncy, &nParts, &imbalance, suppress_output, seed, mode, num_threads, &edgecut, part.data());
+
+  std::cout << "[mt-KaHIP] partition result: " << std::endl;
+  std::cout << " - edgecut: " << edgecut << std::endl;
+  std::cout << " - imbalance: " << imbalance << std::endl;
+  std::cout << "-----------------------------------" << std::endl;
   
   return true;
 }
@@ -205,6 +247,13 @@ inline bool compute_partition(const ECLgraph &g,
       return compute_partition_kahip(g, nParts, part);
 #else
       if (err) *err = "KaHIP not available (rebuild with -DHAVE_KAHIP and link KaHIP)";
+      return false;
+#endif
+    case Method::MtKaHIP:
+#ifdef HAVE_MTKAHIP
+      return compute_partition_mtkahip(g, nParts, part);
+#else
+      if (err) *err = "Mt-KaHIP not available (rebuild with -DHAVE_MTKAHIP and link Mt-KaHIP)";
       return false;
 #endif
   }
