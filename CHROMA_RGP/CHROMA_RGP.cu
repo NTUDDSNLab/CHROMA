@@ -1437,15 +1437,14 @@ int main(int argc, char* argv[]) {
         
         if (pColor == nullptr) continue; // Should not happen if run successfully
 
-        // Parallel merge might be possible but linear is fine for now
-        // #pragma omp parallel for
-        for (size_t localId = 0; localId < l2g.size(); localId++) {
+        // Parallel merge with OpenMP
+        // Only merge owned nodes to avoid race conditions and redundant writes
+        // The first partition_nodes[i].size() elements in l2g are the owned nodes
+        int owned_count = partition_nodes[i].size();
+
+        #pragma omp parallel for schedule(static)
+        for (int localId = 0; localId < owned_count; localId++) {
              int globalId = l2g[localId];
-             // In the kernel it was: colorList[globalID] = partialColorList[i];
-             // The original code seemed to assume disjoint writes or last-writer-wins?
-             // Actually partitioning implies disjoint ownership usually, or ghosts.
-             // But original kernel did: colorList[globalID] = partialColorList[i];
-             // We do the same.
              color[globalId] = (int)pColor[localId];
         }
         
