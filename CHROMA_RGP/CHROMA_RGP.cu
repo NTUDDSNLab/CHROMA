@@ -1319,7 +1319,7 @@ int main(int argc, char* argv[]) {
     // Accumulate per-GPU compute time across its assigned partitions
     std::vector<float> per_gpu_ms(deviceCount, 0.0f);
     std::vector<int> per_gpu_parts(deviceCount, 0);
-    std::vector<size_t> per_gpu_used_mem(deviceCount, 0);
+    std::vector<size_t> per_gpu_max_mem(deviceCount, 0);
     std::vector<size_t> per_gpu_total_mem(deviceCount, 0);
 
     // Timing Variables
@@ -1371,6 +1371,13 @@ int main(int argc, char* argv[]) {
                           sub_boundaryToLocal[first_partition_idx],
                           &ctx,
                           fuzzy_number);
+            
+             size_t free_byte, total_byte;
+             cudaSetDevice(threadID);
+             cudaMemGetInfo(&free_byte, &total_byte);
+             size_t used = total_byte - free_byte;
+             if (used > per_gpu_max_mem[threadID]) per_gpu_max_mem[threadID] = used;
+             per_gpu_total_mem[threadID] = total_byte;
         }
 
         // Barrier to ensure Boundary GC is done and Data is ready for everyone
@@ -1397,6 +1404,13 @@ int main(int argc, char* argv[]) {
                               sub_boundaryToLocal[i],
                               &ctx,
                               fuzzy_number);
+
+                 size_t free_byte, total_byte;
+                 cudaSetDevice(threadID);
+                 cudaMemGetInfo(&free_byte, &total_byte);
+                 size_t used = total_byte - free_byte;
+                 if (used > per_gpu_max_mem[threadID]) per_gpu_max_mem[threadID] = used;
+                 per_gpu_total_mem[threadID] = total_byte;
             }
 
             runPartition(threadID,
@@ -1416,12 +1430,6 @@ int main(int argc, char* argv[]) {
 
         per_gpu_ms[threadID] = local_accum_ms;
         per_gpu_parts[threadID] = local_parts;
-        
-        size_t free_byte, total_byte;
-        cudaSetDevice(threadID);
-        cudaMemGetInfo(&free_byte, &total_byte);
-        per_gpu_used_mem[threadID] = total_byte - free_byte;
-        per_gpu_total_mem[threadID] = total_byte;
     
         auto phase2_end_local = std::chrono::high_resolution_clock::now();
         float local_phase2_ms = std::chrono::duration<float, std::milli>(phase2_end_local - phase2_start_local).count();
@@ -1439,7 +1447,7 @@ int main(int argc, char* argv[]) {
       if (per_gpu_parts[d] > 0) {
         printf("[GPU %d] partitions: %d, compute time: %.3f ms\n", d, per_gpu_parts[d], per_gpu_ms[d]);
       }
-      printMemInfo("Final Summary", d);
+      // printMemInfo("Final Summary", d);
     }
     if (boundary_ms > 0.0f) {
       printf("[GPU 0] boundary phase time: %.3f ms\n", boundary_ms);
@@ -1531,7 +1539,7 @@ int main(int argc, char* argv[]) {
     printf("%-30s: %10.4f ms\n", "Phase 2 (Parallel Exec)", phase2_max_duration_ms);
     printf("%-30s: %10.4f ms\n", "Phase 3 (Result Merge)", phase3_ms);
     printf("------------------------------------------------------------------------------------------------\n");
-    printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Mem Used (MB)", "Mem Total (MB)");
+    printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Max Mem (MB)", "Mem Total (MB)");
     printf("|--------|-----------------|------------------|----------------------|----------------------|\n");
     for (int d = 0; d < deviceCount; ++d) {
         if (per_gpu_parts[d] > 0) {
@@ -1539,7 +1547,7 @@ int main(int argc, char* argv[]) {
                 d, 
                 per_gpu_parts[d], 
                 per_gpu_ms[d], 
-                per_gpu_used_mem[d] / 1024.0 / 1024.0, 
+                per_gpu_max_mem[d] / 1024.0 / 1024.0, 
                 per_gpu_total_mem[d] / 1024.0 / 1024.0);
         }
     }

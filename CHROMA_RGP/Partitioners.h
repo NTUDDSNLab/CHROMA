@@ -55,7 +55,7 @@ inline bool compute_partition_kahip(const ECLgraph &g, int nParts, std::vector<i
   double imbalance = 0.03;
   const bool suppress_output = true;
   const int seed = 42;
-  const int mode = ECO;
+  const int mode = FASTSOCIAL;
   int edgecut = 0;
 
   std::cout << "----------<Start KaHIP>---------" << std::endl;
