@@ -324,21 +324,28 @@
      int* const posscol2 = new int [g.edges / BPI + 1];
      int* const wl = new int [g.nodes];
    
-     CPUTimer timer;
+     CPUTimer timer, PA_time, CA_time;
      timer.start();
+     PA_time.start();
      compute_SL(g, threads, priority);
+     PA_time.stop();
+     
  
      printf("Start init \n");
- 
+     CA_time.start();
      const int wlsize = init(g.nodes, g.edges, g.nindex, g.nlist, nlist2, posscol, posscol2, color, wl, threads,priority.data());
+     
      printf("Start runLarge \n");
  
      runLarge(g.nindex, nlist2, posscol, posscol2, color, wl, wlsize, threads);
      printf("Start runSmall \n");
  
      runSmall(g.nodes, g.nindex, g.nlist, posscol, color, threads);
+     CA_time.stop();
      const float runtime = timer.stop();
    
+     printf("PA time: %.6f ms\n", PA_time.stop() * 1000);
+     printf("CA time: %.6f ms\n", CA_time.stop() * 1000);
      printf("runtime:    %.6f ms\n", runtime*1000);
      printf("throughput: %.6f Mnodes/s\n", g.nodes * 0.000001 / runtime);
      printf("throughput: %.6f Medges/s\n", g.edges * 0.000001 / runtime);

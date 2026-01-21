@@ -7,3 +7,6 @@
 [submodule "External/METIS"]
 	path = External/METIS
 	url = https://github.com/KarypisLab/METIS.git
+[submodule "External/mt-KaHIP"]
+	path = External/mt-KaHIP
+	url = https://github.com/KaHIP/mt-KaHIP.git
