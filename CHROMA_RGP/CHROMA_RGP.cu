@@ -1322,6 +1322,12 @@ int main(int argc, char* argv[]) {
     std::vector<size_t> per_gpu_used_mem(deviceCount, 0);
     std::vector<size_t> per_gpu_total_mem(deviceCount, 0);
 
+    // Timing Variables
+    float phase1_max_duration_ms = 0.0f;
+    float phase2_max_duration_ms = 0.0f;
+    
+    auto phase1_start_global = std::chrono::high_resolution_clock::now();
+
     #pragma omp parallel num_threads(deviceCount) 
     {
         int threadID = omp_get_thread_num();
@@ -1369,8 +1375,16 @@ int main(int argc, char* argv[]) {
 
         // Barrier to ensure Boundary GC is done and Data is ready for everyone
         #pragma omp barrier
+        
+        // Single thread records Phase 1 time (approximate global barrier time)
+        #pragma omp master 
+        {
+            auto phase1_end_global = std::chrono::high_resolution_clock::now();
+            phase1_max_duration_ms = std::chrono::duration<float, std::milli>(phase1_end_global - phase1_start_global).count();
+        }
 
         // --- Phase 2: Execution Loop ---
+        auto phase2_start_local = std::chrono::high_resolution_clock::now();
         for (int i = threadID; i < nParts; i += deviceCount) {
             float part_ms = 0.0f;
             std::cout << "[GPU: " << threadID << "] is running on partition: " << i << std::endl;
@@ -1408,6 +1422,16 @@ int main(int argc, char* argv[]) {
         cudaMemGetInfo(&free_byte, &total_byte);
         per_gpu_used_mem[threadID] = total_byte - free_byte;
         per_gpu_total_mem[threadID] = total_byte;
+    
+        auto phase2_end_local = std::chrono::high_resolution_clock::now();
+        float local_phase2_ms = std::chrono::duration<float, std::milli>(phase2_end_local - phase2_start_local).count();
+        
+        #pragma omp critical
+        {
+            if (local_phase2_ms > phase2_max_duration_ms) {
+                phase2_max_duration_ms = local_phase2_ms;
+            }
+        }
     }
 
     // Report per-GPU timings
@@ -1429,6 +1453,8 @@ int main(int argc, char* argv[]) {
     
     // Initialize color array to 0 just in case
     std::fill(color, color + g.nodes, 0);
+
+    auto phase3_start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < nParts; i++) {
         // We have sub_localToGlobal[i] mapping: localID -> globalID
@@ -1452,6 +1478,9 @@ int main(int argc, char* argv[]) {
         if (pColor) delete[] pColor;
         if (partialIterVec[i]) delete[] partialIterVec[i];
     }
+    
+    auto phase3_end = std::chrono::high_resolution_clock::now();
+    float phase3_ms = std::chrono::duration<float, std::milli>(phase3_end - phase3_start).count();
 
   
   
@@ -1498,6 +1527,9 @@ int main(int argc, char* argv[]) {
     printf("================================================================================================\n");
     printf("%-30s: %10.4f ms\n", "Partition Time", partition_duration.count() * 1000.0f);
     printf("%-30s: %10.4f ms\n", "Total Kernel Runtime", runtime * 1000.0f); // runtime is in seconds, print as ms
+    printf("%-30s: %10.4f ms\n", "Phase 1 (Boundary+Preload)", phase1_max_duration_ms);
+    printf("%-30s: %10.4f ms\n", "Phase 2 (Parallel Exec)", phase2_max_duration_ms);
+    printf("%-30s: %10.4f ms\n", "Phase 3 (Result Merge)", phase3_ms);
     printf("------------------------------------------------------------------------------------------------\n");
     printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Mem Used (MB)", "Mem Total (MB)");
     printf("|--------|-----------------|------------------|----------------------|----------------------|\n");
