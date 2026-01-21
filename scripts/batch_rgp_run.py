@@ -115,9 +115,9 @@ def main():
                 row = {
                     'Partitioner': args.partitioner if args.partitioner else "default",
                     'Partitions': p,
-                    'Phase 1': parsed.get('Phase 1'),
-                    'Phase 2': parsed.get('Phase 2'),
-                    'Phase 3': parsed.get('Phase 3'),
+                    'Phase 1 (Boundary+Preload)': parsed.get('Phase 1'),
+                    'Phase 2 (Parallel Exec)': parsed.get('Phase 2'),
+                    'Phase 3 (Result Merge)': parsed.get('Phase 3'),
                     'Colors': parsed.get('Colors'),
                     'Max Mem (MB)': str(parsed.get('Max Mem (MB)', [])) # Convert list to string
                 }
