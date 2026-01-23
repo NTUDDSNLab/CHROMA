@@ -21,10 +21,10 @@ void print_help(const char* program_name) {
     std::cout << "Options:\n";
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
     std::cout << "  -a, --algorithm <algo>    Select algorithm:\n";
-    std::cout << "                            0 or JP-SL  : JP-SL algorithm\n";
+    std::cout << "                            0 or cuSL  : cuSL algorithm\n";
     std::cout << "                            1 or JP-ADG : JP-ADG algorithm\n";
     std::cout << "                            2 or JP-SLL : JP-SLL algorithm\n";
-    std::cout << "                            (default: JP-SL)\n";
+    std::cout << "                            (default: cuSL)\n";
     std::cout << "  -r, --resilient <number>  Set resilient number θ value (default: 0)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
@@ -35,8 +35,8 @@ void print_help(const char* program_name) {
 
 // Parse algorithm parameters
 void* select_algorithm(const std::string& algo_str, std::string& algo_name) {
-    if (algo_str == "0" || algo_str == "JP-SL") {
-        algo_name = "JP-SL";
+    if (algo_str == "0" || algo_str == "JP-SL" || algo_str == "cuSL") {
+        algo_name = "cuSL";
         return (void*)JP_SL;
     } else if (algo_str == "1" || algo_str == "JP-ADG") {
         algo_name = "JP-ADG";
@@ -175,6 +175,8 @@ int main(int argc, char* argv[])
     const int mTpSM = deviceProp.maxThreadsPerMultiProcessor;
     const int blocks = SMs * mTpSM / ThreadsPerBlock;
     int* const color = new int [g.nodes];
+    
+    // init_random_values(g.nodes);
 
     DevPtr d;
     allocAndInit(g, d);
@@ -198,7 +200,9 @@ int main(int argc, char* argv[])
     // ================CA===================
     ECL_GC_run(blocks, g, d);
     const float runtime = timer.stop();
+
     if (cudaSuccess != cudaMemcpy(color, d.color_d, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
+    
     verifyAndPrintStats(g, color, runtime);
     
     cudaFree(d.wl_d);  cudaFree(d.color_d);  cudaFree(d.posscol2_d);  cudaFree(d.posscol_d);  cudaFree(d.nlist2_d);  cudaFree(d.nlist_d);  cudaFree(d.nidx_d);

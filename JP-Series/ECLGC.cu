@@ -1,7 +1,9 @@
 #include "globals.cuh"
 #include <cuda.h>
 #include <cooperative_groups.h>
+#include <stdio.h>
 namespace cg = cooperative_groups;
+
 static __device__ unsigned int hash(unsigned int val)
 {
   val = ((val >> 16) ^ val) * 0x45d9f3b;
@@ -35,7 +37,7 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
         pos = beg;
         for (int i = beg; i < end; i++) {
           const int nei = nlist[i];
-          // const int degn = nidx[nei + 1] - nidx[nei];
+          const int degn = nidx[nei + 1] - nidx[nei];
           const unsigned int priority_n=priority[nei];
           // unsigned int hash_v = random_vals_d[v];
           // unsigned int hash_nei = random_vals_d[nei];
@@ -43,7 +45,10 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
           unsigned int hash_nei = hash(nei);
 
           // if ((degv < degn) || ((degv == degn) && (hash(v) < hash(nei))) || ((degv == degn) && (hash(v) == hash(nei)) && (v < nei))) {
-          if ((v_priority < priority_n) || ((v_priority == priority_n) && (hash_v < hash_nei)) || ((v_priority == priority_n) && (hash_v == hash_nei) && (v < nei))) {
+          if ((degn >= WS) || (v_priority < priority_n) || 
+          ((v_priority == priority_n) && (degv < degn)) ||
+          ((v_priority == priority_n) && (degv == degn) && (hash_v < hash_nei)) || 
+          ((v_priority == priority_n) && (degv == degn) && (hash_v == hash_nei) && (v < nei))) {
             active |= (unsigned int)MSB >> (i - beg);
             pos++;
           }
@@ -58,7 +63,7 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
       const int wv = __shfl_sync(Warp, v, who);
       const int wbeg = __shfl_sync(Warp, beg, who);
       const int wend = __shfl_sync(Warp, end, who);
-      // const int wdegv = wend - wbeg;
+      const int wdegv = wend - wbeg;
       unsigned int wvpriority=priority[wv];
       int wpos = wbeg;
       for (int i = wbeg + lane; __any_sync(Warp, i < wend); i += WS) {
@@ -66,7 +71,7 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
         bool prio = false;
         if (i < wend) {
           wnei = nlist[i];
-          // const int wdegn = nidx[wnei + 1] - nidx[wnei];
+          const int wdegn = nidx[wnei + 1] - nidx[wnei];
           // prio = ((wdegv < wdegn) || ((wdegv == wdegn) && (hash(wv) < hash(wnei))) || ((wdegv == wdegn) && (hash(wv) == hash(wnei)) && (wv < wnei)));
           unsigned int wnpriority = priority[wnei];
           // unsigned int hash_wv = random_vals_d[wv];
@@ -74,7 +79,10 @@ void init(const int nodes, const int edges, const int* const __restrict__ nidx, 
           unsigned int hash_wv = hash(wv);
           unsigned int hash_wnei = hash(wnei);
 
-          prio = ((wvpriority < wnpriority) || ((wvpriority == wnpriority) && (hash_wv < hash_wnei)) || ((wvpriority == wnpriority) && (hash_wv == hash_wnei) && (wv < wnei)));
+          prio = (wdegn >= WS && (((wvpriority < wnpriority) || 
+            ((wvpriority == wnpriority) && (wdegv < wdegn)) || 
+            ((wvpriority == wnpriority) && (wdegv == wdegn) && (hash_wv < hash_wnei)) || 
+            ((wvpriority == wnpriority) && (wdegv == wdegn) && (hash_wv == hash_wnei) && (wv < wnei)))));
         }
         const int b = __ballot_sync(Warp, prio);
         const int offs = __popc(b & ((1 << lane) - 1));
