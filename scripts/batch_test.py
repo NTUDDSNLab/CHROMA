@@ -12,7 +12,7 @@ Examples:
     --pattern "*.egr" \
     --binary CHROMA/CHROMA \
     --algorithm P_SL_ELS \
-    --resilient 10 \
+    --elastic 10 \
     --runs 5 \
     --out results_chroma.json
 
@@ -39,6 +39,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
+import csv
 
 
 RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
@@ -46,6 +47,14 @@ COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 THETA_RE = re.compile(r"^EGC\s*θ:\s*(\d+)(?:.*)$", re.IGNORECASE | re.MULTILINE)
+
+
+ALGO_MAPPING = {
+    "0": "cuSL_ELS",
+    "1": "cuSL_ELS_SDC",
+    "cuSL_ELS": "cuSL_ELS",
+    "cuSL_ELS_SDC": "cuSL_ELS_SDC"
+}
 
 
 @dataclass
@@ -122,13 +131,13 @@ def parse_output(stdout: str) -> RunResult:
     )
 
 
-def run_chroma(binary: str, dataset: str, algorithm: str, resilient: int, predict: bool, extra_args: List[str],
+def run_chroma(binary: str, dataset: str, algorithm: str, elastic: int, predict: bool, extra_args: List[str],
                timeout_sec: Optional[int]) -> RunResult:
     # Build command; if predict is enabled, omit -r and add --predict
     if predict:
         cmd = [binary, "-f", dataset, "-a", algorithm, "--predict"]
     else:
-        cmd = [binary, "-f", dataset, "-a", algorithm, "-r", str(resilient)]
+        cmd = [binary, "-f", dataset, "-a", algorithm, "-e", str(elastic)]
     if extra_args:
         cmd.extend(extra_args)
 
@@ -195,10 +204,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Path to CHROMA binary (default: CHROMA/CHROMA)")
     ap.add_argument("--algorithm", "-a", default="P_SL_ELS",
                     help="Algorithm spec passed to CHROMA -a (e.g., P_SL_ELS, 0)")
-    ap.add_argument("--resilient", "-r", type=int, default=10,
-                    help="Resilient θ value passed to CHROMA -r (default: 10)")
+    ap.add_argument("--elastic", "-e", type=int, default=10,
+                    help="Elastic θ value passed to CHROMA -e (default: 10)")
     ap.add_argument("--predict", action="store_true", default=False,
-                    help="Use prediction model for elastic parameter (adds --predict to CHROMA and omits -r)")
+                    help="Use prediction model for elastic parameter (adds --predict to CHROMA and omits -e)")
     ap.add_argument("--runs", type=int, default=5,
                     help="Number of runs per dataset (default: 5)")
     ap.add_argument("--timeout", type=int, default=None,
@@ -207,6 +216,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Extra args appended to CHROMA invocation (use after --)")
     ap.add_argument("--out", default=None,
                     help="Output JSON path (default: results_{algo}_YYYYmmdd_HHMMSS.json)")
+    ap.add_argument("--csv", default=None,
+                    help="Output CSV path (optional)")
 
     args = ap.parse_args(argv)
 
@@ -224,7 +235,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "chroma_config": {
             "binary": binary,
             "algorithm": args.algorithm,
-            "resilient": args.resilient,
+            "elastic": args.elastic,
             "predict": bool(args.predict),
             "runs_per_dataset": args.runs,
             "dataset_dir": os.path.abspath(args.dataset_dir),
@@ -250,7 +261,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 binary=binary,
                 dataset=os.path.abspath(path),
                 algorithm=str(args.algorithm),
-                resilient=int(args.resilient),
+                elastic=int(args.elastic),
                 predict=bool(args.predict),
                 extra_args=args.extra or [],
                 timeout_sec=args.timeout,
@@ -292,6 +303,42 @@ def main(argv: Optional[List[str]] = None) -> int:
         json.dump(summary, f, indent=2, sort_keys=False)
 
     print(f"\nWrote summary to: {out_path}")
+
+    # Write CSV if requested
+    if args.csv:
+        csv_path = args.csv
+        print(f"Writing CSV to: {csv_path}")
+        
+        # Prepare rows
+        csv_rows = []
+        # Columns: dataset name, algorithm, elastic number, runtime, color count
+        fieldnames = ["dataset name", "algorithm", "elastic number", "runtime", "color count"]
+        
+        sorted_datasets = sorted(summary["datasets"].keys())
+        for ds_name in sorted_datasets:
+            ds_data = summary["datasets"][ds_name]
+            # 'resilient' is the elastic number. If predict was used, we might want to note that,
+            # but user specifically asked for "elastic number (resilisent number改)".
+            # We'll use the global arg value for 'elastic number' as it's the input parameter.
+            
+            row = {
+                "dataset name": ds_name,
+                "algorithm": ALGO_MAPPING.get(str(args.algorithm), str(args.algorithm)),
+                "elastic number": args.elastic,
+                "runtime": ds_data.get("best_runtime_ms", ""),
+                "color count": ds_data.get("best_color", "")
+            }
+            csv_rows.append(row)
+            
+        try:
+            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(csv_rows)
+            print(f"Wrote CSV to: {csv_path}")
+        except IOError as e:
+            print(f"Error writing CSV: {e}", file=sys.stderr)
+
     return 0
 
 

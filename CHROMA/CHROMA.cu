@@ -38,30 +38,30 @@ void print_help(const char* program_name) {
     std::cout << "                            .txt  : Text format (CSR graph)\n";
     std::cout << "                            .bin  : Binary format (CSR graph)\n";
     std::cout << "  -a, --algorithm <algo>    Select algorithm:\n";
-    std::cout << "                            0 or P_SL_ELS     : P_SL_ELS algorithm\n";
-    std::cout << "                            1 or P_SL_ELS_SDC : P_SL_ELS_SDC algorithm\n";
-    std::cout << "                            (default: P_SL_ELS)\n";
+    std::cout << "                            0 or cuSL_ELS     : cuSL_ELS algorithm\n";
+    std::cout << "                            1 or cuSL_ELS_SDC : cuSL_ELS_SDC algorithm\n";
+    std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
-    std::cout << "  " << program_name << " --file graph.egr -a P_SL_ELS_SDC\n";
+    std::cout << "  " << program_name << " --file graph.egr -a cuSL_ELS_SDC\n";
     std::cout << "  " << program_name << " -f graph.bin --algorithm 1 --elastic 15\n";
     std::cout << "  " << program_name << " -f graph.egr --predict\n";
 }
 
 // Parse algorithm parameters
 void* select_algorithm(const std::string& algo_str, std::string& algo_name) {
-    if (algo_str == "0" || algo_str == "P_SL_ELS") {
-        algo_name = "P_SL_ELS";
+    if (algo_str == "0" || algo_str == "cuSL_ELS") {
+        algo_name = "cuSL_ELS";
         return (void*)P_SL_ELS;
-    } else if (algo_str == "1" || algo_str == "P_SL_ELS_SDC") {
-        algo_name = "P_SL_ELS_SDC";
+    } else if (algo_str == "1" || algo_str == "cuSL_ELS_SDC") {
+        algo_name = "cuSL_ELS_SDC";
         return (void*)P_SL_ELS_SDC;
     } else {
-        std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default P_SL_ELS.\n";
-        algo_name = "P_SL_ELS";
+        std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
+        algo_name = "cuSL_ELS";
         return (void*)P_SL_ELS;
     }
 }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     std::string filename;
     int fuzzy_number = 0;  // EGC θ default value is 0
     void* kernel_to_launch = (void*)P_SL_ELS;
-    std::string algo_name = "P_SL_ELS";
+    std::string algo_name = "cuSL_ELS";
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
 
     // Parse command line arguments
