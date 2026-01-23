@@ -324,7 +324,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             row = {
                 "dataset name": ds_name,
                 "algorithm": ALGO_MAPPING.get(str(args.algorithm), str(args.algorithm)),
-                "elastic number": args.elastic,
+                "elastic number": ds_data.get("theta") if ds_data.get("theta") is not None else args.elastic,
                 "runtime": ds_data.get("best_runtime_ms", ""),
                 "color count": ds_data.get("best_color", "")
             }
