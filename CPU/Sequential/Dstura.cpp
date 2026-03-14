@@ -1,236 +1,269 @@
-
-// A C++ program to implement greedy algorithm for graph coloring
-#include <iostream>
-#include <list>
 #include "ECLgraph.h"
-#include <vector>
+
 #include <algorithm>
-#include <list>
-#include <utility>
+#include <chrono>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
+#include <limits>
+#include <vector>
 
-#include <chrono>  // Include <chrono> header
-#include <set>
-using namespace std;
- 
-// A class that represents an undirected graph
-class Graph
-{
-    int V;    // No. of vertices
-    list<int> *adj;    // A dynamic array of adjacency lists
+using clk = std::chrono::high_resolution_clock;
+
+class DSaturColoring {
 public:
-    // Constructor and destructor
-    Graph(int V)   { this->V = V; adj = new list<int>[V]; }
-    ~Graph()       { delete [] adj; }
- 
-    // function to add an edge to graph
-    void addEdge(int v, int w);
- 
-    // Prints greedy coloring of the vertices
-    void greedyColoring();
+    explicit DSaturColoring(const ECLgraph& graph)
+        : g(graph),
+          color(g.nodes, -1),
+          saturation_upper(g.nodes, 0),
+          uncolored_degree(g.nodes, 0),
+          heap(g.nodes, -1),
+          position(g.nodes, -1),
+          color_mark(1, 0)
+    {
+        for (int v = 0; v < g.nodes; ++v) {
+            uncolored_degree[v] = g.nindex[v + 1] - g.nindex[v];
+            heap[v] = v;
+            position[v] = v;
+        }
+        build_heap();
+    }
+
+    int run()
+    {
+        while (!heap.empty()) {
+            const int u = select_next_vertex();
+            const int chosen_color = smallest_available_color(u);
+
+            color[u] = chosen_color;
+            max_color = std::max(max_color, chosen_color);
+            remove_top();
+
+            for (int e = g.nindex[u]; e < g.nindex[u + 1]; ++e) {
+                const int v = g.nlist[e];
+                if (color[v] != -1) continue;
+
+                saturation_upper[v] += 1;
+                uncolored_degree[v] -= 1;
+                sift_up(position[v]);
+            }
+        }
+
+        return max_color + 1;
+    }
+
+    const std::vector<int>& colors() const
+    {
+        return color;
+    }
+
+private:
+    const ECLgraph& g;
+    std::vector<int> color;
+    std::vector<int> saturation_upper;
+    std::vector<int> uncolored_degree;
+    std::vector<int> heap;
+    std::vector<int> position;
+    std::vector<uint32_t> color_mark;
+    uint32_t mark_token = 1;
+    int max_color = -1;
+
+    bool higher_priority(int lhs, int rhs) const
+    {
+        if (saturation_upper[lhs] != saturation_upper[rhs]) {
+            return saturation_upper[lhs] > saturation_upper[rhs];
+        }
+        if (uncolored_degree[lhs] != uncolored_degree[rhs]) {
+            return uncolored_degree[lhs] > uncolored_degree[rhs];
+        }
+        return lhs < rhs;
+    }
+
+    void swap_heap_nodes(const int i, const int j)
+    {
+        std::swap(heap[i], heap[j]);
+        position[heap[i]] = i;
+        position[heap[j]] = j;
+    }
+
+    void sift_up(int idx)
+    {
+        while (idx > 0) {
+            const int parent = (idx - 1) / 2;
+            if (!higher_priority(heap[idx], heap[parent])) break;
+            swap_heap_nodes(idx, parent);
+            idx = parent;
+        }
+    }
+
+    void sift_down(int idx)
+    {
+        const int n = static_cast<int>(heap.size());
+        while (true) {
+            int best = idx;
+            const int left = idx * 2 + 1;
+            const int right = left + 1;
+
+            if (left < n && higher_priority(heap[left], heap[best])) best = left;
+            if (right < n && higher_priority(heap[right], heap[best])) best = right;
+            if (best == idx) break;
+
+            swap_heap_nodes(idx, best);
+            idx = best;
+        }
+    }
+
+    void build_heap()
+    {
+        for (int idx = static_cast<int>(heap.size()) / 2 - 1; idx >= 0; --idx) {
+            sift_down(idx);
+        }
+    }
+
+    void ensure_color_mark_size(const int color_id)
+    {
+        if (color_id >= static_cast<int>(color_mark.size())) {
+            color_mark.resize(color_id + 1, 0);
+        }
+    }
+
+    uint32_t next_mark_token()
+    {
+        if (mark_token == std::numeric_limits<uint32_t>::max()) {
+            std::fill(color_mark.begin(), color_mark.end(), 0);
+            mark_token = 1;
+        } else {
+            ++mark_token;
+        }
+        return mark_token;
+    }
+
+    int exact_saturation(const int v)
+    {
+        if (max_color >= 0) ensure_color_mark_size(max_color);
+        const uint32_t token = next_mark_token();
+        int saturation = 0;
+
+        for (int e = g.nindex[v]; e < g.nindex[v + 1]; ++e) {
+            const int neighbor = g.nlist[e];
+            const int neighbor_color = color[neighbor];
+            if (neighbor_color < 0) continue;
+
+            ensure_color_mark_size(neighbor_color);
+            if (color_mark[neighbor_color] != token) {
+                color_mark[neighbor_color] = token;
+                ++saturation;
+            }
+        }
+
+        return saturation;
+    }
+
+    int smallest_available_color(const int v)
+    {
+        ensure_color_mark_size(max_color + 1);
+        const uint32_t token = next_mark_token();
+
+        for (int e = g.nindex[v]; e < g.nindex[v + 1]; ++e) {
+            const int neighbor_color = color[g.nlist[e]];
+            if (neighbor_color < 0) continue;
+
+            ensure_color_mark_size(neighbor_color);
+            color_mark[neighbor_color] = token;
+        }
+
+        int chosen_color = 0;
+        while (chosen_color <= max_color && color_mark[chosen_color] == token) {
+            ++chosen_color;
+        }
+        return chosen_color;
+    }
+
+    int select_next_vertex()
+    {
+        while (true) {
+            const int v = heap.front();
+            const int exact = exact_saturation(v);
+
+            if (exact == saturation_upper[v]) {
+                return v;
+            }
+
+            saturation_upper[v] = exact;
+            sift_down(0);
+        }
+    }
+
+    void remove_top()
+    {
+        const int top = heap.front();
+        position[top] = -1;
+
+        if (heap.size() == 1) {
+            heap.pop_back();
+            return;
+        }
+
+        heap[0] = heap.back();
+        position[heap[0]] = 0;
+        heap.pop_back();
+        sift_down(0);
+    }
 };
- 
-void Graph::addEdge(int v, int w)
+
+static bool verify_coloring(const ECLgraph& g, const std::vector<int>& color)
 {
-    adj[v].push_back(w);
-    adj[w].push_back(v);  // Note: the graph is undirected
-}
- void Graph::greedyColoring()
-{
-    std::cout << "Number of vertices (V): " <<  V << std::endl;
-    // int result[V];  // Array to store result (color assignment)
-    // int saturation[V]; // Array to store the saturation degree of each vertex
-    int* result = new int[V];  // Array to store result (color assignment)
-    int* saturation = new int[V]; // Array to store the saturation degree of each vertex
-    
-    // Initialize all vertices as unassigned and saturation as 0
-    for (int u = 0; u < V; u++) {
-        result[u] = -1;  // No color is assigned
-        saturation[u] = 0;  // Initial saturation is 0
-    }
-    // Initialize available colors array
-    bool available[V];
-    for (int cr = 0; cr < V; cr++)
-        available[cr] = false;
-
-    // Array to store the degree of each vertex
-    std::vector<int> degree(V);
-    for (int u = 0; u < V; u++)
-        degree[u] = adj[u].size(); // Degree of each vertex
-
-    // Start with the vertex of maximum degree
-    int u = std::max_element(degree.begin(), degree.end()) - degree.begin();
-    result[u] = 0; // Assign the first color
-
-    // Update saturation degrees of adjacent vertices
-    for (int neighbor : adj[u])
-        saturation[neighbor]++;
-
-    // Repeat for remaining V-1 vertices
-    for (int i = 1; i < V; i++)
-    {
-        // Select the next vertex to color
-        int max_sat = -1, max_deg = -1, next_vertex = -1;
-        for (int v = 0; v < V; v++)
-        {
-            if (result[v] == -1)  // If v is not colored
-            {
-                if (saturation[v] > max_sat || 
-                    (saturation[v] == max_sat && degree[v] > max_deg))
-                {
-                    max_sat = saturation[v];
-                    max_deg = degree[v];
-                    next_vertex = v;
-                }
-            }
+    for (int v = 0; v < g.nodes; ++v) {
+        if (color[v] < 0) {
+            std::printf("ERROR: vertex %d is uncolored\n", v);
+            return false;
         }
 
-        u = next_vertex;
-
-        // Mark the colors of adjacent vertices as unavailable
-        for (int neighbor : adj[u])
-            if (result[neighbor] != -1)
-                available[result[neighbor]] = true;
-
-        // Find the first available color
-        int cr;
-        for (cr = 0; cr < V; cr++)
-            if (!available[cr])
-                break;
-
-        result[u] = cr; // Assign the found color
-
-        // Reset the available array back to false
-        for (int neighbor : adj[u])
-            if (result[neighbor] != -1)
-                available[result[neighbor]] = false;
-
-        // Update saturation degrees of adjacent vertices
-        for (int neighbor : adj[u])
-            if (result[neighbor] == -1)
-            {
-                std::set<int> unique_colors; // Track unique colors of adjacent nodes
-                for (int adj_of_neighbor : adj[neighbor])
-                    if (result[adj_of_neighbor] != -1)
-                        unique_colors.insert(result[adj_of_neighbor]);
-
-                saturation[neighbor] = unique_colors.size();
+        for (int e = g.nindex[v]; e < g.nindex[v + 1]; ++e) {
+            const int neighbor = g.nlist[e];
+            if (v == neighbor) {
+                std::printf("ERROR: self-loop at vertex %d\n", v);
+                return false;
             }
-    }
-
-    // Check color conflict
-    bool conflict_found = false;
-    for (int u = 0; u < V; u++)
-    {
-        for (int neighbor : adj[u])
-        {
-            if (result[u] == result[neighbor] && u != neighbor)
-            {
-                printf("Conflict detected between vertex %d and vertex %d\n", u, neighbor);
-                conflict_found = true;
+            if (color[v] == color[neighbor]) {
+                std::printf("ERROR: edge (%d,%d) same color %d\n",
+                            v, neighbor, color[v]);
+                return false;
             }
         }
     }
 
-    if (!conflict_found)
-    {
-        printf("No conflicts found.\n");
-    }
-
-    int cols = -1;
-
-    // Calculate the number of colors used
-    for (int u = 0; u < V; u++)
-        cols = std::max(cols, result[u]);
-
-    cols++;
-    printf("colors used: %d\n", cols);
+    return true;
 }
 
-// Assigns colors (starting from 0) to all vertices and prints
-// the assignment of colors
-
-// void Graph::greedyColoring()
-// {
-//     int result[V];
-
-//     // Initialize all vertices as unassigned
-//     for (int u = 0; u < V; u++)
-//         result[u] = -1;  // no color is assigned to u
-
-//     // A temporary array to store the available colors. True
-//     // value of available[cr] would mean that the color cr is
-//     // assigned to one of its adjacent vertices
-//     bool available[V];
-//     for (int cr = 0; cr < V; cr++)
-//         available[cr] = false;
-
-//     // Array to store the degree of each vertex
-//     std::vector<std::pair<int, int>> vertex_degree(V);
-//     for (int u = 0; u < V; u++)
-//         vertex_degree[u] = {adj[u].size(), u}; // pair (degree, vertex)
-
-//     // Sort vertices in descending order of degree
-//     std::sort(vertex_degree.rbegin(), vertex_degree.rend());
-
-//     // Assign colors to all vertices
-//     for (int i = 0; i < V; i++)
-//     {
-//         int u = vertex_degree[i].second; // Get the vertex with the current highest degree
-
-//         // Process all adjacent vertices and flag their colors as unavailable
-//         for (int neighbor : adj[u])
-//             if (result[neighbor] != -1)
-//                 available[result[neighbor]] = true;
-
-//         // Find the first available color
-//         int cr;
-//         for (cr = 0; cr < V; cr++)
-//             if (available[cr] == false)
-//                 break;
-
-//         result[u] = cr; // Assign the found color
-
-//         // Reset the values back to false for the next iteration
-//         for (int neighbor : adj[u])
-//             if (result[neighbor] != -1)
-//                 available[result[neighbor]] = false;
-//     }
-
-//     int cols = -1;
-
-//     // Calculate the number of colors used
-//     for (int u = 0; u < V; u++)
-//         cols = std::max(cols, result[u]);
-
-//     cols++;
-//     printf("colors used: %d\n", cols);
-// }   
- 
-// Driver program to test above function
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-    ECLgraph g = readECLgraph(argv[1]);    
-    Graph g1(g.nodes);
-    for (int i = 0; i < g.nodes; i++) {
-        for (int j = g.nindex[i]; j < g.nindex[i+1]; j++) {
-            g1.addEdge(i, g.nlist[j]);
-        }
+    if (argc != 2) {
+        std::printf("USAGE: %s <graph.egr>\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
-    cout << "Coloring of graph 1\n";
-    
-    // Start timing
-    auto start = std::chrono::high_resolution_clock::now();
+    ECLgraph g = readECLgraph(argv[1]);
+    std::printf("nodes: %d  edges: %d  avg_deg: %.2f\n",
+                g.nodes, g.edges, 1.0 * g.edges / g.nodes);
+    std::printf("order  : DSatur (CSR)\n");
 
-    g1.greedyColoring();  // Execute coloring algorithm
+    DSaturColoring solver(g);
 
-    // End timing
-    auto end = std::chrono::high_resolution_clock::now();
+    const auto start = clk::now();
+    const int colors_used = solver.run();
+    const auto end = clk::now();
 
-    // Calculate execution time (in seconds)
-    std::chrono::duration<double> elapsed = end - start;
-    printf("runtime:    %.6f ms\n", elapsed.count()*1000);
+    const double runtime_ms =
+        std::chrono::duration<double, std::milli>(end - start).count();
 
-    return 0;
+    std::printf("runtime:    %.6f ms\n", runtime_ms);
+    std::printf("colors used: %d\n", colors_used);
+
+    const bool ok = verify_coloring(g, solver.colors());
+    std::printf("%s\n", ok ? "result verification passed"
+                            : "result verification FAILED");
+
+    freeECLgraph(g);
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

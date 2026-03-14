@@ -2,6 +2,7 @@
 *.out
 *.o
 *.json
+*.txt
 
 # Datasets
 Datasets/*.egr
@@ -15,6 +16,7 @@ Datasets/SNAP/p5/
 Datasets/SSMC/
 Datasets/fail/
 Datasets/test/
+Datasets/*
 
 *_pycache_*
 cpu_*

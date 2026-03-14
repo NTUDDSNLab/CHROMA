@@ -1,4 +1,4 @@
-# CHROMA: Coloring with High-Quality Robust Optimized Multi-GPU Allocation
+# CHROMA: High-quality Robust Graph Coloring on GPUs
 
 ## Overview
 CHROMA delivers elastic graph coloring across single-GPU, multi-GPU, and CPU backends. The project couples CUDA kernels with robust graph partitioning (RGP) and CPU heuristics to explore state-of-the-art MIS and SGR strategies on large graphs stored under `Datasets/`.

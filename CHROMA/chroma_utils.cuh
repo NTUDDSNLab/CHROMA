@@ -9,11 +9,25 @@ struct DevPtr {
     unsigned int *degree_list{}, *iteration_list_d{};
 };
 
+struct ColorReductionStats {
+    int colors_before{};
+    int colors_after{};
+    float runtime_sec{};
+    bool attempted{};
+    bool applied{};
+};
+
 /* Space allocation + Pre-initialization */
 void allocAndInit(const ECLgraph& g, DevPtr& d);
 
 /* Three-step kernel wrapper (need to complete iteration_list with sl_allocate first) */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d);
+
+/* Post-process color reduction wrapper */
+ColorReductionStats run_post_color_reduction(int blocks,
+                                             const ECLgraph& g,
+                                             DevPtr& d,
+                                             int* color_host_buffer);
 
 /* verify & Stats Output */
 void verifyAndPrintStats(const ECLgraph& g,

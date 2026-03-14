@@ -380,7 +380,10 @@ int main(int argc, char* argv[])
     float runtime_CA = timer_CA.stop();
     std::cout << "Finish CA " << std::endl;
 
-    float total_runtime = runtime_PA + runtime_CA;
+    ColorReductionStats reduction_stats =
+        run_post_color_reduction(blocks, g, d, color);
+
+    float total_runtime = runtime_PA + runtime_CA + reduction_stats.runtime_sec;
     
     printf("PA runtime: %.6f ms\n", runtime_PA * 1000); // GPUTimer returns seconds? No, wait.
     // Let's double check GPUTimer::stop() implementation in line 108.
@@ -388,9 +391,12 @@ int main(int argc, char* argv[])
     // It returns seconds (0.001f * ms).
     
     printf("CA runtime: %.6f ms\n", runtime_CA * 1000);
+    printf("Post reduction runtime: %.6f ms\n", reduction_stats.runtime_sec * 1000);
     printf("Total runtime: %.6f ms\n", total_runtime * 1000);
-
-    if (cudaSuccess != cudaMemcpy(color, d.color_d, g.nodes * sizeof(int), cudaMemcpyDeviceToHost)) {printf("ERROR: copying color from device failed\n\n");  exit(-1);}
+    printf("colors before reduction: %d\n", reduction_stats.colors_before);
+    printf("colors after reduction: %d\n", reduction_stats.colors_after);
+    printf("color reduction delta: %d\n",
+           reduction_stats.colors_before - reduction_stats.colors_after);
     verifyAndPrintStats(g, color, total_runtime);
 
     #ifdef PROFILE

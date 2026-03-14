@@ -44,6 +44,9 @@ import csv
 
 RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
+BEFORE_RE = re.compile(r"colors before reduction:\s*(\d+)", re.IGNORECASE)
+AFTER_RE = re.compile(r"colors after reduction:\s*(\d+)", re.IGNORECASE)
+DELTA_RE = re.compile(r"color reduction delta:\s*(-?\d+)", re.IGNORECASE)
 NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 THETA_RE = re.compile(r"^EGC\s*θ:\s*(\d+)(?:.*)$", re.IGNORECASE | re.MULTILINE)
@@ -61,6 +64,9 @@ ALGO_MAPPING = {
 class RunResult:
     runtime_ms: float
     colors_used: int
+    colors_before_reduction: Optional[int] = None
+    colors_after_reduction: Optional[int] = None
+    color_reduction_delta: Optional[int] = None
     nodes: Optional[int] = None
     edges: Optional[int] = None
     theta: Optional[int] = None
@@ -73,6 +79,9 @@ class RunResult:
 def parse_output(stdout: str) -> RunResult:
     runtime_ms: Optional[float] = None
     colors_used: Optional[int] = None
+    colors_before_reduction: Optional[int] = None
+    colors_after_reduction: Optional[int] = None
+    color_reduction_delta: Optional[int] = None
     theta: Optional[int] = None
     theta_predicted: Optional[bool] = None
 
@@ -83,6 +92,18 @@ def parse_output(stdout: str) -> RunResult:
     m = COLORS_RE.search(stdout)
     if m:
         colors_used = int(m.group(1))
+
+    m = BEFORE_RE.search(stdout)
+    if m:
+        colors_before_reduction = int(m.group(1))
+
+    m = AFTER_RE.search(stdout)
+    if m:
+        colors_after_reduction = int(m.group(1))
+
+    m = DELTA_RE.search(stdout)
+    if m:
+        color_reduction_delta = int(m.group(1))
 
     nodes = None
     edges = None
@@ -110,6 +131,9 @@ def parse_output(stdout: str) -> RunResult:
         return RunResult(
             runtime_ms=0.0,
             colors_used=-1,
+            colors_before_reduction=colors_before_reduction,
+            colors_after_reduction=colors_after_reduction,
+            color_reduction_delta=color_reduction_delta,
             nodes=nodes,
             edges=edges,
             theta=theta,
@@ -122,6 +146,9 @@ def parse_output(stdout: str) -> RunResult:
     return RunResult(
         runtime_ms=runtime_ms,
         colors_used=colors_used,
+        colors_before_reduction=colors_before_reduction,
+        colors_after_reduction=colors_after_reduction,
+        color_reduction_delta=color_reduction_delta,
         nodes=nodes,
         edges=edges,
         theta=theta,
@@ -268,7 +295,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
             run_results.append(res)
             status = "ok" if res.ok else f"fail: {res.error}"
-            print(f"  run {i+1}/{args.runs}: colors={res.colors_used} runtime_ms={res.runtime_ms:.3f} [{status}]")
+            print(
+                "  run "
+                f"{i+1}/{args.runs}: colors_after={res.colors_after_reduction} "
+                f"colors_before={res.colors_before_reduction} "
+                f"delta={res.color_reduction_delta} "
+                f"runtime_ms={res.runtime_ms:.3f} [{status}]"
+            )
             
             # Automatically skip remaining runs if timeout detected
             if "timeout" in res.error.lower() if res.error else False:
@@ -280,6 +313,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         entry: Dict[str, object] = {
             "path": os.path.abspath(path),
             "best_color": best.colors_used if best else None,
+            "best_color_before_reduction":
+                best.colors_before_reduction if best else None,
+            "best_color_after_reduction":
+                best.colors_after_reduction if best else None,
+            "best_color_reduction_delta":
+                best.color_reduction_delta if best else None,
             "best_runtime_ms": round(best.runtime_ms, 6) if best else None,
             "nodes": best.nodes if best and best.nodes is not None else None,
             "edges": best.edges if best and best.edges is not None else None,
@@ -289,6 +328,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                 {
                     "ok": r.ok,
                     "color": r.colors_used,
+                    "color_before_reduction": r.colors_before_reduction,
+                    "color_after_reduction": r.colors_after_reduction,
+                    "color_reduction_delta": r.color_reduction_delta,
                     "runtime_ms": round(r.runtime_ms, 6),
                     "theta": r.theta,
                     "theta_predicted": r.theta_predicted,
@@ -311,8 +353,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         
         # Prepare rows
         csv_rows = []
-        # Columns: dataset name, algorithm, elastic number, runtime, color count
-        fieldnames = ["dataset name", "algorithm", "elastic number", "runtime", "color count"]
+        fieldnames = [
+            "dataset name",
+            "algorithm",
+            "elastic number",
+            "runtime",
+            "color before reduction",
+            "color after reduction",
+            "color reduction delta",
+            "final color count",
+        ]
         
         sorted_datasets = sorted(summary["datasets"].keys())
         for ds_name in sorted_datasets:
@@ -326,7 +376,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "algorithm": ALGO_MAPPING.get(str(args.algorithm), str(args.algorithm)),
                 "elastic number": args.elastic,
                 "runtime": ds_data.get("best_runtime_ms", ""),
-                "color count": ds_data.get("best_color", "")
+                "color before reduction": ds_data.get("best_color_before_reduction", ""),
+                "color after reduction": ds_data.get("best_color_after_reduction", ""),
+                "color reduction delta": ds_data.get("best_color_reduction_delta", ""),
+                "final color count": ds_data.get("best_color", ""),
             }
             csv_rows.append(row)
             
@@ -344,4 +397,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
