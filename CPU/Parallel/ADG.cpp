@@ -281,91 +281,148 @@
   * priority[v] = (iter << 16) | (deg & 0xffff)
   * eps          – Recommended 0.0 ~ 0.1; 0 means strict "≤ avg", larger is faster but color count may increase by 1~2.
   ********************************************************************/
- void compute_ADG(const ECLgraph& g,
-     int threads,
-     std::vector<int>& priority,
-     double eps = 0.0)
- {
- const int N = g.nodes;
- 
- /* Initial degrees and active set ----------------------------------------- */
- std::vector<int>  deg(N);
- std::vector<char> active(N, 1);
- 
- #pragma omp parallel for num_threads(threads) schedule(static)
- for (int v = 0; v < N; ++v)
- deg[v] = g.nindex[v + 1] - g.nindex[v];
- 
- long long sum = 0;
- int        cnt = 0;
- int        iter = 0;
- 
- /* ---------------- parallel region ---------------------------- */
- #pragma omp parallel num_threads(threads) shared(deg,active,priority,iter,sum,cnt)
- {
- std::vector<int> bucket;          // thread-local neighbor decrements buffer
- bucket.reserve(256);
- 
- while (true) {
- /* (1) Recompute Σdeg and active count |U| */
- #pragma omp single
- { sum = 0; cnt = 0; }
- 
- #pragma omp for reduction(+:sum,cnt) schedule(static)
- for (int v = 0; v < N; ++v)
-    if (active[v]) { sum += deg[v]; ++cnt; }
- 
- double avg;
- #pragma omp single
- { avg = cnt ? double(sum) / cnt : 0.0; }
- 
- if (cnt == 0) break;          // All peeled
- 
- const double threshold = (1.0 + eps) * avg;
- 
- /* (2) Peel + collect neighbors to bucket (no atomic) */
- bucket.clear();
- int local_removed = 0;        // thread-local
- 
- #pragma omp for schedule(dynamic,256) nowait
- for (int v = 0; v < N; ++v) {
-    if (!active[v] || deg[v] > threshold) continue;
- 
-    active[v] = 0;
-    int deg_v = (g.nindex[v + 1] - g.nindex[v])>=BPI;
- 
-    priority[v] = ((deg_v) << 30) |((iter + 1) << 16) | (deg[v] & 0xffff);
-    ++local_removed;
- 
-    for (int idx = g.nindex[v]; idx < g.nindex[v + 1]; ++idx) {
-        int nei = g.nlist[idx];
-        if (active[nei]) bucket.push_back(nei);
+void compute_ADG(const ECLgraph& g,
+    int threads,
+    std::vector<int>& priority,
+    double eps = 0.0)
+{
+const int N = g.nodes;
+std::vector<int> deg(N);
+priority.assign(N, 0);
+
+long long degree_sum = 0;
+int max_deg = 0;
+std::vector<char> active(N, 1);
+
+#pragma omp parallel for num_threads(threads) schedule(static) reduction(+: degree_sum) reduction(max: max_deg)
+for (int v = 0; v < N; ++v) {
+    const int d = g.nindex[v + 1] - g.nindex[v];
+    deg[v] = d;
+    degree_sum += d;
+    max_deg = std::max(max_deg, d);
+}
+
+std::vector<int> bucket_head(max_deg + 1, -1);
+std::vector<int> bucket_size(max_deg + 1, 0);
+std::vector<int> next_node(N, -1);
+std::vector<int> prev_node(N, -1);
+std::vector<unsigned long long> nonempty_words((max_deg >> 6) + 1, 0ULL);
+
+auto set_nonempty = [&](const int d) {
+    nonempty_words[d >> 6] |= 1ULL << (d & 63);
+};
+
+auto clear_nonempty = [&](const int d) {
+    nonempty_words[d >> 6] &= ~(1ULL << (d & 63));
+};
+
+auto bucket_insert = [&](const int v, const int d) {
+    prev_node[v] = -1;
+    next_node[v] = bucket_head[d];
+    if (bucket_head[d] != -1) prev_node[bucket_head[d]] = v;
+    bucket_head[d] = v;
+    if (bucket_size[d]++ == 0) set_nonempty(d);
+};
+
+auto bucket_remove = [&](const int v, const int d) {
+    const int prev = prev_node[v];
+    const int next = next_node[v];
+    if (prev != -1) {
+        next_node[prev] = next;
+    } else {
+        bucket_head[d] = next;
     }
- }
- 
- /* (3) After barrier, batch decrement neighbor degrees in bucket */
- #pragma omp barrier
- #pragma omp for schedule(static,1024)
- for (size_t i = 0; i < bucket.size(); ++i)
-    --deg[bucket[i]];
- 
- /* (4) Next round */
- #pragma omp single
- { ++iter; }
- #pragma omp barrier
- } /* while */
- }     /* end parallel */
- 
- /* (5) Fill priority for remaining active vertices (very few) */
- #pragma omp parallel for num_threads(threads) schedule(static)
- for (int v = 0; v < N; ++v)
- if (priority[v] == 0){
-     int deg_v = (g.nindex[v + 1] - g.nindex[v])>=BPI;
-     priority[v] = ((deg_v) << 30) |((iter + 1) << 16) | (deg[v] & 0xffff); 
- }
- 
- printf("ADG finished: iterations = %d\n", iter);
- }
+    if (next != -1) prev_node[next] = prev;
+    prev_node[v] = -1;
+    next_node[v] = -1;
+    if (--bucket_size[d] == 0) clear_nonempty(d);
+};
+
+for (int v = 0; v < N; ++v) bucket_insert(v, deg[v]);
+
+int iter = 0;
+int active_count = N;
+std::vector<int> round_vertices;
+round_vertices.reserve(256);
+
+auto collect_up_to = [&](const int cutoff, long long& removed_deg_sum) {
+    round_vertices.clear();
+    removed_deg_sum = 0;
+    if (cutoff < 0) return;
+
+    const int last_word = cutoff >> 6;
+    for (int word_idx = 0; word_idx <= last_word; ++word_idx) {
+        unsigned long long word = nonempty_words[word_idx];
+        if (word_idx == last_word) {
+            const int last_bit = cutoff & 63;
+            if (last_bit != 63) word &= (1ULL << (last_bit + 1)) - 1ULL;
+        }
+
+        while (word != 0) {
+            const int bit = __builtin_ctzll(word);
+            const int d = (word_idx << 6) + bit;
+            word &= word - 1;
+
+            int curr = bucket_head[d];
+            bucket_head[d] = -1;
+            bucket_size[d] = 0;
+            clear_nonempty(d);
+
+            while (curr != -1) {
+                const int next = next_node[curr];
+                next_node[curr] = -1;
+                prev_node[curr] = -1;
+                active[curr] = 0;
+                round_vertices.push_back(curr);
+                removed_deg_sum += deg[curr];
+                curr = next;
+            }
+        }
+    }
+};
+
+while (active_count > 0) {
+    const double avg = static_cast<double>(degree_sum) / active_count;
+    const int cutoff = std::min(max_deg, std::max(0, static_cast<int>(std::floor((1.0 + eps) * avg))));
+
+    long long removed_deg_sum = 0;
+    collect_up_to(cutoff, removed_deg_sum);
+
+    if (round_vertices.empty()) {
+        int fallback_deg = 0;
+        while ((fallback_deg <= max_deg) && (bucket_size[fallback_deg] == 0)) ++fallback_deg;
+        if (fallback_deg > max_deg) break;
+        collect_up_to(fallback_deg, removed_deg_sum);
+    }
+
+    const int round_id = iter + 1;
+    for (const int v : round_vertices) {
+        const int deg_v = (g.nindex[v + 1] - g.nindex[v]) >= BPI;
+        priority[v] = (deg_v << 30) | (round_id << 16) | (deg[v] & 0xffff);
+    }
+
+    long long cross_edges = 0;
+    for (const int v : round_vertices) {
+        for (int idx = g.nindex[v]; idx < g.nindex[v + 1]; ++idx) {
+            const int nei = g.nlist[idx];
+            if (!active[nei]) continue;
+
+            const int old_deg = deg[nei];
+            bucket_remove(nei, old_deg);
+            const int new_deg = old_deg - 1;
+            deg[nei] = new_deg;
+            bucket_insert(nei, new_deg);
+            ++cross_edges;
+        }
+    }
+
+    degree_sum -= removed_deg_sum + cross_edges;
+    active_count -= round_vertices.size();
+    ++iter;
+}
+
+printf("ADG finished: iterations = %d\n", iter);
+}
  
  int main(int argc, char** argv)
  {

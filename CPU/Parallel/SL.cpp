@@ -222,86 +222,101 @@
    float stop() {gettimeofday(&end, NULL); return end.tv_sec - beg.tv_sec + (end.tv_usec - beg.tv_usec) * 0.000001f;}
  };
  
- void compute_SL(const ECLgraph& g, int threads, std::vector<int>& priority)
- {
-     const int N = g.nodes;
-     std::vector<int> deg(N);
-     std::vector<char> active(N, 1);
-     priority.assign(N, 0);
- 
-     #pragma omp parallel for num_threads(threads) schedule(static)
-     for (int v = 0; v < N; ++v)
-         deg[v] = g.nindex[v + 1] - g.nindex[v];
- 
-     int  iter = 0;
-     bool done = false;
-     int  minDeg;
-     int  removed_round;
- 
-     #pragma omp parallel num_threads(threads) \
-             shared(active,deg,priority,iter,done,minDeg,removed_round)
-     {
-         std::vector<int> bucket; bucket.reserve(256);
- 
-         while (!done) {
-             #pragma omp single
-             { minDeg = INT_MAX; removed_round = 0; }
- 
-             #pragma omp barrier
- 
-             #pragma omp for reduction(min:minDeg) schedule(static)
-             for (int v = 0; v < N; ++v)
-                 if (active[v]) minDeg = std::min(minDeg, deg[v]);
- 
-             if (minDeg == INT_MAX) {
-                 #pragma omp single
-                 done = true;
-                 break;
-             }
- 
-             bucket.clear();
-             int removed_local = 0;
- 
-             #pragma omp for schedule(dynamic,256) nowait
-             for (int v = 0; v < N; ++v) {
-                 if (!active[v] || deg[v] != minDeg) continue;
- 
-                 active[v] = 0;
-                 int flag  = (g.nindex[v + 1] - g.nindex[v]) >= BPI;
-                 priority[v] = (flag << 30) | ((iter + 1) << 16) | (deg[v] & 0xffff);
-                 ++removed_local;
- 
-                 for (int idx = g.nindex[v]; idx < g.nindex[v + 1]; ++idx) {
-                     int nei = g.nlist[idx];
-                     if (active[nei]) bucket.push_back(nei);
-                 }
-             }
- 
-             /* Thread decrements degree */
-             for (int nei : bucket) {
-                 #pragma omp atomic
-                 --deg[nei];
-             }
- 
-             /* Accumulate removed count to shared variable */
-             #pragma omp atomic update
-             removed_round += removed_local;
- 
-             #pragma omp barrier
-             #pragma omp single
-             { if (removed_round == 0) done = true; ++iter; }
-             #pragma omp barrier
-         }
-     }
- 
-     /* Process very few remaining vertices */
-     #pragma omp parallel for num_threads(threads) schedule(static)
-     for (int v = 0; v < N; ++v)
-         if (active[v])
-             priority[v] = ((iter + 1) << 16) | (deg[v] & 0xffff);
- 
-     printf("SDL finished: iterations = %d\n", iter);
- }
+void compute_SL(const ECLgraph& g, int threads, std::vector<int>& priority)
+{
+    const int N = g.nodes;
+    std::vector<int> deg(N);
+    priority.assign(N, 0);
+
+    int max_deg = 0;
+    #pragma omp parallel for num_threads(threads) schedule(static) reduction(max: max_deg)
+    for (int v = 0; v < N; ++v) {
+        const int d = g.nindex[v + 1] - g.nindex[v];
+        deg[v] = d;
+        max_deg = std::max(max_deg, d);
+    }
+
+    std::vector<char> active(N, 1);
+    std::vector<int> bucket_head(max_deg + 1, -1);
+    std::vector<int> next_node(N, -1);
+    std::vector<int> prev_node(N, -1);
+
+    auto bucket_insert = [&](const int v, const int d) {
+        prev_node[v] = -1;
+        next_node[v] = bucket_head[d];
+        if (bucket_head[d] != -1) prev_node[bucket_head[d]] = v;
+        bucket_head[d] = v;
+    };
+
+    auto bucket_remove = [&](const int v, const int d) {
+        const int prev = prev_node[v];
+        const int next = next_node[v];
+        if (prev != -1) {
+            next_node[prev] = next;
+        } else {
+            bucket_head[d] = next;
+        }
+        if (next != -1) prev_node[next] = prev;
+        prev_node[v] = -1;
+        next_node[v] = -1;
+    };
+
+    for (int v = 0; v < N; ++v) bucket_insert(v, deg[v]);
+
+    int iter = 0;
+    int remaining = N;
+    int min_deg = 0;
+    std::vector<int> round_vertices;
+    round_vertices.reserve(256);
+
+    while (remaining > 0) {
+        while ((min_deg <= max_deg) && (bucket_head[min_deg] == -1)) ++min_deg;
+        if (min_deg > max_deg) break;
+
+        round_vertices.clear();
+
+        int curr = bucket_head[min_deg];
+        bucket_head[min_deg] = -1;
+        while (curr != -1) {
+            const int next = next_node[curr];
+            next_node[curr] = -1;
+            prev_node[curr] = -1;
+            if (active[curr]) {
+                active[curr] = 0;
+                round_vertices.push_back(curr);
+            }
+            curr = next;
+        }
+
+        if (round_vertices.empty()) continue;
+
+        ++iter;
+        remaining -= round_vertices.size();
+
+        for (const int v : round_vertices) {
+            const int flag = (g.nindex[v + 1] - g.nindex[v]) >= BPI;
+            priority[v] = (flag << 30) | ((iter + 1) << 16) | (deg[v] & 0xffff);
+        }
+
+        int next_min_deg = min_deg;
+        for (const int v : round_vertices) {
+            for (int idx = g.nindex[v]; idx < g.nindex[v + 1]; ++idx) {
+                const int nei = g.nlist[idx];
+                if (!active[nei]) continue;
+
+                const int old_deg = deg[nei];
+                bucket_remove(nei, old_deg);
+                const int new_deg = old_deg - 1;
+                deg[nei] = new_deg;
+                bucket_insert(nei, new_deg);
+                next_min_deg = std::min(next_min_deg, new_deg);
+            }
+        }
+        min_deg = next_min_deg;
+    }
+
+    printf("SDL finished: iterations = %d\n", iter);
+}
  
  
  int main(int argc, char** argv)
