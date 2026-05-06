@@ -13,3 +13,12 @@ __device__ int  worker      = 0;
 __device__ int  theta       = 1;
 __device__ int  iteration   = 0;
 __device__ int  iter_count  = 0;
+
+// ── BB-cuSL device globals ────────────────────────────────────────────────
+__device__ int   bb_window           = 0;
+__device__ int   bb_bucket_capacity  = 0;
+__device__ int*  bb_bucket_data      = nullptr;
+__device__ int*  bb_bucket_count     = nullptr;
+__device__ int   bb_init_done        = 0;
+__device__ int   bb_overflow_needed  = 0;
+__device__ int   bb_peel_iter        = 0;

@@ -16,6 +16,15 @@ extern __device__ int  theta;
 extern __device__ int  iteration;
 extern __device__ int  iter_count;
 
+// ── BB-cuSL device globals (declared here, defined in globals.cu) ─────────
+extern __device__ int   bb_window;            // = FuzzyNumber + 1, host-set
+extern __device__ int   bb_bucket_capacity;   // = N, host-set
+extern __device__ int*  bb_bucket_data;       // size = N * bb_window
+extern __device__ int*  bb_bucket_count;      // size = bb_window
+extern __device__ int   bb_init_done;         // 0 = need Phase 0; 1 = done
+extern __device__ int   bb_overflow_needed;   // 0/1 latch from Phase 3 → 4
+extern __device__ int   bb_peel_iter;         // 0-indexed outer iter counter
+
 // ── host-side constants can stay here (since they are not __device__ variables) ──
 static const int Device          = 0;
 static const int ThreadsPerBlock = 512;
@@ -89,6 +98,13 @@ __global__ void P_SL_ELS_SDC_FUSED_BATCH(
     int* __restrict__ posscol2,
     int* __restrict__ color,
     int* __restrict__ wl,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_BB(
+    const int  nodes,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
     unsigned int* __restrict__ degree_list,
     unsigned int* __restrict__ iteration_list);
 
