@@ -44,6 +44,7 @@ void print_help(const char* program_name) {
     std::cout << "                            3 or cuSL_ELS_SDC_FUSED : SDC PA+Init post-loop fused\n";
     std::cout << "                            4 or cuSL_ELS_SDC_FUSED_BATCH : SDC PA+Init per-batch fused\n";
     std::cout << "                            5 or cuSL_ELS_BB    : sliding-window bucket-based PA\n";
+    std::cout << "                            6 or cuSL_ELS_BB_SPLIT : per-phase split-kernel diagnostic variant (NCU profiling)\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -79,6 +80,9 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
     } else if (algo_str == "5" || algo_str == "cuSL_ELS_BB") {
         algo_name = "cuSL_ELS_BB";
         return (void*)P_SL_ELS_BB;
+    } else if (algo_str == "6" || algo_str == "cuSL_ELS_BB_SPLIT") {
+        algo_name = "cuSL_ELS_BB_SPLIT";
+        return (void*)P_SL_ELS_BB;  // placeholder pointer; not actually launched via cooperative kernel
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
@@ -381,24 +385,35 @@ int main(int argc, char* argv[])
     timer_PA.start();
     init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d.nidx_d, d.nlist_d,d.degree_list);
     cudaDeviceSynchronize();
-    int blkPerSM;
-    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
-      kernel_to_launch, ThreadsPerBlock, 0);
-    int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
-    if (is_fused) {
-      int edges_val = g.edges;
-      void* args[] = { &g.nodes, &edges_val, &d.nidx_d, &d.nlist_d,
-        &d.nlist2_d, &d.posscol_d, &d.posscol2_d, &d.color_d, &d.wl_d,
-        &d.degree_list, &d.iteration_list_d };
-      cudaLaunchCooperativeKernel(
-              (void*)kernel_to_launch,
-              dim3(gridDim), dim3(ThreadsPerBlock), args);
+
+    if (algo_name == "cuSL_ELS_BB_SPLIT") {
+        // Split-kernel diagnostic variant: each phase is a separate kernel launch
+        // so NCU can measure per-phase metrics independently.
+        int blkPerSM_split;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_split,
+            bb_split_phase1_peel, ThreadsPerBlock, 0);
+        int gridDim_split = blkPerSM_split * SMs;
+        run_bb_split(gridDim_split, g, d);
     } else {
-      void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
-        &d.degree_list, &d.iteration_list_d };
-      cudaLaunchCooperativeKernel(
-              (void*)kernel_to_launch,
-              dim3(gridDim), dim3(ThreadsPerBlock), args);
+        int blkPerSM;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
+          kernel_to_launch, ThreadsPerBlock, 0);
+        int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
+        if (is_fused) {
+          int edges_val = g.edges;
+          void* args[] = { &g.nodes, &edges_val, &d.nidx_d, &d.nlist_d,
+            &d.nlist2_d, &d.posscol_d, &d.posscol2_d, &d.color_d, &d.wl_d,
+            &d.degree_list, &d.iteration_list_d };
+          cudaLaunchCooperativeKernel(
+                  (void*)kernel_to_launch,
+                  dim3(gridDim), dim3(ThreadsPerBlock), args);
+        } else {
+          void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
+            &d.degree_list, &d.iteration_list_d };
+          cudaLaunchCooperativeKernel(
+                  (void*)kernel_to_launch,
+                  dim3(gridDim), dim3(ThreadsPerBlock), args);
+        }
     }
     cudaDeviceSynchronize();
     float runtime_PA = timer_PA.stop();

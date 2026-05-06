@@ -36,3 +36,6 @@ ColorReductionStats run_post_color_reduction(int blocks,
 void verifyAndPrintStats(const ECLgraph& g,
                          const int* color,
                          float runtime);
+
+/* BB-cuSL split-phase host driver (diagnostic; use for NCU per-phase profiling) */
+void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d);

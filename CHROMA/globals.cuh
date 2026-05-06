@@ -108,6 +108,48 @@ __global__ void P_SL_ELS_BB(
     unsigned int* __restrict__ degree_list,
     unsigned int* __restrict__ iteration_list);
 
+// ── BB-cuSL split-phase kernel prototypes (BB_split.cu) ───────────────────
+__global__ void bb_split_phase0a_find_theta(
+    int N,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void bb_split_phase0b_set_theta();
+
+__global__ void bb_split_phase0c_fill_buckets(
+    int N,
+    const unsigned int* __restrict__ degree_list);
+
+__global__ void bb_split_phase1_peel(
+    int N,
+    const int* __restrict__ nidx,
+    const unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list,
+    int peel_iter);
+
+__global__ void bb_split_phase1_reset();
+
+__global__ void bb_split_phase2_decrement(
+    int N,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
+
+__global__ void bb_split_phase3_advance();
+
+__global__ void bb_split_phase4a_scan(
+    int N,
+    const unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
+
+__global__ void bb_split_phase4b_set_theta();
+
+__global__ void bb_split_phase4c_refill(
+    int N,
+    const unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
+
 // ── hash function (shared by PA fused + ECLGC init) ──────
 static __device__ __forceinline__ unsigned int hash(unsigned int val)
 {

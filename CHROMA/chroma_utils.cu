@@ -151,6 +151,68 @@ void ECL_GC_coloring_only(int blocks, const ECLgraph& g, DevPtr& d)
     }
 }
 
+/* --------------- run_bb_split ------------------- */
+void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d)
+{
+    int N = g.nodes;
+
+    // ── Phase 0: Init theta + initial bucket fill (once) ──────────────────
+    bb_split_phase0a_find_theta<<<blocks, ThreadsPerBlock>>>(N, d.degree_list, d.iteration_list_d);
+    cudaDeviceSynchronize();
+
+    bb_split_phase0b_set_theta<<<1, 1>>>();
+    cudaDeviceSynchronize();
+
+    bb_split_phase0c_fill_buckets<<<blocks, ThreadsPerBlock>>>(N, d.degree_list);
+    cudaDeviceSynchronize();
+
+    // ── Main loop: Phases 1–4 ─────────────────────────────────────────────
+    int worker_h = 0;
+    int peel_iter = 0;
+
+    while (worker_h != N) {
+        // Phase 1: peel
+        bb_split_phase1_peel<<<blocks, ThreadsPerBlock>>>(
+            N, d.nidx_d, d.degree_list, d.iteration_list_d, peel_iter);
+        cudaDeviceSynchronize();
+
+        // Phase 1 reset: zero bucket counts for current window
+        bb_split_phase1_reset<<<1, 32>>>();
+        cudaDeviceSynchronize();
+
+        // Phase 2: decrement neighbours + push
+        bb_split_phase2_decrement<<<blocks, ThreadsPerBlock>>>(
+            N, d.nidx_d, d.nlist_d, d.degree_list, d.iteration_list_d);
+        cudaDeviceSynchronize();
+
+        // Phase 3: advance theta, update worker/remove_size, set overflow latch
+        bb_split_phase3_advance<<<1, 32>>>();
+        cudaDeviceSynchronize();
+
+        // Check overflow latch on host
+        int overflow_h = 0;
+        cudaMemcpyFromSymbol(&overflow_h, bb_overflow_needed, sizeof(int));
+        if (overflow_h) {
+            // Phase 4a: scan unpeeled, find new min degree
+            bb_split_phase4a_scan<<<blocks, ThreadsPerBlock>>>(
+                N, d.degree_list, d.iteration_list_d);
+            cudaDeviceSynchronize();
+
+            // Phase 4b: set theta = g_minDegree, reset counts
+            bb_split_phase4b_set_theta<<<1, 32>>>();
+            cudaDeviceSynchronize();
+
+            // Phase 4c: refill buckets from unpeeled
+            bb_split_phase4c_refill<<<blocks, ThreadsPerBlock>>>(
+                N, d.degree_list, d.iteration_list_d);
+            cudaDeviceSynchronize();
+        }
+
+        cudaMemcpyFromSymbol(&worker_h, worker, sizeof(int));
+        peel_iter++;
+    }
+}
+
 /* --------------- verify & stats ----------------- */
 void verifyAndPrintStats(const ECLgraph& g,
                          const int* color,
