@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 /* ----------------- allocAndInit ----------------- */
-void allocAndInit(const ECLgraph& g, DevPtr& d)
+void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number)
 {
     cudaMalloc(&d.nidx_d,      (g.nodes + 1) * sizeof(int));
     cudaMalloc(&d.nlist_d,      g.edges        * sizeof(int));
@@ -32,6 +32,28 @@ void allocAndInit(const ECLgraph& g, DevPtr& d)
 
     // Initialize nlist2 to -1
     cudaMemset(d.nlist2_d, -1, g.edges * sizeof(int));
+
+    // ── BB-cuSL setup (memory + device-global init) ──────────────────────
+    int bw_host = fuzzy_number + 1;
+    if (bw_host < 1)  bw_host = 1;
+    if (bw_host > 31) bw_host = 31;            // §10 R6 clamp
+    cudaMemcpyToSymbol(bb_window, &bw_host, sizeof(int));
+
+    int cap = g.nodes;
+    cudaMemcpyToSymbol(bb_bucket_capacity, &cap, sizeof(int));
+
+    int* bb_data_ptr = nullptr;
+    int* bb_count_ptr = nullptr;
+    cudaMalloc(&bb_data_ptr,  sizeof(int) * (size_t)g.nodes * (size_t)bw_host);
+    cudaMalloc(&bb_count_ptr, sizeof(int) * (size_t)bw_host);
+    cudaMemset(bb_count_ptr, 0, sizeof(int) * (size_t)bw_host);
+    cudaMemcpyToSymbol(bb_bucket_data,  &bb_data_ptr,  sizeof(int*));
+    cudaMemcpyToSymbol(bb_bucket_count, &bb_count_ptr, sizeof(int*));
+
+    int zero = 0;
+    cudaMemcpyToSymbol(bb_init_done,       &zero, sizeof(int));
+    cudaMemcpyToSymbol(bb_overflow_needed, &zero, sizeof(int));
+    cudaMemcpyToSymbol(bb_peel_iter,       &zero, sizeof(int));
 }
 
 

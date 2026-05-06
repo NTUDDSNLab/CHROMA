@@ -18,7 +18,7 @@ struct ColorReductionStats {
 };
 
 /* Space allocation + Pre-initialization */
-void allocAndInit(const ECLgraph& g, DevPtr& d);
+void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number);
 
 /* Three-step kernel wrapper (need to complete iteration_list with sl_allocate first) */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d);
