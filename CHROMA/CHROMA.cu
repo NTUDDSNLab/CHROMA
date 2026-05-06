@@ -43,6 +43,7 @@ void print_help(const char* program_name) {
     std::cout << "                            2 or cuSL_ELS_FUSED : PA+Init post-loop fused\n";
     std::cout << "                            3 or cuSL_ELS_SDC_FUSED : SDC PA+Init post-loop fused\n";
     std::cout << "                            4 or cuSL_ELS_SDC_FUSED_BATCH : SDC PA+Init per-batch fused\n";
+    std::cout << "                            5 or cuSL_ELS_BB    : sliding-window bucket-based PA\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -75,6 +76,9 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
         algo_name = "cuSL_ELS_SDC_FUSED_BATCH";
         is_fused = true;
         return (void*)P_SL_ELS_SDC_FUSED_BATCH;
+    } else if (algo_str == "5" || algo_str == "cuSL_ELS_BB") {
+        algo_name = "cuSL_ELS_BB";
+        return (void*)P_SL_ELS_BB;
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
