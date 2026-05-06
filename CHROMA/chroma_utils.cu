@@ -222,6 +222,31 @@ void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d)
     }
 }
 
+/* --------------- run_sdc_split ------------------- */
+void run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d)
+{
+    int N = g.nodes;
+    int worker_h = 0;
+
+    while (worker_h != N) {
+        // Phase 1: scan all N vertices, peel those with degree <= theta+FuzzyNumber
+        P_SL_ELS_SDC_split_scan<<<blocks, ThreadsPerBlock>>>(
+            N, d.nidx_d, d.degree_list, d.iteration_list_d);
+        cudaDeviceSynchronize();
+
+        // Phase 2: decrement neighbours of peeled vertices, track new min degree
+        P_SL_ELS_SDC_split_decrement<<<blocks, ThreadsPerBlock>>>(
+            d.nidx_d, d.nlist_d, d.degree_list, d.iteration_list_d);
+        cudaDeviceSynchronize();
+
+        // Phase 3: advance worker, reset remove_size, update theta
+        P_SL_ELS_SDC_split_advance<<<1, 32>>>();
+        cudaDeviceSynchronize();
+
+        cudaMemcpyFromSymbol(&worker_h, worker, sizeof(int));
+    }
+}
+
 /* --------------- verify & stats ----------------- */
 void verifyAndPrintStats(const ECLgraph& g,
                          const int* color,

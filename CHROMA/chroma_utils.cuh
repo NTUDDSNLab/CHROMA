@@ -39,3 +39,6 @@ void verifyAndPrintStats(const ECLgraph& g,
 
 /* BB-cuSL split-phase host driver (diagnostic; use for NCU per-phase profiling) */
 void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d);
+
+/* SDC-cuSL split-phase host driver (diagnostic; use for NCU per-phase profiling) */
+void run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d);

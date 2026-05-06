@@ -45,6 +45,7 @@ void print_help(const char* program_name) {
     std::cout << "                            4 or cuSL_ELS_SDC_FUSED_BATCH : SDC PA+Init per-batch fused\n";
     std::cout << "                            5 or cuSL_ELS_BB    : sliding-window bucket-based PA\n";
     std::cout << "                            6 or cuSL_ELS_BB_SPLIT : per-phase split-kernel diagnostic variant (NCU profiling)\n";
+    std::cout << "                            7 or cuSL_ELS_SDC_SPLIT : SDC per-phase split-kernel diagnostic variant (NCU profiling)\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -83,6 +84,9 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
     } else if (algo_str == "6" || algo_str == "cuSL_ELS_BB_SPLIT") {
         algo_name = "cuSL_ELS_BB_SPLIT";
         return (void*)P_SL_ELS_BB;  // placeholder pointer; not actually launched via cooperative kernel
+    } else if (algo_str == "7" || algo_str == "cuSL_ELS_SDC_SPLIT") {
+        algo_name = "cuSL_ELS_SDC_SPLIT";
+        return (void*)P_SL_ELS_SDC;  // placeholder; main flow detects by name
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
@@ -394,6 +398,14 @@ int main(int argc, char* argv[])
             bb_split_phase1_peel, ThreadsPerBlock, 0);
         int gridDim_split = blkPerSM_split * SMs;
         run_bb_split(gridDim_split, g, d);
+    } else if (algo_name == "cuSL_ELS_SDC_SPLIT") {
+        // SDC split-kernel diagnostic variant: scan/decrement/advance are separate
+        // kernel launches so nsys/ncu can measure per-phase time independently.
+        int blkPerSM_sdc_split;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_sdc_split,
+            P_SL_ELS_SDC_split_scan, ThreadsPerBlock, 0);
+        int gridDim_sdc_split = blkPerSM_sdc_split * SMs;
+        run_sdc_split(gridDim_sdc_split, g, d);
     } else {
         int blkPerSM;
         cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,

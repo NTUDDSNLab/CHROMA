@@ -26,7 +26,7 @@ TARGET    := CHROMA
 
 
 # ---- Source File List --------------------------------------
-SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu BB.cu BB_split.cu CHROMA.cu
+SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu BB.cu BB_split.cu CHROMA.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
 
 ifeq ($(PRE_MODEL), 1)

@@ -152,6 +152,21 @@ __global__ void bb_split_phase4c_refill(
 
 __global__ void bb_split_phase4_reset_buckets();
 
+// ── SDC-cuSL split-phase kernel prototypes (PA_split.cu) ──────────────────
+__global__ void P_SL_ELS_SDC_split_scan(
+    const int N,
+    const int* __restrict__ nidx,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_split_decrement(
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_split_advance();
+
 // ── hash function (shared by PA fused + ECLGC init) ──────
 static __device__ __forceinline__ unsigned int hash(unsigned int val)
 {
