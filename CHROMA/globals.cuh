@@ -22,7 +22,7 @@ extern __device__ int   bb_bucket_capacity;   // = N, host-set
 extern __device__ int*  bb_bucket_data;       // size = N * bb_window
 extern __device__ int*  bb_bucket_count;      // size = bb_window
 extern __device__ int   bb_init_done;         // 0 = need Phase 0; 1 = done
-extern __device__ int   bb_overflow_needed;   // 0/1 latch from Phase 3 → 4
+extern __device__ int   bb_overflow_needed;   // 0=none, 1=full Phase4, 2=refill-only Phase4
 extern __device__ int   bb_peel_iter;         // 0-indexed outer iter counter
 
 // ── host-side constants can stay here (since they are not __device__ variables) ──
@@ -149,6 +149,8 @@ __global__ void bb_split_phase4c_refill(
     int N,
     const unsigned int* __restrict__ degree_list,
     const unsigned int* __restrict__ iteration_list);
+
+__global__ void bb_split_phase4_reset_buckets();
 
 // ── hash function (shared by PA fused + ECLGC init) ──────
 static __device__ __forceinline__ unsigned int hash(unsigned int val)

@@ -192,14 +192,23 @@ void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d)
         // Check overflow latch on host
         int overflow_h = 0;
         cudaMemcpyFromSymbol(&overflow_h, bb_overflow_needed, sizeof(int));
-        if (overflow_h) {
-            // Phase 4a: scan unpeeled, find new min degree
+        if (overflow_h == 1) {
+            // Full Phase 4: scan unpeeled, find new min degree
             bb_split_phase4a_scan<<<blocks, ThreadsPerBlock>>>(
                 N, d.degree_list, d.iteration_list_d);
             cudaDeviceSynchronize();
 
             // Phase 4b: set theta = g_minDegree, reset counts
             bb_split_phase4b_set_theta<<<1, 32>>>();
+            cudaDeviceSynchronize();
+
+            // Phase 4c: refill buckets from unpeeled
+            bb_split_phase4c_refill<<<blocks, ThreadsPerBlock>>>(
+                N, d.degree_list, d.iteration_list_d);
+            cudaDeviceSynchronize();
+        } else if (overflow_h == 2) {
+            // Refill-only Phase 4 (Plan A): theta already set in Phase 3, skip O(N) scan
+            bb_split_phase4_reset_buckets<<<1, 32>>>();
             cudaDeviceSynchronize();
 
             // Phase 4c: refill buckets from unpeeled

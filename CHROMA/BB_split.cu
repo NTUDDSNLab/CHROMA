@@ -181,12 +181,15 @@ __global__ void bb_split_phase2_decrement(
         int beg = nidx[v];
         int end = nidx[v + 1];
 
+        unsigned int warpMin = UINT_MAX;
+
         for (int i = beg + lane; i < end; i += WS) {
             int u = nlist[i];
             unsigned int it_u = __ldg(&iteration_list[u]);
             if (it_u & 0x40000000u) continue;       // u already peeled
 
             unsigned int new_d = atomicSub(&degree_list[u], 1) - 1;
+            warpMin = min(warpMin, new_d);          // Plan A: track post-decrement min
 
             if (new_d >= (unsigned int)curr_theta &&
                 new_d < (unsigned int)(curr_theta + window)) {
@@ -200,6 +203,12 @@ __global__ void bb_split_phase2_decrement(
                         printf("BB_split: bucket overflow in Phase 2 (slot %d)\n", physical);
                 }
             }
+        }
+
+        // Plan A: warp-reduce + atomicMin to g_minDegree (mirrors P_SL_ELS_SDC)
+        warpMin = warpReduceMin(warpMin);
+        if (lane == 0 && warpMin < UINT_MAX) {
+            atomicMin(&g_minDegree, (int)warpMin);
         }
     }
 }
@@ -226,9 +235,19 @@ __global__ void bb_split_phase3_advance()
         new_theta++;
     }
 
+    int captured_min = g_minDegree;
+    atomicExch(&g_minDegree, INT_MAX);
+
     if (new_theta >= curr_theta + window) {
-        bb_overflow_needed = 1;
+        // Window empty — unbounded jump via captured_min (Plan A)
+        if (captured_min < INT_MAX) {
+            theta              = captured_min;
+            bb_overflow_needed = 2;             // refill-only Phase 4
+        } else {
+            bb_overflow_needed = 1;             // full Phase 4 fallback
+        }
     } else {
+        // Window has entries — normal advance (window scan is authoritative)
         for (int dd = curr_theta; dd < new_theta; dd++) {
             bb_bucket_count[dd % window] = 0;
         }
@@ -239,6 +258,19 @@ __global__ void bb_split_phase3_advance()
 #ifdef PROFILE
     iter_count += 1;
 #endif
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Phase 4 reset-buckets: mode==2 helper — zero all bucket_count slots.
+// Theta was already set by Phase 3 (Plan A captured_min path); skip O(N) scan.
+// Single-block kernel (same pattern as phase4b, minus theta assignment).
+// ────────────────────────────────────────────────────────────────────────────
+__global__ void bb_split_phase4_reset_buckets()
+{
+    if (threadIdx.x == 0 && blockIdx.x == 0) {
+        int win = bb_window;
+        for (int s = 0; s < win; s++) bb_bucket_count[s] = 0;
+    }
 }
 
 // ────────────────────────────────────────────────────────────────────────────

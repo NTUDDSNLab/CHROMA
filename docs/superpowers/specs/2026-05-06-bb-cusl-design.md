@@ -127,6 +127,35 @@ already an `O(window)` scan over `bucket_count[]` — this is the **ground
 truth minimum within the window**, not a sample. SDC is therefore subsumed
 for free; no separate `cuSL_ELS_BB_SDC` variant is needed.
 
+### 3.6 Plan A: unbounded θ jumps via warpReduceMin (2026-05-06)
+
+Profiling revealed that BB-cuSL performed **160 outer iterations** on
+`youtube.egr -e 10` while `cuSL_ELS_SDC` performed only **66**. Per-iteration
+cost was similar (BB ~144 μs vs SDC ~180 μs), so the 2.4× iter-count gap
+explained the full 1.94× total slowdown.
+
+Root cause: Phase 3's window-scan finds the minimum only within
+`[curr_theta, curr_theta + window)`. When the window is empty, the old code
+set `bb_overflow_needed = 1` (triggering the O(N) fallback scan). Phase 2's
+constant refills kept the lowest in-window slot non-empty most of the time,
+so Phase 3 advanced θ by 1–2 slots per iteration rather than jumping ahead.
+SDC, by contrast, tracks the true post-decrement global minimum via
+`warpReduceMin` + `atomicMin(&g_minDegree, ...)`, allowing θ to jump by
+hundreds of slots at once.
+
+**Fix:** BB now mirrors SDC's mechanism. Phase 2 computes a per-warp minimum
+of `new_d` using `warpReduceMin` and publishes it to `g_minDegree` via
+`atomicMin`. Phase 3 reads this `captured_min` after the window scan. When
+the window is empty and `captured_min < INT_MAX`, Phase 3 jumps θ directly
+to `captured_min` and signals `bb_overflow_needed = 2` (refill-only). Phase 4
+gains a refill-only mode (mode 2) that skips the O(N) scan since θ is already
+correct, directly zeroing the bucket counts and refilling from unpeeled
+vertices. Mode 1 (full fallback) is retained for the edge case where no
+decrements fired during Phase 2 (`captured_min == INT_MAX`).
+
+Both the cooperative kernel (`BB.cu`) and the split-kernel diagnostic variant
+(`BB_split.cu`) are updated to maintain semantic equivalence.
+
 ---
 
 ## 4. Architecture
@@ -361,12 +390,15 @@ for (int k = warpId; k < rs; k += numWarp) {
   int beg = nidx[v];          // each lane reads itself — coalesced,
   int end = nidx[v + 1];      // no shfl_sync broadcast needed
 
+  unsigned int warpMin = UINT_MAX;
+
   for (int i = beg + lane; i < end; i += WS) {
     int u = nlist[i];
     unsigned int it_u = __ldg(&iteration_list[u]);
     if (it_u & 0x40000000u) continue;        // u already peeled
 
     unsigned int new_d = atomicSub(&degree_list[u], 1) - 1;
+    warpMin = min(warpMin, new_d);           // Plan A: track post-decrement min
 
     if (new_d >= (unsigned int)curr_theta && new_d < (unsigned int)(curr_theta + window)) {
       int physical = new_d % window;
@@ -378,6 +410,10 @@ for (int k = warpId; k < rs; k += numWarp) {
       }
     }
   }
+
+  // Plan A: warp-reduce + publish to g_minDegree (mirrors P_SL_ELS_SDC)
+  warpMin = warpReduceMin(warpMin);
+  if (lane == 0 && warpMin < UINT_MAX) atomicMin(&g_minDegree, (int)warpMin);
 }
 grid.sync();
 ```
@@ -410,9 +446,19 @@ if (grid.thread_rank() == 0) {
     new_theta++;
   }
 
+  int captured_min = g_minDegree;
+  atomicExch(&g_minDegree, INT_MAX);        // reset for next iter
+
   if (new_theta >= curr_theta + window) {
-    bb_overflow_needed = 1;            // window emptied → overflow path
+    // Window empty — unbounded jump via captured_min (Plan A)
+    if (captured_min < INT_MAX) {
+      theta              = captured_min;
+      bb_overflow_needed = 2;              // refill-only Phase 4
+    } else {
+      bb_overflow_needed = 1;             // full Phase 4 fallback
+    }
   } else {
+    // Window has entries — normal advance (window scan is authoritative)
     for (int d = curr_theta; d < new_theta; d++) {
       bb_bucket_count[d % window] = 0;
     }
@@ -429,26 +475,51 @@ Because Phase 1 resets `bb_bucket_count` to 0 at the end of each iteration
 fresh pushes. `bb_bucket_count[s] > 0` therefore means there are genuine
 live entries in slot `s` — not stale leftovers. Phase 3's scan is exact.
 
-### 6.5 Phase 4 — Overflow scan (fallback)
+`captured_min` is the warp-reduced post-decrement minimum accumulated by
+Phase 2's `warpReduceMin + atomicMin` calls. When the window scan finds
+entries (`new_theta < curr_theta + window`), `captured_min` is irrelevant —
+the window-scan answer is authoritative (it is the exact in-window minimum).
+When the window is empty, `captured_min` gives the true global minimum of
+remaining degree values, allowing Phase 3 to skip directly to it without an
+O(N) scan.
+
+### 6.5 Phase 4 — Overflow / refill (fallback)
+
+`bb_overflow_needed` is now a tri-state latch:
+- `0` = no Phase 4 needed
+- `1` = full Phase 4: O(N) scan + set theta + refill
+- `2` = refill-only: theta already set by Phase 3's Plan A jump; skip O(N) scan
 
 ```c
-if (bb_overflow_needed) {
-  unsigned int local_min = UINT_MAX;
-  for (v = tid; v < N; v += threads) {
-    if (!(iteration_list[v] & 0x40000000u)) {
-      local_min = min(local_min, degree_list[v]);
+if (bb_overflow_needed != 0) {
+  int mode = bb_overflow_needed;
+
+  if (mode == 1) {
+    // Full fallback: scan unpeeled to find min degree, then set theta
+    unsigned int local_min = UINT_MAX;
+    for (v = tid; v < N; v += threads) {
+      if (!(iteration_list[v] & 0x40000000u)) {
+        local_min = min(local_min, degree_list[v]);
+      }
     }
-  }
-  // warp/block reduce → atomicMin(&g_minDegree, local_min)
-  grid.sync();
+    // warp/block reduce → atomicMin(&g_minDegree, local_min)
+    grid.sync();
 
-  if (grid.thread_rank() == 0) {
-    for (int s = 0; s < window; s++) bb_bucket_count[s] = 0;
-    theta = g_minDegree;
-    atomicExch(&g_minDegree, 0x7FFFFFFF);
+    if (grid.thread_rank() == 0) {
+      for (int s = 0; s < window; s++) bb_bucket_count[s] = 0;
+      theta = g_minDegree;
+      atomicExch(&g_minDegree, INT_MAX);
+    }
+    grid.sync();
+  } else {
+    // mode == 2: refill-only (Plan A) — theta already correct, just reset buckets
+    if (grid.thread_rank() == 0) {
+      for (int s = 0; s < window; s++) bb_bucket_count[s] = 0;
+    }
+    grid.sync();
   }
-  grid.sync();
 
+  // Common: refill buckets for [new_theta, new_theta + window)
   int new_theta = theta;
   for (v = tid; v < N; v += threads) {
     if (iteration_list[v] & 0x40000000u) continue;
@@ -460,12 +531,18 @@ if (bb_overflow_needed) {
     }
   }
   grid.sync();
+
+  if (grid.thread_rank() == 0) bb_overflow_needed = 0;
+  grid.sync();
 }
 ```
 
-This is structurally a re-execution of Phase 0 over the unpeeled subset.
-Triggered when the window genuinely emptied — typical on graphs with disjoint
-high-degree subgraphs (not expected on social or synthetic large graphs).
+Mode 1 is structurally a re-execution of Phase 0 over the unpeeled subset.
+Triggered when `captured_min == INT_MAX` (no decrements in Phase 2) — rare.
+
+Mode 2 (Plan A fast path) fires when the window empties and Phase 2 did
+observe at least one decrement. This eliminates the O(N) scan on every
+window-empty iteration; only the O(N) refill remains (unavoidable).
 
 The outer `do { … } while (worker != N)` loop wraps Phases 1–4.
 
