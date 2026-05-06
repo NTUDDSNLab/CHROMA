@@ -91,6 +91,44 @@ void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d)
     }
 }
 
+/* ----------- ECL_GC_coloring_only --------------- */
+void ECL_GC_coloring_only(int blocks, const ECLgraph& g, DevPtr& d)
+{
+    cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
+    cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
+
+    cudaSetDevice(Device);
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, Device);
+    const int SMs = deviceProp.multiProcessorCount;
+    int blkPerSM_GC;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+    int gridDim_GC = blkPerSM_GC * SMs;
+
+    // NOTE: use too many blocks may cause OCCUPANCY DEADLOCK in runLarge
+    runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes,
+              d.nidx_d, d.nlist2_d,
+              d.posscol_d, d.posscol2_d,
+              d.color_d, d.wl_d);
+
+    cudaError_t err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error after runLarge: %s\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+
+    runSmall<<<blocks, ThreadsPerBlock>>>(g.nodes,
+              d.nidx_d, d.nlist_d,
+              d.posscol_d,
+              d.color_d);
+
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error after runSmall: %s\n", cudaGetErrorString(err));
+        exit(EXIT_FAILURE);
+    }
+}
+
 /* --------------- verify & stats ----------------- */
 void verifyAndPrintStats(const ECLgraph& g,
                          const int* color,

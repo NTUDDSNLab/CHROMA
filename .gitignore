@@ -17,6 +17,7 @@ Datasets/SSMC/
 Datasets/fail/
 Datasets/test/
 Datasets/*
+*.egr
 
 *_pycache_*
 cpu_*

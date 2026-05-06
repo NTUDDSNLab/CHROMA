@@ -3,13 +3,6 @@
 #include <cooperative_groups.h>
 #include <stdio.h>
 namespace cg = cooperative_groups;
-static __device__ unsigned int hash(unsigned int val)
-{
-  val = ((val >> 16) ^ val) * 0x45d9f3b;
-  val = ((val >> 16) ^ val) * 0x45d9f3b;
-  return (val >> 16) ^ val;
-}
-
 __global__
 void init(const int nodes, const int edges, const int* const __restrict__ nidx, const int* const __restrict__ nlist, int* const __restrict__ nlist2, int* const __restrict__ posscol, int* const __restrict__ posscol2, int* const __restrict__ color, int* const __restrict__ wl,unsigned int* const __restrict__ priority)
 {

@@ -38,8 +38,11 @@ void print_help(const char* program_name) {
     std::cout << "                            .txt  : Text format (CSR graph)\n";
     std::cout << "                            .bin  : Binary format (CSR graph)\n";
     std::cout << "  -a, --algorithm <algo>    Select algorithm:\n";
-    std::cout << "                            0 or cuSL_ELS     : cuSL_ELS algorithm\n";
-    std::cout << "                            1 or cuSL_ELS_SDC : cuSL_ELS_SDC algorithm\n";
+    std::cout << "                            0 or cuSL_ELS       : cuSL_ELS algorithm\n";
+    std::cout << "                            1 or cuSL_ELS_SDC   : cuSL_ELS_SDC algorithm\n";
+    std::cout << "                            2 or cuSL_ELS_FUSED : PA+Init post-loop fused\n";
+    std::cout << "                            3 or cuSL_ELS_SDC_FUSED : SDC PA+Init post-loop fused\n";
+    std::cout << "                            4 or cuSL_ELS_SDC_FUSED_BATCH : SDC PA+Init per-batch fused\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -52,13 +55,26 @@ void print_help(const char* program_name) {
 }
 
 // Parse algorithm parameters
-void* select_algorithm(const std::string& algo_str, std::string& algo_name) {
+void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool& is_fused) {
+    is_fused = false;
     if (algo_str == "0" || algo_str == "cuSL_ELS") {
         algo_name = "cuSL_ELS";
         return (void*)P_SL_ELS;
     } else if (algo_str == "1" || algo_str == "cuSL_ELS_SDC") {
         algo_name = "cuSL_ELS_SDC";
         return (void*)P_SL_ELS_SDC;
+    } else if (algo_str == "2" || algo_str == "cuSL_ELS_FUSED") {
+        algo_name = "cuSL_ELS_FUSED";
+        is_fused = true;
+        return (void*)P_SL_ELS_FUSED;
+    } else if (algo_str == "3" || algo_str == "cuSL_ELS_SDC_FUSED") {
+        algo_name = "cuSL_ELS_SDC_FUSED";
+        is_fused = true;
+        return (void*)P_SL_ELS_SDC_FUSED;
+    } else if (algo_str == "4" || algo_str == "cuSL_ELS_SDC_FUSED_BATCH") {
+        algo_name = "cuSL_ELS_SDC_FUSED_BATCH";
+        is_fused = true;
+        return (void*)P_SL_ELS_SDC_FUSED_BATCH;
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
@@ -116,6 +132,7 @@ int main(int argc, char* argv[])
     int fuzzy_number = 0;  // EGC θ default value is 0
     void* kernel_to_launch = (void*)P_SL_ELS;
     std::string algo_name = "cuSL_ELS";
+    bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
 
     // Parse command line arguments
@@ -133,7 +150,7 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--algorithm") == 0) {
             if (i + 1 < argc) {
-                kernel_to_launch = select_algorithm(argv[++i], algo_name);
+                kernel_to_launch = select_algorithm(argv[++i], algo_name, is_fused);
             } else {
                 std::cerr << "Error: Algorithm option requires an argument.\n";
                 print_help(argv[0]);
@@ -364,21 +381,34 @@ int main(int argc, char* argv[])
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
       kernel_to_launch, ThreadsPerBlock, 0);
     int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
-    int *out_d;  cudaMalloc(&out_d, g.nodes * sizeof(int));
-    void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
-      &d.degree_list, &d.iteration_list_d };
-    cudaLaunchCooperativeKernel(
-            (void*)kernel_to_launch,
-            dim3(gridDim), dim3(ThreadsPerBlock), args);
+    if (is_fused) {
+      int edges_val = g.edges;
+      void* args[] = { &g.nodes, &edges_val, &d.nidx_d, &d.nlist_d,
+        &d.nlist2_d, &d.posscol_d, &d.posscol2_d, &d.color_d, &d.wl_d,
+        &d.degree_list, &d.iteration_list_d };
+      cudaLaunchCooperativeKernel(
+              (void*)kernel_to_launch,
+              dim3(gridDim), dim3(ThreadsPerBlock), args);
+    } else {
+      void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
+        &d.degree_list, &d.iteration_list_d };
+      cudaLaunchCooperativeKernel(
+              (void*)kernel_to_launch,
+              dim3(gridDim), dim3(ThreadsPerBlock), args);
+    }
     cudaDeviceSynchronize();
     float runtime_PA = timer_PA.stop();
-    std::cout << "Finish PA " << std::endl;
-    
+    std::cout << "Finish PA" << (is_fused ? "+Init" : "") << std::endl;
+
     // ================CA===================
     timer_CA.start();
-    ECL_GC_run(blocks, g, d);
+    if (is_fused) {
+      ECL_GC_coloring_only(blocks, g, d);
+    } else {
+      ECL_GC_run(blocks, g, d);
+    }
     float runtime_CA = timer_CA.stop();
-    std::cout << "Finish CA " << std::endl;
+    std::cout << "Finish CA" << (is_fused ? " (coloring only)" : "") << std::endl;
 
     ColorReductionStats reduction_stats =
         run_post_color_reduction(blocks, g, d, color);

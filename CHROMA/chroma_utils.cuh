@@ -23,6 +23,9 @@ void allocAndInit(const ECLgraph& g, DevPtr& d);
 /* Three-step kernel wrapper (need to complete iteration_list with sl_allocate first) */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d);
 
+/* Coloring only (runLarge + runSmall) — used when init is fused into PA */
+void ECL_GC_coloring_only(int blocks, const ECLgraph& g, DevPtr& d);
+
 /* Post-process color reduction wrapper */
 ColorReductionStats run_post_color_reduction(int blocks,
                                              const ECLgraph& g,

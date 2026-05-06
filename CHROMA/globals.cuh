@@ -52,3 +52,50 @@ __global__ void P_SL_ELS_SDC(
     const int* __restrict__ nlist,
     unsigned int* __restrict__ degree_list,
     unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_FUSED(
+    const int  nodes,
+    const int  edges,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    int* __restrict__ nlist2,
+    int* __restrict__ posscol,
+    int* __restrict__ posscol2,
+    int* __restrict__ color,
+    int* __restrict__ wl,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_FUSED(
+    const int  nodes,
+    const int  edges,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    int* __restrict__ nlist2,
+    int* __restrict__ posscol,
+    int* __restrict__ posscol2,
+    int* __restrict__ color,
+    int* __restrict__ wl,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_FUSED_BATCH(
+    const int  nodes,
+    const int  edges,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    int* __restrict__ nlist2,
+    int* __restrict__ posscol,
+    int* __restrict__ posscol2,
+    int* __restrict__ color,
+    int* __restrict__ wl,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+// ── hash function (shared by PA fused + ECLGC init) ──────
+static __device__ __forceinline__ unsigned int hash(unsigned int val)
+{
+    val = ((val >> 16) ^ val) * 0x45d9f3b;
+    val = ((val >> 16) ^ val) * 0x45d9f3b;
+    return (val >> 16) ^ val;
+}
