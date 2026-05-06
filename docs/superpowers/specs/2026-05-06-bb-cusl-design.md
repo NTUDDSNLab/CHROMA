@@ -359,7 +359,7 @@ for (int k = warpId; k < rs; k += numWarp) {
 
     unsigned int new_d = atomicSub(&degree_list[u], 1) - 1;
 
-    if (new_d < (unsigned int)(curr_theta + window)) {
+    if (new_d >= (unsigned int)curr_theta && new_d < (unsigned int)(curr_theta + window)) {
       int physical = new_d % window;
       int idx = atomicAdd(&bb_bucket_count[physical], 1);
       if (idx < bb_bucket_capacity) {
@@ -376,6 +376,17 @@ grid.sync();
 Note: `nidx[v]` / `nidx[v+1]` are read independently by each lane (they all
 target the same address — the load coalesces and broadcasts in cache). The
 shfl-from-lane-0 broadcast pattern used in `P_SL_ELS` is unnecessary here.
+
+The push condition guards both ends of the window. The lower-bound
+`new_d >= curr_theta` is required: a vertex `u` with multiple peeled
+neighbours can have its degree drop below `curr_theta` during Phase 2. Without
+the guard, `new_d % window` maps to the same physical slot as a **future**
+logical bucket (`new_d + window`), corrupting its count with a stale entry
+that lazy-validation permanently rejects. That phantom count prevents Phase 4
+overflow recovery from ever seeing the slot as empty, stalling `worker` at
+`< N` and causing an infinite loop on high-degree-hub graphs. Vertices whose
+degree falls below `curr_theta` are correctly recovered by Phase 4 once the
+window legitimately empties.
 
 ### 6.4 Phase 3 — Advance θ + reset emptied slots
 

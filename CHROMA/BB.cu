@@ -116,7 +116,7 @@ __global__ void P_SL_ELS_BB(
 
                 unsigned int new_d = atomicSub(&degree_list[u], 1) - 1;
 
-                if (new_d < (unsigned int)(curr_theta + window)) {
+                if (new_d >= (unsigned int)curr_theta && new_d < (unsigned int)(curr_theta + window)) {
                     int physical = (int)new_d % window;
                     int idx = atomicAdd(&bb_bucket_count[physical], 1);
                     if (idx < bb_bucket_capacity) {
