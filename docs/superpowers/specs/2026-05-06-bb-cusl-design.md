@@ -343,6 +343,15 @@ grid.sync();
 The `atomicCAS` ensures a single peel-claim per vertex even if multiple stale
 duplicates pass lazy validation in the same iteration.
 
+After the outer `for slot_off` loop completes and the grid syncs, a single
+thread resets `bb_bucket_count[physical] = 0` for all `window` slots. This is
+required because Phase 1 does not decrement the count when it skips stale
+entries or peels valid ones — without an explicit reset, the count carries
+stale-positive values into Phase 3 and theta never advances. Phase 2 then
+atomicAdds into freshly-zeroed counts, so `bb_bucket_count` correctly reflects
+only this iteration's pushes. A second `grid.sync()` follows the reset so
+Phase 2 sees count = 0 before any atomicAdd.
+
 ### 6.3 Phase 2 — Decrement + push
 
 ```c
@@ -415,11 +424,10 @@ if (grid.thread_rank() == 0) {
 grid.sync();
 ```
 
-Tradeoff: `bb_bucket_count[s] > 0` is necessary but not sufficient — entries
-may all be stale. Rather than scan-validate inside Phase 3, BB-cuSL accepts
-**at most O(window) "empty" iterations per overflow region** (each such
-iteration drains the false-positive entries via Phase 1 lazy validate, then
-Phase 3 advances). This keeps Phase 3 trivial.
+Because Phase 1 resets `bb_bucket_count` to 0 at the end of each iteration
+(before Phase 2 runs), the count entering Phase 3 reflects only Phase 2's
+fresh pushes. `bb_bucket_count[s] > 0` therefore means there are genuine
+live entries in slot `s` — not stale leftovers. Phase 3's scan is exact.
 
 ### 6.5 Phase 4 — Overflow scan (fallback)
 

@@ -102,6 +102,18 @@ __global__ void P_SL_ELS_BB(
         }
         grid.sync();
 
+        // Reset bucket counts for the window slots just processed.
+        // Stale entries (skipped by lazy validate) and successfully-peeled
+        // entries both leave count > 0; without reset, count accumulates and
+        // Phase 3 never advances theta. Phase 2 pushes start from count=0.
+        if (grid.thread_rank() == 0) {
+            for (int slot_off = 0; slot_off < window; slot_off++) {
+                int physical = (curr_theta + slot_off) % window;
+                bb_bucket_count[physical] = 0;
+            }
+        }
+        grid.sync();
+
         // ───── Phase 2: Decrement neighbours + push (warp-per-vertex) ─────
         int rs = remove_size;
         for (int k = warpId; k < rs; k += numWarp) {
