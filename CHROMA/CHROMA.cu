@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
 
 
     DevPtr d;
-    allocAndInit(g, d);
+    allocAndInit(g, d, fuzzy_number);
 
     // Analyze the degree distribution of the graph
     int max_degree = 0;
