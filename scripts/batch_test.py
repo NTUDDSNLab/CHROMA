@@ -42,7 +42,7 @@ from typing import Dict, List, Optional, Tuple
 import csv
 
 
-RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
+RUNTIME_RE = re.compile(r"^\s*runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE | re.MULTILINE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 BEFORE_RE = re.compile(r"colors before reduction:\s*(\d+)", re.IGNORECASE)
 AFTER_RE = re.compile(r"colors after reduction:\s*(\d+)", re.IGNORECASE)
@@ -50,6 +50,8 @@ DELTA_RE = re.compile(r"color reduction delta:\s*(-?\d+)", re.IGNORECASE)
 NODES_RE = re.compile(r"^Nodes:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 EDGES_RE = re.compile(r"^Edges:\s*(\d+)$", re.IGNORECASE | re.MULTILINE)
 THETA_RE = re.compile(r"^EGC\s*θ:\s*(\d+)(?:.*)$", re.IGNORECASE | re.MULTILINE)
+PA_RUNTIME_RE = re.compile(r"PA runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
+CA_RUNTIME_RE = re.compile(r"CA runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 
 
 ALGO_MAPPING = {
@@ -71,6 +73,8 @@ class RunResult:
     edges: Optional[int] = None
     theta: Optional[int] = None
     theta_predicted: Optional[bool] = None
+    pa_runtime_ms: Optional[float] = None
+    ca_runtime_ms: Optional[float] = None
     ok: bool = True
     error: Optional[str] = None
     stdout: Optional[str] = None
@@ -84,6 +88,8 @@ def parse_output(stdout: str) -> RunResult:
     color_reduction_delta: Optional[int] = None
     theta: Optional[int] = None
     theta_predicted: Optional[bool] = None
+    pa_runtime_ms: Optional[float] = None
+    ca_runtime_ms: Optional[float] = None
 
     m = RUNTIME_RE.search(stdout)
     if m:
@@ -127,6 +133,13 @@ def parse_output(stdout: str) -> RunResult:
         line_text = stdout[span_start:span_end]
         theta_predicted = ("predicted" in line_text.lower())
 
+    m = PA_RUNTIME_RE.search(stdout)
+    if m:
+        pa_runtime_ms = float(m.group(1))
+    m = CA_RUNTIME_RE.search(stdout)
+    if m:
+        ca_runtime_ms = float(m.group(1))
+
     if runtime_ms is None or colors_used is None:
         return RunResult(
             runtime_ms=0.0,
@@ -138,6 +151,8 @@ def parse_output(stdout: str) -> RunResult:
             edges=edges,
             theta=theta,
             theta_predicted=theta_predicted,
+            pa_runtime_ms=pa_runtime_ms,
+            ca_runtime_ms=ca_runtime_ms,
             ok=False,
             error="Failed to parse runtime and/or colors",
             stdout=stdout,
@@ -153,6 +168,8 @@ def parse_output(stdout: str) -> RunResult:
         edges=edges,
         theta=theta,
         theta_predicted=theta_predicted,
+        pa_runtime_ms=pa_runtime_ms,
+        ca_runtime_ms=ca_runtime_ms,
         ok=True,
         stdout=stdout,
     )
@@ -324,6 +341,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             "edges": best.edges if best and best.edges is not None else None,
             "theta": best.theta if best and best.theta is not None else None,
             "theta_predicted": bool(best.theta_predicted) if best and best.theta_predicted is not None else None,
+            "best_pa_runtime_ms": round(best.pa_runtime_ms, 6) if best and best.pa_runtime_ms is not None else None,
+            "best_ca_runtime_ms": round(best.ca_runtime_ms, 6) if best and best.ca_runtime_ms is not None else None,
             "all_runs": [
                 {
                     "ok": r.ok,
@@ -334,6 +353,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     "runtime_ms": round(r.runtime_ms, 6),
                     "theta": r.theta,
                     "theta_predicted": r.theta_predicted,
+                    "pa_runtime_ms": round(r.pa_runtime_ms, 6) if r.pa_runtime_ms is not None else None,
+                    "ca_runtime_ms": round(r.ca_runtime_ms, 6) if r.ca_runtime_ms is not None else None,
                     "error": r.error,
                 }
                 for r in run_results
