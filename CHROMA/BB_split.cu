@@ -218,42 +218,93 @@ __global__ void bb_split_phase2_decrement(
 //   set bb_overflow_needed latch.
 // Corresponds to BB.cu lines 146-169 (before line-170 grid.sync())
 // ────────────────────────────────────────────────────────────────────────────
-__global__ void bb_split_phase3_advance()
+__global__ void bb_split_phase3_advance(
+    const unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list)
 {
     if (threadIdx.x != 0) return;
 
     int curr_theta = theta;
     int window     = bb_window;
     int rs         = remove_size;
+    // bb_bucket_capacity was set to g.nodes in allocAndInit
+    int N          = bb_bucket_capacity;
 
     worker      += rs;
     remove_size  = 0;
 
-    int new_theta = curr_theta;
-    while (new_theta < curr_theta + window) {
-        if (bb_bucket_count[new_theta % window] > 0) break;
-        new_theta++;
+    int new_theta_window = curr_theta;
+    while (new_theta_window < curr_theta + window) {
+        if (bb_bucket_count[new_theta_window % window] > 0) break;
+        new_theta_window++;
     }
+    bool window_has_entry = (new_theta_window < curr_theta + window);
 
-    int captured_min = g_minDegree;
+    int captured_min = g_minDegree;                           // Plan A
     atomicExch(&g_minDegree, INT_MAX);
 
-    if (new_theta >= curr_theta + window) {
-        // Window empty — unbounded jump via captured_min (Plan A)
-        if (captured_min < INT_MAX) {
-            theta              = captured_min;
-            bb_overflow_needed = 2;             // refill-only Phase 4
-        } else {
-            bb_overflow_needed = 1;             // full Phase 4 fallback
+    // Path A: binary-search bb_sorted_degree to jump s_ptr to first entry >=
+    // curr_theta in O(log N), then linear-scan the above-window region.
+    int s_ptr = bb_S_ptr;
+    int min_S = INT_MAX;
+    {
+        // Binary search: first position with bb_sorted_degree[pos] >= curr_theta
+        int lo = s_ptr, hi = N;
+        while (lo < hi) {
+            int mid = (lo + hi) >> 1;
+            if (bb_sorted_degree[mid] < curr_theta) lo = mid + 1;
+            else hi = mid;
         }
-    } else {
-        // Window has entries — normal advance (window scan is authoritative)
-        for (int dd = curr_theta; dd < new_theta; dd++) {
+        s_ptr = lo;
+        bb_S_ptr = s_ptr;
+
+        while (s_ptr < N) {
+            int d_sorted = bb_sorted_degree[s_ptr];            // sequential
+            if (d_sorted < curr_theta + window) {
+                break;                                         // in window — stop
+            }
+            int v_cand        = bb_sorted_S[s_ptr];           // random
+            unsigned int it_c = iteration_list[v_cand];       // random
+            if (it_c & 0x40000000u) {
+                s_ptr++;                                       // peeled: skip
+                continue;
+            }
+            unsigned int d_cur = degree_list[v_cand];         // random
+            if ((int)d_cur < d_sorted) {
+                if ((int)d_cur >= curr_theta + window) {
+                    min_S = (int)d_cur;
+                }
+                s_ptr++;
+                break;
+            }
+            min_S = d_sorted;
+            break;
+        }
+        bb_S_ptr = s_ptr;
+    }
+
+    if (window_has_entry) {
+        // Normal in-window advance (window is authoritative when non-empty)
+        for (int dd = curr_theta; dd < new_theta_window; dd++) {
             bb_bucket_count[dd % window] = 0;
         }
-        theta              = new_theta;
+        theta              = new_theta_window;
         bb_overflow_needed = 0;
+    } else {
+        // Window empty — jump to best of captured_min and min_S
+        int candidate = INT_MAX;
+        if (captured_min < candidate) candidate = captured_min;
+        if (min_S        < candidate) candidate = min_S;
+
+        if (candidate == INT_MAX) {
+            // No info — full Phase 4 scan as last resort
+            bb_overflow_needed = 1;
+        } else {
+            theta              = candidate;
+            bb_overflow_needed = 2;                            // refill-only Phase 4
+        }
     }
+
     bb_peel_iter += 1;
 #ifdef PROFILE
     iter_count += 1;

@@ -49,6 +49,7 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
+    std::cout << "  --dump-priority <path>    Dump PA priority list (uint32 per vertex) to FILE\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
@@ -146,6 +147,7 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    std::string dump_priority_path;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -184,6 +186,13 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "--dump-priority") == 0) {
+            if (i + 1 < argc) {
+                dump_priority_path = argv[++i];
+            } else {
+                std::cerr << "Error: --dump-priority requires a path argument.\n";
+                return 1;
+            }
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -390,6 +399,12 @@ int main(int argc, char* argv[])
     init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d.nidx_d, d.nlist_d,d.degree_list);
     cudaDeviceSynchronize();
 
+    // Path A: pre-sort vertices by initial degree (only needed for BB variants)
+    if (algo_name == "cuSL_ELS_BB" ||
+        algo_name == "cuSL_ELS_BB_SPLIT") {
+        bb_setup_sorted_S(g, d);
+    }
+
     if (algo_name == "cuSL_ELS_BB_SPLIT") {
         // Split-kernel diagnostic variant: each phase is a separate kernel launch
         // so NCU can measure per-phase metrics independently.
@@ -430,6 +445,24 @@ int main(int argc, char* argv[])
     cudaDeviceSynchronize();
     float runtime_PA = timer_PA.stop();
     std::cout << "Finish PA" << (is_fused ? "+Init" : "") << std::endl;
+
+    if (!dump_priority_path.empty()) {
+        std::vector<unsigned int> host_iter(g.nodes);
+        cudaMemcpy(host_iter.data(), d.iteration_list_d,
+                   g.nodes * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+        for (int v = 0; v < g.nodes; ++v) host_iter[v] &= 0x3FFFFFFFu;
+        FILE* fp = fopen(dump_priority_path.c_str(), "wb");
+        if (fp == nullptr) {
+            std::cerr << "ERROR: cannot open " << dump_priority_path
+                      << " for write\n";
+        } else {
+            size_t w = fwrite(host_iter.data(), sizeof(unsigned int),
+                              host_iter.size(), fp);
+            fclose(fp);
+            std::cout << "dumped " << w << " priorities to "
+                      << dump_priority_path << std::endl;
+        }
+    }
 
     // ================CA===================
     timer_CA.start();

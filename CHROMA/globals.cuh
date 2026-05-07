@@ -25,6 +25,12 @@ extern __device__ int   bb_init_done;         // 0 = need Phase 0; 1 = done
 extern __device__ int   bb_overflow_needed;   // 0=none, 1=full Phase4, 2=refill-only Phase4
 extern __device__ int   bb_peel_iter;         // 0-indexed outer iter counter
 
+// Path A: sorted-S hint for global-min visibility
+extern __device__ int*  bb_sorted_S;        // size N: vertex IDs sorted by initial degree (ascending)
+extern __device__ int*  bb_sorted_degree;   // size N: initial degrees in sorted order (same order as bb_sorted_S)
+extern __device__ int*  bb_initial_degree;  // size N: initial degree indexed by vertex id
+extern __device__ int   bb_S_ptr;           // current scan position into bb_sorted_S
+
 // ── host-side constants can stay here (since they are not __device__ variables) ──
 static const int Device          = 0;
 static const int ThreadsPerBlock = 512;
@@ -136,7 +142,9 @@ __global__ void bb_split_phase2_decrement(
     unsigned int* __restrict__ degree_list,
     const unsigned int* __restrict__ iteration_list);
 
-__global__ void bb_split_phase3_advance();
+__global__ void bb_split_phase3_advance(
+    const unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
 
 __global__ void bb_split_phase4a_scan(
     int N,

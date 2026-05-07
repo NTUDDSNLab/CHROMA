@@ -22,3 +22,9 @@ __device__ int*  bb_bucket_count     = nullptr;
 __device__ int   bb_init_done        = 0;
 __device__ int   bb_overflow_needed  = 0;
 __device__ int   bb_peel_iter        = 0;
+
+// Path A: sorted-S hint for global-min visibility
+__device__ int*  bb_sorted_S       = nullptr;
+__device__ int*  bb_sorted_degree  = nullptr;
+__device__ int*  bb_initial_degree = nullptr;
+__device__ int   bb_S_ptr          = 0;

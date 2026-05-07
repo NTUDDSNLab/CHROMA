@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <iostream>
 #include <stdio.h>
+#include <thrust/device_ptr.h>
+#include <thrust/sort.h>
+#include <thrust/sequence.h>
 
 /* ----------------- allocAndInit ----------------- */
 void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number)
@@ -186,7 +189,7 @@ void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d)
         cudaDeviceSynchronize();
 
         // Phase 3: advance theta, update worker/remove_size, set overflow latch
-        bb_split_phase3_advance<<<1, 32>>>();
+        bb_split_phase3_advance<<<1, 32>>>(d.degree_list, d.iteration_list_d);
         cudaDeviceSynchronize();
 
         // Check overflow latch on host
@@ -245,6 +248,44 @@ void run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d)
 
         cudaMemcpyFromSymbol(&worker_h, worker, sizeof(int));
     }
+}
+
+/* --------------- bb_setup_sorted_S -------------- */
+void bb_setup_sorted_S(const ECLgraph& g, DevPtr& d)
+{
+    int N = g.nodes;
+
+    int* sorted_S_ptr      = nullptr;
+    int* sorted_degree_ptr = nullptr;
+    int* initial_degree_ptr = nullptr;
+    cudaMalloc(&sorted_S_ptr,        sizeof(int) * (size_t)N);
+    cudaMalloc(&sorted_degree_ptr,   sizeof(int) * (size_t)N);
+    cudaMalloc(&initial_degree_ptr,  sizeof(int) * (size_t)N);
+
+    // initial_degree[v] = degree_list[v] (which was just filled by init_degree)
+    cudaMemcpy(initial_degree_ptr, d.degree_list,
+               sizeof(int) * (size_t)N, cudaMemcpyDeviceToDevice);
+
+    // sorted_S[i] = i; sorted_degree[i] = degree[i] (will be sorted together)
+    thrust::device_ptr<int> sorted_S_dev(sorted_S_ptr);
+    thrust::sequence(sorted_S_dev, sorted_S_dev + N);
+
+    // Use sorted_degree_ptr as the sort key (copy of initial degrees)
+    cudaMemcpy(sorted_degree_ptr, initial_degree_ptr,
+               sizeof(int) * (size_t)N, cudaMemcpyDeviceToDevice);
+
+    // Sort both sorted_S[] and sorted_degree[] by degree ascending
+    thrust::device_ptr<int> key_dev(sorted_degree_ptr);
+    thrust::sort_by_key(key_dev, key_dev + N, sorted_S_dev);
+    // After sort: sorted_degree[i] = i-th smallest initial degree (sequential access!)
+    //             sorted_S[i]      = vertex id with i-th smallest initial degree
+
+    // Publish to device symbols
+    cudaMemcpyToSymbol(bb_sorted_S,       &sorted_S_ptr,       sizeof(int*));
+    cudaMemcpyToSymbol(bb_sorted_degree,  &sorted_degree_ptr,  sizeof(int*));
+    cudaMemcpyToSymbol(bb_initial_degree, &initial_degree_ptr, sizeof(int*));
+    int zero = 0;
+    cudaMemcpyToSymbol(bb_S_ptr, &zero, sizeof(int));
 }
 
 /* --------------- verify & stats ----------------- */
