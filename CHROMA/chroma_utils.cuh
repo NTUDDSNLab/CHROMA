@@ -32,11 +32,19 @@ void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d);
 /* Coloring only (runLarge + runSmall) — used when init is fused into PA */
 void ECL_GC_coloring_only(int blocks, const ECLgraph& g, DevPtr& d);
 
-/* Post-process color reduction wrapper */
+/* Post-process color reduction wrapper.
+ *   enabled = false → skip reduction entirely, just count colours.
+ *   enabled = true  → dispatch heuristic 1 (avg_deg > 10) or heuristic 2
+ *                     (avg_deg ≤ 10), matching ECL-GC's choice.
+ *
+ * Note: runtime_sec returned in ColorReductionStats is the time the
+ * reduction kernels took (0 when enabled=false).
+ */
 ColorReductionStats run_post_color_reduction(int blocks,
                                              const ECLgraph& g,
                                              DevPtr& d,
-                                             int* color_host_buffer);
+                                             int* color_host_buffer,
+                                             bool enabled = true);
 
 /* verify & Stats Output */
 void verifyAndPrintStats(const ECLgraph& g,

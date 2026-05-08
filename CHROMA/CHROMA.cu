@@ -46,13 +46,19 @@ void print_help(const char* program_name) {
     std::cout << "                            5 or cuSL_ELS_BB    : sliding-window bucket-based PA\n";
     std::cout << "                            6 or cuSL_ELS_BB_SPLIT : per-phase split-kernel diagnostic variant (NCU profiling)\n";
     std::cout << "                            7 or cuSL_ELS_SDC_SPLIT : SDC per-phase split-kernel diagnostic variant (NCU profiling)\n";
-    std::cout << "                            8 or cuSL_ELS_SDC_CTA   : SDC with CTA-balanced removal (cub BlockSort/Scan)\n";
+    std::cout << "                            8 or cuSL_ELS_SDC_CTA   : SDC with CTA-balanced removal (cub::BlockScan + binary search)\n";
+    std::cout << "                            9 or cuSL_ELS_SDC_CTA_W : SDC + dynamic dispatch (warp-balanced for small remove_size, CTA otherwise)\n";
+    std::cout << "                           10 or cuSL_ELS_SDC_CTA_S : SDC + dynamic dispatch (SDC warp-per-vertex for small remove_size, CTA otherwise) [recommended]\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
     std::cout << "  -r, --runs <int>          Repeat PA+CA N times on the same loaded\n"
                  "                            graph and print per-run timings + final\n"
                  "                            avg/min/max summary (default: 1)\n";
+    std::cout << "  --reduce / --no-reduce    Run / skip post-CA color reduction\n"
+                 "                            (default: --reduce). When enabled,\n"
+                 "                            dispatches heuristic 1 if avg_deg > 10\n"
+                 "                            else heuristic 2 (matches ECL-GC).\n";
     std::cout << "  --dump-priority <path>    Dump PA priority list (uint32 per vertex) to FILE\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
@@ -162,6 +168,7 @@ int main(int argc, char* argv[])
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
     std::string dump_priority_path;
     int  num_runs = 1;
+    bool enable_reduce = true;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -223,6 +230,10 @@ int main(int argc, char* argv[])
                 std::cerr << "Error: --dump-priority requires a path argument.\n";
                 return 1;
             }
+        } else if (strcmp(argv[i], "--reduce") == 0) {
+            enable_reduce = true;
+        } else if (strcmp(argv[i], "--no-reduce") == 0) {
+            enable_reduce = false;
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -513,7 +524,7 @@ int main(int argc, char* argv[])
         float runtime_CA = timer_CA.stop();
 
         ColorReductionStats reduction_stats =
-            run_post_color_reduction(blocks, g, d, color);
+            run_post_color_reduction(blocks, g, d, color, enable_reduce);
 
         float total_runtime = runtime_PA + runtime_CA + reduction_stats.runtime_sec;
 
