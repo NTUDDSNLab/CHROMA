@@ -31,6 +31,13 @@ Two limitations the user wants to fix:
    We want the predictor to push θ̂ as high as possible **subject to
    keeping VR low**, so we capture more runtime gain without
    regressing colouring quality.
+3. **The training target is locally-greedy.** `prepare_train_data`
+   stops scanning as soon as it sees `color(θ) > color(0)`, but the
+   paper itself (§VI-C, as-skitter) notes the `θ → color` curve is
+   non-monotonic on some graphs — meaning the current target labels
+   non-monotonic graphs with a too-small `max_θ` and the model is
+   trained to under-predict on them. Section "Target (revised)" below
+   addresses this.
 
 ## Goals
 
@@ -135,12 +142,73 @@ calls `score(scaled_input)`. The model class is captured in
 
 ## Target + Loss
 
-### Target (unchanged)
+### Target (revised — fix non-monotonic bug)
 
-`prepare_train_data` in `model/data.py` keeps the existing logic:
-walk θ from 0 upward; record the largest θ where `color(θ) ≤
-color(0)` AND the per-step speedup hasn't fallen below 1.2×. Same as
-the paper.
+The existing `prepare_train_data` walks θ in dict-iteration order
+and stops at the first θ whose `color(θ) > color(0)`:
+
+```python
+if data[dataset][theta]['color'] <= base_theta_color:
+    max_theta = theta
+    if cur_speedup <= 1.2: break
+else:
+    break          # ← gives up at first colour regression
+```
+
+This is wrong for graphs whose `θ → color` landscape is
+non-monotonic (paper §VI-C explicitly notes as-skitter's pattern:
+worst at θ=9, best at θ=11). On these graphs the "early break"
+discards globally-better θ values and labels the dataset with a
+locally-conservative `max_θ`, which propagates to under-prediction
+at inference time.
+
+**New target definition** (`model/data.py`):
+
+```python
+def compute_max_theta(per_theta, baseline_color, speedup_decay=1.2):
+    """Return the largest θ such that:
+       (a) color(θ) ≤ baseline_color, AND
+       (b) the cumulative incremental speedup since θ=0 stays
+           productive (per-step speedup ≥ 1.2× at the chosen θ).
+       The whole θ range is scanned — no early break on regressions.
+    """
+    sorted_thetas = sorted(
+        (int(t) for t in per_theta if t.isdigit()),
+    )
+    last_runtime = per_theta['0']['runtime_ms']
+    best_theta   = 0
+    for t in sorted_thetas:
+        rec = per_theta[str(t)]
+        if rec.get('color') is None:
+            continue
+        cur_runtime = rec['runtime_ms']
+        cur_speedup = last_runtime / cur_runtime if cur_runtime else 0
+        last_runtime = cur_runtime
+        if rec['color'] <= baseline_color and cur_speedup >= speedup_decay:
+            best_theta = t
+        # else: keep scanning (do NOT break)
+    return best_theta
+```
+
+Two semantic differences vs current:
+
+1. **Sorted iteration** by integer θ (was: dict insertion order; brittle
+   if the JSON gets re-emitted with stringly-sorted keys).
+2. **No `break` on colour regression** — keep scanning the full range
+   so non-monotonic graphs see their true global max θ.
+
+The speedup filter (1.2×) is preserved as the practical stop — we
+only count θ as "useful" if the marginal speedup is meaningful.
+
+Acknowledged limitation: with only graph-structural features (V, E,
+d, s, R, GI, H_er) the model cannot directly observe the
+non-monotonic landscape. We expect the predictor to learn a
+"safe-ish" θ that under-predicts on non-monotonic graphs (lower mean
+θ̂ but no VR cost), which is the right trade-off for `--predict`.
+Capturing the landscape itself would require either (a) multi-output
+regression of the curve or (b) inference-time micro-search; both
+were considered (brainstorming options 2 + 3) and deferred until v2's
+mean θ̂ plateaus on real datasets.
 
 ### Loss
 
@@ -362,6 +430,17 @@ arguments.
 * **R5.** m2cgen support for LightGBM is partial. If LightGBM trains
   best, may need to fall back to GBR for emit step. `models.py` flag
   this risk per ModelSpec.
+* **R6.** The new target definition (global max θ with no early
+  break on colour regression) will yield strictly-larger `max_θ` on
+  graphs whose `θ → color` curve is non-monotonic, but the
+  graph-structural features alone (V/E/d/s/R/GI/H_er) probably
+  can't predict *which* graphs are non-monotonic. So the model is
+  expected to under-predict on those — the conservative behaviour we
+  want, but it caps the achievable mean θ̂. If post-train evaluation
+  shows mean θ̂ plateauing on non-monotonic graphs, escalation paths
+  (deferred): predict the entire (color − baseline) curve as a 21-d
+  vector (option 2 in brainstorming), or add inference-time
+  micro-search around θ̂ (option 3).
 
 ## Migration
 
