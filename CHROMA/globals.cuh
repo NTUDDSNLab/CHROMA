@@ -16,6 +16,15 @@ extern __device__ int  theta;
 extern __device__ int  iteration;
 extern __device__ int  iter_count;
 
+// ── CTA-balanced removal cursor (used by P_SL_ELS_SDC_CTA) ────────────────
+extern __device__ int  cursor_remove;
+
+// ── JP-Series PA globals (used by JP_ADG; declared here so the unified
+//    pa_dumper binary can link CHROMA + JP-Series PA against shared globals) ─
+extern __device__ int  avg_deg;
+extern __device__ int  total_deg;
+extern __device__ int  total_worker;
+
 // ── BB-cuSL device globals (declared here, defined in globals.cu) ─────────
 extern __device__ int   bb_window;            // = FuzzyNumber + 1, host-set
 extern __device__ int   bb_bucket_capacity;   // = N, host-set
@@ -62,6 +71,27 @@ __global__ void P_SL_ELS(
     unsigned int* __restrict__ iteration_list);
 
 __global__ void P_SL_ELS_SDC(
+    const int  nodes,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_CTA(
+    const int  nodes,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_CTA_W(
+    const int  nodes,
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    unsigned int* __restrict__ iteration_list);
+
+__global__ void P_SL_ELS_SDC_CTA_S(
     const int  nodes,
     const int* __restrict__ nidx,
     const int* __restrict__ nlist,

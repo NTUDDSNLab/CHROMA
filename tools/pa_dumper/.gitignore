@@ -1,0 +1,5 @@
+pa_dumper
+*.o
+# Override root .gitignore's `cpu_*` rule for the source files in this dir
+!cpu_sdl.cpp
+!cpu_sdl.h

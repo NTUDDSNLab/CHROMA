@@ -14,6 +14,15 @@ __device__ int  theta       = 1;
 __device__ int  iteration   = 0;
 __device__ int  iter_count  = 0;
 
+// CTA-balanced removal cursor (used by P_SL_ELS_SDC_CTA)
+__device__ int  cursor_remove = 0;
+
+// JP-Series PA globals (used by JP_ADG; defined here so a unified pa_dumper
+// can link CHROMA + JP-Series PA against shared globals).
+__device__ int  avg_deg      = 0;
+__device__ int  total_deg    = 0;
+__device__ int  total_worker = 0;
+
 // ── BB-cuSL device globals ────────────────────────────────────────────────
 __device__ int   bb_window           = 0;
 __device__ int   bb_bucket_capacity  = 0;

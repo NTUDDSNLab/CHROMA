@@ -46,6 +46,7 @@ void print_help(const char* program_name) {
     std::cout << "                            5 or cuSL_ELS_BB    : sliding-window bucket-based PA\n";
     std::cout << "                            6 or cuSL_ELS_BB_SPLIT : per-phase split-kernel diagnostic variant (NCU profiling)\n";
     std::cout << "                            7 or cuSL_ELS_SDC_SPLIT : SDC per-phase split-kernel diagnostic variant (NCU profiling)\n";
+    std::cout << "                            8 or cuSL_ELS_SDC_CTA   : SDC with CTA-balanced removal (cub BlockSort/Scan)\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -88,6 +89,15 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
     } else if (algo_str == "7" || algo_str == "cuSL_ELS_SDC_SPLIT") {
         algo_name = "cuSL_ELS_SDC_SPLIT";
         return (void*)P_SL_ELS_SDC;  // placeholder; main flow detects by name
+    } else if (algo_str == "8" || algo_str == "cuSL_ELS_SDC_CTA") {
+        algo_name = "cuSL_ELS_SDC_CTA";
+        return (void*)P_SL_ELS_SDC_CTA;
+    } else if (algo_str == "9" || algo_str == "cuSL_ELS_SDC_CTA_W") {
+        algo_name = "cuSL_ELS_SDC_CTA_W";
+        return (void*)P_SL_ELS_SDC_CTA_W;
+    } else if (algo_str == "10" || algo_str == "cuSL_ELS_SDC_CTA_S") {
+        algo_name = "cuSL_ELS_SDC_CTA_S";
+        return (void*)P_SL_ELS_SDC_CTA_S;
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
