@@ -1,12 +1,60 @@
 #include "chroma_utils.cuh"
 #include "globals.cuh"
 #include <algorithm>
+#include <climits>
 #include <cstdio>
 #include <iostream>
 #include <stdio.h>
 #include <thrust/device_ptr.h>
 #include <thrust/sort.h>
 #include <thrust/sequence.h>
+
+
+/* ----------------- resetForRun ----------------- *
+ * Reset all per-run device state in place without re-allocating.
+ * Used by `-r/--runs N` to dispatch N back-to-back PA+CA passes on the
+ * same graph after a single allocAndInit, with each run starting from a
+ * clean state.
+ */
+void resetForRun(const ECLgraph& g, DevPtr& d)
+{
+    // Reset two device-side arrays that PA / ECLGC-init initialise to a
+    // sentinel before reading.
+    cudaMemset(d.iteration_list_d, 0, g.nodes * sizeof(unsigned int));
+    cudaMemset(d.nlist2_d, -1, g.edges * sizeof(int));
+
+    // Reset every __device__ global the PA/CA path mutates back to its
+    // start-of-binary value.
+    int  zero = 0;
+    int  one  = 1;
+    int  imax = INT_MAX;
+    cudaMemcpyToSymbol(g_minDegree,         &imax, sizeof(int));
+    cudaMemcpyToSymbol(remove_size,         &zero, sizeof(int));
+    cudaMemcpyToSymbol(worker,              &zero, sizeof(int));
+    cudaMemcpyToSymbol(theta,               &one,  sizeof(int));
+    cudaMemcpyToSymbol(iteration,           &zero, sizeof(int));
+    cudaMemcpyToSymbol(iter_count,          &zero, sizeof(int));
+    cudaMemcpyToSymbol(cursor_remove,       &zero, sizeof(int));
+    cudaMemcpyToSymbol(wlsize,              &zero, sizeof(int));
+    cudaMemcpyToSymbol(avg_deg,             &zero, sizeof(int));
+    cudaMemcpyToSymbol(total_deg,           &zero, sizeof(int));
+    cudaMemcpyToSymbol(total_worker,        &zero, sizeof(int));
+    cudaMemcpyToSymbol(bb_init_done,        &zero, sizeof(int));
+    cudaMemcpyToSymbol(bb_overflow_needed,  &zero, sizeof(int));
+    cudaMemcpyToSymbol(bb_peel_iter,        &zero, sizeof(int));
+
+    // Clear bb_bucket_count if BB was set up by allocAndInit. Capacity is
+    // bb_window (= FuzzyNumber + 1, clamped to [1, 31]).
+    int bw = 0;
+    cudaMemcpyFromSymbol(&bw, bb_window, sizeof(int));
+    if (bw > 0) {
+        int* bb_count_ptr = nullptr;
+        cudaMemcpyFromSymbol(&bb_count_ptr, bb_bucket_count, sizeof(int*));
+        if (bb_count_ptr != nullptr) {
+            cudaMemset(bb_count_ptr, 0, (size_t)bw * sizeof(int));
+        }
+    }
+}
 
 /* ----------------- allocAndInit ----------------- */
 void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number)

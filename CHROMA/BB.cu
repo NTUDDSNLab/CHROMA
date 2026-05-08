@@ -234,9 +234,7 @@ __global__ void P_SL_ELS_BB(
             }
 
             bb_peel_iter += 1;
-            #ifdef PROFILE
             iter_count += 1;
-            #endif
         }
         grid.sync();
 

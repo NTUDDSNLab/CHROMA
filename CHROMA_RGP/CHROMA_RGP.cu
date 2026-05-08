@@ -1002,6 +1002,9 @@ void print_help(const char* program_name) {
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
     std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip, mt_kahip (default: metis)\n";
     std::cout << "      --predict             Use prediction model to auto-select θ (default: false)\n";
+    std::cout << "  -r, --runs <int>          Repeat phases 1-3 N times on the same\n"
+                 "                            graph + partition; print per-run timings\n"
+                 "                            and final avg/min/max summary (default: 1)\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
     std::cout << "  " << program_name << " -f graph.txt\n";
@@ -1017,6 +1020,7 @@ int main(int argc, char* argv[]) {
     int nParts = 2;         // Default partition into 2 subgraphs
     std::string partitioner_name = "metis"; // Default use METIS for partitioning
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    int num_runs = 1;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -1068,6 +1072,22 @@ int main(int argc, char* argv[]) {
             }
         } else if (strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runs") == 0) {
+            if (i + 1 < argc) {
+                try {
+                    num_runs = std::stoi(argv[++i]);
+                    if (num_runs < 1) {
+                        std::cerr << "Error: --runs must be >= 1.\n";
+                        return 1;
+                    }
+                } catch (const std::exception&) {
+                    std::cerr << "Error: Invalid --runs value '" << argv[i] << "'.\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: --runs option requires an integer.\n";
+                return 1;
+            }
         } else if (argv[i][0] == '-') {
             std::cerr << "Error: Unknown option '" << argv[i] << "'.\n";
             print_help(argv[0]);
@@ -1300,8 +1320,17 @@ int main(int argc, char* argv[]) {
     printf("Boundary graph has %d nodes, %d edges\n",
            boundaryGraph.nodes, boundaryGraph.edges);
 
-    // GPUTimer timer;
-    // timer.start();
+    // ── Per-run stats (size = num_runs) ────────────────────────────────────
+    // RGP doesn't have a clean PA/CA split — each partition runs its own
+    // PA+CA on its own GPU. We track the three macro phases instead:
+    //   Phase 1 = boundary GC on GPU 0 + first-partition preload (overlapped)
+    //   Phase 2 = parallel per-partition PA+CA across all GPUs
+    //   Phase 3 = host-side colour merge
+    std::vector<float> phase1_ms_arr, phase2_ms_arr, phase3_ms_arr;
+    std::vector<float> total_ms_arr;
+    std::vector<int>   colors_arr;
+
+  for (int run_idx = 0; run_idx < num_runs; ++run_idx) {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     float boundary_ms = 0.0f;
@@ -1496,64 +1525,102 @@ int main(int argc, char* argv[]) {
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = end_time - start_time;
     const float runtime = duration.count(); // seconds
-  
-    printf("runtime:    %.6f ms\n", runtime*1000);
-    printf("throughput: %.6f Mnodes/s\n", g.nodes * 0.000001 / runtime);
-    printf("throughput: %.6f Medges/s\n", g.edges * 0.000001 / runtime);
 
-
-
+    // Verify
     for (int v = 0; v < g.nodes; v++) {
-      if (color[v] < 0) {printf("ERROR: found unprocessed node in graph (node %d with deg %d)\n\n", v, g.nindex[v + 1] - g.nindex[v]);  exit(-1);}
+      if (color[v] < 0) {printf("[Run %d/%d] ERROR: unprocessed node %d (deg %d)\n", run_idx+1, num_runs, v, g.nindex[v + 1] - g.nindex[v]);  exit(-1);}
       for (int i = g.nindex[v]; i < g.nindex[v + 1]; i++) {
-        if (color[g.nlist[i]] == color[v]&&g.nlist[i]!=v) {printf("ERROR: found adjacent nodes with same color %d (%d %d)\n\n", color[v], v, g.nlist[i]);exit(-1);  }
+        if (color[g.nlist[i]] == color[v] && g.nlist[i] != v) {
+          printf("[Run %d/%d] ERROR: adjacent nodes %d %d share colour %d\n",
+                 run_idx+1, num_runs, v, g.nlist[i], color[v]);
+          exit(-1);
+        }
       }
     }
-
-    printf("result verification passed\n"); 
-    const int vals = 16;
-    int c[vals];
-    for (int i = 0; i < vals; i++) c[i] = 0;
     int cols = -1;
-    for (int v = 0; v < g.nodes; v++) {
-      cols = std::max(cols, color[v]);
-      if (color[v] < vals) c[color[v]]++;
-    }
+    for (int v = 0; v < g.nodes; v++) cols = std::max(cols, color[v]);
     cols++;
-    printf("colors used: %d\n", cols);
 
-    cudaFreeHost(boundaryColor_h);
-    cudaFreeHost(boundaryPosColor_h);
-    cudaFreeHost(boundaryIterList_h);
-
-    delete [] color;
-
-    // ===================================== Summary Table =====================================
-    printf("\n");
-    printf("================================================================================================\n");
-    printf("                                  EXECUTION SUMMARY                                             \n");
-    printf("================================================================================================\n");
-    printf("%-30s: %10.4f ms\n", "Partition Time", partition_duration.count() * 1000.0f);
-    printf("%-30s: %10.4f ms\n", "Total Kernel Runtime", runtime * 1000.0f); // runtime is in seconds, print as ms
-    printf("%-30s: %10.4f ms\n", "Phase 1 (Boundary+Preload)", phase1_max_duration_ms);
-    printf("%-30s: %10.4f ms\n", "Phase 2 (Parallel Exec)", phase2_max_duration_ms);
-    printf("%-30s: %10.4f ms\n", "Phase 3 (Result Merge)", phase3_ms);
-    printf("------------------------------------------------------------------------------------------------\n");
-    printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Max Mem (MB)", "Mem Total (MB)");
-    printf("|--------|-----------------|------------------|----------------------|----------------------|\n");
-    for (int d = 0; d < deviceCount; ++d) {
-        if (per_gpu_parts[d] > 0) {
-            printf("| %-6d | %-15d | %16.4f | %20.2f | %20.2f |\n", 
-                d, 
-                per_gpu_parts[d], 
-                per_gpu_ms[d], 
-                per_gpu_max_mem[d] / 1024.0 / 1024.0, 
-                per_gpu_total_mem[d] / 1024.0 / 1024.0);
-        }
+    if (num_runs > 1) {
+      printf("[Run %d/%d] Phase1: %8.3f ms  Phase2: %8.3f ms  Phase3: %7.3f ms  "
+             "Total: %9.3f ms  colors: %d\n",
+             run_idx+1, num_runs,
+             phase1_max_duration_ms, phase2_max_duration_ms, phase3_ms,
+             runtime * 1000, cols);
+    } else {
+      printf("runtime:    %.6f ms\n", runtime*1000);
+      printf("throughput: %.6f Mnodes/s\n", g.nodes * 0.000001 / runtime);
+      printf("throughput: %.6f Medges/s\n", g.edges * 0.000001 / runtime);
+      printf("result verification passed\n");
+      printf("colors used: %d\n", cols);
     }
-    printf("================================================================================================\n");
 
+    phase1_ms_arr.push_back(phase1_max_duration_ms);
+    phase2_ms_arr.push_back(phase2_max_duration_ms);
+    phase3_ms_arr.push_back(phase3_ms);
+    total_ms_arr.push_back(runtime * 1000);
+    colors_arr.push_back(cols);
 
-    freeECLgraph(g);  // Free graph resources
-    return 0;
+    if (num_runs == 1) {
+      // ====== Detailed per-run summary (kept for backward compat on --runs 1) ======
+      printf("\n");
+      printf("================================================================================================\n");
+      printf("                                  EXECUTION SUMMARY                                             \n");
+      printf("================================================================================================\n");
+      printf("%-30s: %10.4f ms\n", "Partition Time", partition_duration.count() * 1000.0f);
+      printf("%-30s: %10.4f ms\n", "Total Kernel Runtime", runtime * 1000.0f);
+      printf("%-30s: %10.4f ms\n", "Phase 1 (Boundary+Preload)", phase1_max_duration_ms);
+      printf("%-30s: %10.4f ms\n", "Phase 2 (Parallel Exec)", phase2_max_duration_ms);
+      printf("%-30s: %10.4f ms\n", "Phase 3 (Result Merge)", phase3_ms);
+      printf("------------------------------------------------------------------------------------------------\n");
+      printf("| %-6s | %-15s | %-16s | %-20s | %-20s |\n", "GPU ID", "Partitions", "Exec Time (ms)", "Max Mem (MB)", "Mem Total (MB)");
+      printf("|--------|-----------------|------------------|----------------------|----------------------|\n");
+      for (int d = 0; d < deviceCount; ++d) {
+          if (per_gpu_parts[d] > 0) {
+              printf("| %-6d | %-15d | %16.4f | %20.2f | %20.2f |\n",
+                  d,
+                  per_gpu_parts[d],
+                  per_gpu_ms[d],
+                  per_gpu_max_mem[d] / 1024.0 / 1024.0,
+                  per_gpu_total_mem[d] / 1024.0 / 1024.0);
+          }
+      }
+      printf("================================================================================================\n");
+    }
+
+    // Free per-run pinned buffers (re-allocated by runBoundaryGC next iter).
+    cudaFreeHost(boundaryColor_h);     boundaryColor_h    = nullptr;
+    cudaFreeHost(boundaryPosColor_h);  boundaryPosColor_h = nullptr;
+    cudaFreeHost(boundaryIterList_h);  boundaryIterList_h = nullptr;
+  }  // end of run loop
+
+  // Multi-run summary stats
+  if (num_runs > 1) {
+    auto stats_f = [](const std::vector<float>& v) {
+      float s = 0, mn = v[0], mx = v[0];
+      for (float x : v) { s += x; mn = std::min(mn, x); mx = std::max(mx, x); }
+      char buf[160];
+      snprintf(buf, sizeof(buf),
+               "avg=%9.3f  min=%9.3f  max=%9.3f", s / v.size(), mn, mx);
+      return std::string(buf);
+    };
+    auto stats_i = [](const std::vector<int>& v) {
+      double s = 0; int mn = v[0], mx = v[0];
+      for (int x : v) { s += x; mn = std::min(mn, x); mx = std::max(mx, x); }
+      char buf[160];
+      snprintf(buf, sizeof(buf),
+               "avg=%9.3f  min=%9d  max=%9d", s / v.size(), mn, mx);
+      return std::string(buf);
+    };
+    printf("\n=== Statistics over %d runs (ms) ===\n", num_runs);
+    printf("Phase 1     : %s\n", stats_f(phase1_ms_arr).c_str());
+    printf("Phase 2     : %s\n", stats_f(phase2_ms_arr).c_str());
+    printf("Phase 3     : %s\n", stats_f(phase3_ms_arr).c_str());
+    printf("Total time  : %s\n", stats_f(total_ms_arr).c_str());
+    printf("colors used : %s\n", stats_i(colors_arr).c_str());
+  }
+
+  delete [] color;
+  freeECLgraph(g);  // Free graph resources
+  return 0;
 }

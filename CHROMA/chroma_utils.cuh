@@ -20,6 +20,12 @@ struct ColorReductionStats {
 /* Space allocation + Pre-initialization */
 void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number);
 
+/* Reset per-run device state without re-allocating: clears iteration_list,
+   nlist2, all PA/BB device globals; ready for another PA pass on the same
+   graph. degree_list is NOT touched here — caller must re-launch
+   init_degree<<<>>> before each run. */
+void resetForRun(const ECLgraph& g, DevPtr& d);
+
 /* Three-step kernel wrapper (need to complete iteration_list with sl_allocate first) */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d);
 

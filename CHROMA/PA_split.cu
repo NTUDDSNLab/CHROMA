@@ -83,8 +83,6 @@ __global__ void P_SL_ELS_SDC_split_advance()
         theta        = g_minDegree;
         atomicExch(&g_minDegree, 0x7FFFFFFF);
         iteration    = iteration + 1 + FuzzyNumber;
-        #ifdef PROFILE
         iter_count++;
-        #endif
     }
 }

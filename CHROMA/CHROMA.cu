@@ -50,6 +50,9 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
+    std::cout << "  -r, --runs <int>          Repeat PA+CA N times on the same loaded\n"
+                 "                            graph and print per-run timings + final\n"
+                 "                            avg/min/max summary (default: 1)\n";
     std::cout << "  --dump-priority <path>    Dump PA priority list (uint32 per vertex) to FILE\n";
     std::cout << "  -h, --help                Show this help message\n\n";
     std::cout << "Examples:\n";
@@ -158,6 +161,7 @@ int main(int argc, char* argv[])
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
     std::string dump_priority_path;
+    int  num_runs = 1;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
@@ -196,6 +200,22 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runs") == 0) {
+            if (i + 1 < argc) {
+                try {
+                    num_runs = std::stoi(argv[++i]);
+                    if (num_runs < 1) {
+                        std::cerr << "Error: --runs must be >= 1.\n";
+                        return 1;
+                    }
+                } catch (const std::exception&) {
+                    std::cerr << "Error: Invalid --runs value '" << argv[i] << "'.\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: --runs option requires an integer.\n";
+                return 1;
+            }
         } else if (strcmp(argv[i], "--dump-priority") == 0) {
             if (i + 1 < argc) {
                 dump_priority_path = argv[++i];
@@ -401,113 +421,190 @@ int main(int argc, char* argv[])
     // }
 
 
-    GPUTimer timer_PA;
-    GPUTimer timer_CA;
-    
-    // ================PA===================
-    timer_PA.start();
-    init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d.nidx_d, d.nlist_d,d.degree_list);
-    cudaDeviceSynchronize();
+    // Per-run stats (size = num_runs)
+    std::vector<float> pa_ms_arr, ca_ms_arr, reduce_ms_arr, total_ms_arr;
+    std::vector<int>   colors_arr, iter_count_arr;
 
-    // Path A: pre-sort vertices by initial degree (only needed for BB variants)
-    if (algo_name == "cuSL_ELS_BB" ||
-        algo_name == "cuSL_ELS_BB_SPLIT") {
-        bb_setup_sorted_S(g, d);
-    }
+    for (int run_idx = 0; run_idx < num_runs; ++run_idx) {
+        if (run_idx > 0) {
+            // Reset device state in place (allocAndInit already initialised
+            // run 0). degree_list is re-filled by the init_degree<<<>>> launch
+            // a few lines below.
+            resetForRun(g, d);
+        }
 
-    if (algo_name == "cuSL_ELS_BB_SPLIT") {
-        // Split-kernel diagnostic variant: each phase is a separate kernel launch
-        // so NCU can measure per-phase metrics independently.
-        int blkPerSM_split;
-        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_split,
-            bb_split_phase1_peel, ThreadsPerBlock, 0);
-        int gridDim_split = blkPerSM_split * SMs;
-        run_bb_split(gridDim_split, g, d);
-    } else if (algo_name == "cuSL_ELS_SDC_SPLIT") {
-        // SDC split-kernel diagnostic variant: scan/decrement/advance are separate
-        // kernel launches so nsys/ncu can measure per-phase time independently.
-        int blkPerSM_sdc_split;
-        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_sdc_split,
-            P_SL_ELS_SDC_split_scan, ThreadsPerBlock, 0);
-        int gridDim_sdc_split = blkPerSM_sdc_split * SMs;
-        run_sdc_split(gridDim_sdc_split, g, d);
-    } else {
-        int blkPerSM;
-        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
-          kernel_to_launch, ThreadsPerBlock, 0);
-        int gridDim = blkPerSM * SMs;      // Guaranteed to be resident simultaneously
+        GPUTimer timer_PA;
+        GPUTimer timer_CA;
+
+        // ================PA===================
+        timer_PA.start();
+        init_degree<<<ceil(g.nodes/512.0),512>>>(g.nodes, d.nidx_d, d.nlist_d,d.degree_list);
+        cudaDeviceSynchronize();
+
+        // Path A: pre-sort vertices by initial degree (only needed for BB variants)
+        if (algo_name == "cuSL_ELS_BB" ||
+            algo_name == "cuSL_ELS_BB_SPLIT") {
+            bb_setup_sorted_S(g, d);
+        }
+
+        if (algo_name == "cuSL_ELS_BB_SPLIT") {
+            int blkPerSM_split;
+            cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_split,
+                bb_split_phase1_peel, ThreadsPerBlock, 0);
+            int gridDim_split = blkPerSM_split * SMs;
+            run_bb_split(gridDim_split, g, d);
+        } else if (algo_name == "cuSL_ELS_SDC_SPLIT") {
+            int blkPerSM_sdc_split;
+            cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_sdc_split,
+                P_SL_ELS_SDC_split_scan, ThreadsPerBlock, 0);
+            int gridDim_sdc_split = blkPerSM_sdc_split * SMs;
+            run_sdc_split(gridDim_sdc_split, g, d);
+        } else {
+            int blkPerSM;
+            cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
+              kernel_to_launch, ThreadsPerBlock, 0);
+            int gridDim = blkPerSM * SMs;
+            if (is_fused) {
+              int edges_val = g.edges;
+              void* args[] = { &g.nodes, &edges_val, &d.nidx_d, &d.nlist_d,
+                &d.nlist2_d, &d.posscol_d, &d.posscol2_d, &d.color_d, &d.wl_d,
+                &d.degree_list, &d.iteration_list_d };
+              cudaLaunchCooperativeKernel(
+                      (void*)kernel_to_launch,
+                      dim3(gridDim), dim3(ThreadsPerBlock), args);
+            } else {
+              void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
+                &d.degree_list, &d.iteration_list_d };
+              cudaLaunchCooperativeKernel(
+                      (void*)kernel_to_launch,
+                      dim3(gridDim), dim3(ThreadsPerBlock), args);
+            }
+        }
+        cudaDeviceSynchronize();
+        float runtime_PA = timer_PA.stop();   // GPUTimer::stop returns seconds
+
+        // Optional priority dump — only on the first run (output file is one
+        // path; later runs would just overwrite with byte-identical data).
+        if (run_idx == 0 && !dump_priority_path.empty()) {
+            std::vector<unsigned int> host_iter(g.nodes);
+            cudaMemcpy(host_iter.data(), d.iteration_list_d,
+                       g.nodes * sizeof(unsigned int), cudaMemcpyDeviceToHost);
+            for (int v = 0; v < g.nodes; ++v) host_iter[v] &= 0x3FFFFFFFu;
+            FILE* fp = fopen(dump_priority_path.c_str(), "wb");
+            if (fp == nullptr) {
+                std::cerr << "ERROR: cannot open " << dump_priority_path
+                          << " for write\n";
+            } else {
+                size_t w = fwrite(host_iter.data(), sizeof(unsigned int),
+                                  host_iter.size(), fp);
+                fclose(fp);
+                std::cout << "dumped " << w << " priorities to "
+                          << dump_priority_path << std::endl;
+            }
+        }
+
+        // ================CA===================
+        timer_CA.start();
         if (is_fused) {
-          int edges_val = g.edges;
-          void* args[] = { &g.nodes, &edges_val, &d.nidx_d, &d.nlist_d,
-            &d.nlist2_d, &d.posscol_d, &d.posscol2_d, &d.color_d, &d.wl_d,
-            &d.degree_list, &d.iteration_list_d };
-          cudaLaunchCooperativeKernel(
-                  (void*)kernel_to_launch,
-                  dim3(gridDim), dim3(ThreadsPerBlock), args);
+          ECL_GC_coloring_only(blocks, g, d);
         } else {
-          void* args[] = { &g.nodes, &d.nidx_d, &d.nlist_d,
-            &d.degree_list, &d.iteration_list_d };
-          cudaLaunchCooperativeKernel(
-                  (void*)kernel_to_launch,
-                  dim3(gridDim), dim3(ThreadsPerBlock), args);
+          ECL_GC_run(blocks, g, d);
         }
-    }
-    cudaDeviceSynchronize();
-    float runtime_PA = timer_PA.stop();
-    std::cout << "Finish PA" << (is_fused ? "+Init" : "") << std::endl;
+        float runtime_CA = timer_CA.stop();
 
-    if (!dump_priority_path.empty()) {
-        std::vector<unsigned int> host_iter(g.nodes);
-        cudaMemcpy(host_iter.data(), d.iteration_list_d,
-                   g.nodes * sizeof(unsigned int), cudaMemcpyDeviceToHost);
-        for (int v = 0; v < g.nodes; ++v) host_iter[v] &= 0x3FFFFFFFu;
-        FILE* fp = fopen(dump_priority_path.c_str(), "wb");
-        if (fp == nullptr) {
-            std::cerr << "ERROR: cannot open " << dump_priority_path
-                      << " for write\n";
+        ColorReductionStats reduction_stats =
+            run_post_color_reduction(blocks, g, d, color);
+
+        float total_runtime = runtime_PA + runtime_CA + reduction_stats.runtime_sec;
+
+        // iter_count: device global, no longer guarded by PROFILE — always 0
+        // unless the kernel actually incremented it (which all PA kernels do
+        // unconditionally now).
+        int host_iter_count = 0;
+        cudaMemcpyFromSymbol(&host_iter_count, iter_count, sizeof(int), 0,
+                             cudaMemcpyDeviceToHost);
+
+        // Verify (abort on failure).
+        for (int v = 0; v < g.nodes; v++) {
+            if (color[v] < 0) {
+                printf("[Run %d/%d] ERROR: unprocessed node %d\n",
+                       run_idx + 1, num_runs, v);
+                exit(-1);
+            }
+            for (int i = g.nindex[v]; i < g.nindex[v + 1]; i++) {
+                if (color[g.nlist[i]] == color[v] && g.nlist[i] != v) {
+                    printf("[Run %d/%d] ERROR: adjacent nodes %d %d share "
+                           "color %d\n", run_idx + 1, num_runs,
+                           v, g.nlist[i], color[v]);
+                    exit(-1);
+                }
+            }
+        }
+
+        // Pass color count from reduction_stats (after color reduction).
+        int colors_after = reduction_stats.colors_after;
+
+        // Per-run line.
+        if (num_runs > 1) {
+            printf("[Run %d/%d] PA: %8.3f ms  CA: %7.3f ms  Reduce: %6.3f ms  "
+                   "Total: %8.3f ms  colors: %d  iters: %d\n",
+                   run_idx + 1, num_runs,
+                   runtime_PA * 1000, runtime_CA * 1000,
+                   reduction_stats.runtime_sec * 1000, total_runtime * 1000,
+                   colors_after, host_iter_count);
         } else {
-            size_t w = fwrite(host_iter.data(), sizeof(unsigned int),
-                              host_iter.size(), fp);
-            fclose(fp);
-            std::cout << "dumped " << w << " priorities to "
-                      << dump_priority_path << std::endl;
+            // Backward-compatible single-run output (verbose).
+            std::cout << "Finish PA" << (is_fused ? "+Init" : "") << std::endl;
+            std::cout << "Finish CA" << (is_fused ? " (coloring only)" : "")
+                      << std::endl;
+            printf("PA runtime: %.6f ms\n", runtime_PA * 1000);
+            printf("CA runtime: %.6f ms\n", runtime_CA * 1000);
+            printf("Post reduction runtime: %.6f ms\n",
+                   reduction_stats.runtime_sec * 1000);
+            printf("Total runtime: %.6f ms\n", total_runtime * 1000);
+            printf("colors before reduction: %d\n", reduction_stats.colors_before);
+            printf("colors after reduction: %d\n", reduction_stats.colors_after);
+            printf("color reduction delta: %d\n",
+                   reduction_stats.colors_before - reduction_stats.colors_after);
+            printf("result verification passed\n");
+            printf("colors used: %d\n", colors_after);
+            printf("Iter count: %d\n", host_iter_count);
         }
+
+        pa_ms_arr.push_back(runtime_PA * 1000);
+        ca_ms_arr.push_back(runtime_CA * 1000);
+        reduce_ms_arr.push_back(reduction_stats.runtime_sec * 1000);
+        total_ms_arr.push_back(total_runtime * 1000);
+        colors_arr.push_back(colors_after);
+        iter_count_arr.push_back(host_iter_count);
     }
 
-    // ================CA===================
-    timer_CA.start();
-    if (is_fused) {
-      ECL_GC_coloring_only(blocks, g, d);
-    } else {
-      ECL_GC_run(blocks, g, d);
+    // Final summary across runs (only when num_runs > 1).
+    if (num_runs > 1) {
+        auto stats_f = [](const std::vector<float>& v) {
+            float s = 0, mn = v[0], mx = v[0];
+            for (float x : v) { s += x; mn = std::min(mn, x); mx = std::max(mx, x); }
+            char buf[160];
+            snprintf(buf, sizeof(buf),
+                     "avg=%9.3f  min=%9.3f  max=%9.3f", s / v.size(), mn, mx);
+            return std::string(buf);
+        };
+        auto stats_i = [](const std::vector<int>& v) {
+            double s = 0; int mn = v[0], mx = v[0];
+            for (int x : v) { s += x; mn = std::min(mn, x); mx = std::max(mx, x); }
+            char buf[160];
+            snprintf(buf, sizeof(buf),
+                     "avg=%9.3f  min=%9d  max=%9d", s / v.size(), mn, mx);
+            return std::string(buf);
+        };
+        printf("\n=== Statistics over %d runs (ms) ===\n", num_runs);
+        printf("PA time     : %s\n", stats_f(pa_ms_arr).c_str());
+        printf("CA time     : %s\n", stats_f(ca_ms_arr).c_str());
+        printf("Reduce time : %s\n", stats_f(reduce_ms_arr).c_str());
+        printf("Total time  : %s\n", stats_f(total_ms_arr).c_str());
+        printf("colors used : %s\n", stats_i(colors_arr).c_str());
+        printf("iter count  : %s\n", stats_i(iter_count_arr).c_str());
     }
-    float runtime_CA = timer_CA.stop();
-    std::cout << "Finish CA" << (is_fused ? " (coloring only)" : "") << std::endl;
-
-    ColorReductionStats reduction_stats =
-        run_post_color_reduction(blocks, g, d, color);
-
-    float total_runtime = runtime_PA + runtime_CA + reduction_stats.runtime_sec;
-    
-    printf("PA runtime: %.6f ms\n", runtime_PA * 1000); // GPUTimer returns seconds? No, wait.
-    // Let's double check GPUTimer::stop() implementation in line 108.
-    // float stop() {cudaEventRecord(end, 0);  cudaEventSynchronize(end);  float ms;  cudaEventElapsedTime(&ms, beg, end);  return 0.001f * ms;}
-    // It returns seconds (0.001f * ms).
-    
-    printf("CA runtime: %.6f ms\n", runtime_CA * 1000);
-    printf("Post reduction runtime: %.6f ms\n", reduction_stats.runtime_sec * 1000);
-    printf("Total runtime: %.6f ms\n", total_runtime * 1000);
-    printf("colors before reduction: %d\n", reduction_stats.colors_before);
-    printf("colors after reduction: %d\n", reduction_stats.colors_after);
-    printf("color reduction delta: %d\n",
-           reduction_stats.colors_before - reduction_stats.colors_after);
-    verifyAndPrintStats(g, color, total_runtime);
-
-    #ifdef PROFILE
-    int host_iter_count = 0;
-    cudaMemcpyFromSymbol(&host_iter_count, iter_count, sizeof(int), 0, cudaMemcpyDeviceToHost);
-    printf("Iter count: %d\n", host_iter_count);
-    #endif
     
     cudaFree(d.wl_d);  cudaFree(d.color_d);  cudaFree(d.posscol2_d);  cudaFree(d.posscol_d);  cudaFree(d.nlist2_d);  cudaFree(d.nlist_d);  cudaFree(d.nidx_d);
     delete [] color;

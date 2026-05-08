@@ -306,9 +306,7 @@ __global__ void bb_split_phase3_advance(
     }
 
     bb_peel_iter += 1;
-#ifdef PROFILE
     iter_count += 1;
-#endif
 }
 
 // ────────────────────────────────────────────────────────────────────────────
