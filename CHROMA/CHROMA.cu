@@ -338,15 +338,18 @@ int main(int argc, char* argv[])
                 input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
                          /  chroma_predictor::SCALER_STD[i];
             }
-            score_result = score(input);
+            score_result = score(input) + chroma_predictor::SCORE_SHIFT;
+            fuzzy_number = chroma_predictor::USE_FLOOR
+                           ? (int)floor(score_result)
+                           : (int)round(score_result);
         } else
     #endif
         {
             // Legacy 2-feature predictor: V, E only
             double input[2] = {(double)g.nodes, (double)g.edges};
             score_result = score(input);
+            fuzzy_number = (int)round(score_result);
         }
-        fuzzy_number = (int)round(score_result);
         if (fuzzy_number < 0) fuzzy_number = 0;
     }
     #else

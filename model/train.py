@@ -101,8 +101,11 @@ def run_v2(args) -> int:
         print(f"[v2] wrote {args.out_cpp}  ({len(cpp)} bytes)")
 
     write_scaler_header(scaler, model_class=spec.name,
-                         feature_names=FEATURE_NAMES, path=args.out_scaler)
-    print(f"[v2] wrote {args.out_scaler}")
+                         feature_names=FEATURE_NAMES, path=args.out_scaler,
+                         use_floor=args.use_floor,
+                         score_shift=args.score_shift)
+    print(f"[v2] wrote {args.out_scaler}  "
+          f"(use_floor={args.use_floor}, score_shift={args.score_shift})")
 
     meta = {
         "generated_utc":   datetime.datetime.utcnow().isoformat() + "Z",
@@ -117,6 +120,8 @@ def run_v2(args) -> int:
         "cv_folds":        args.cv_folds,
         "best_params":     best_params,
         "cv_results":      fold_metrics,
+        "rounding_policy": {"use_floor": args.use_floor,
+                             "score_shift": args.score_shift},
         "training_samples": names,
         "sklearn_version": sklearn.__version__,
         "input":           str(Path(args.input).resolve()),
@@ -165,6 +170,12 @@ def _build_parser():
     p.add_argument("--out-cpp",    default="model/model_v2.cpp")
     p.add_argument("--out-scaler", default="model/scaler.h")
     p.add_argument("--out-meta",   default="model/model_meta.json")
+    p.add_argument("--use-floor", action="store_true",
+                   help="emit USE_FLOOR=true so deployment uses floor() instead "
+                        "of round() (trades VR for ŷ — see model_meta.json)")
+    p.add_argument("--score-shift", type=float, default=0.0,
+                   help="constant added to score(input) before round/floor at "
+                        "deployment (negative = more conservative)")
     return p
 
 

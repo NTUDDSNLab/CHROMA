@@ -2,6 +2,7 @@
   "alpha": 10.0,
   "best_params": {
     "max_depth": 10,
+    "max_features": 1.0,
     "min_samples_leaf": 3,
     "n_estimators": 100
   },
@@ -55,10 +56,14 @@
     "GI",
     "H_er"
   ],
-  "generated_utc": "2026-05-09T20:04:05.887071Z",
+  "generated_utc": "2026-05-09T20:22:54.853534Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/SSMC_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged.json",
   "model_class": "rf",
+  "rounding_policy": {
+    "score_shift": -0.5,
+    "use_floor": true
+  },
   "sklearn_version": "1.7.2",
   "training_samples": [
     "CollegeMsg.egr",

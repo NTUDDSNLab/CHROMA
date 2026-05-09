@@ -1,5 +1,5 @@
 {
-  "alpha": 10.0,
+  "alpha": 30.0,
   "best_params": {
     "max_depth": 10,
     "max_features": 1.0,
@@ -14,35 +14,35 @@
       "mae": 1.5,
       "mean_theta": 3.857142857142857,
       "vr": 0.40476190476190477,
-      "weighted_loss": -0.3095238095238093
+      "weighted_loss": 6.7857142857142865
     },
     {
       "fold": 1,
       "mae": 1.3333333333333333,
       "mean_theta": 4.0476190476190474,
       "vr": 0.3333333333333333,
-      "weighted_loss": -1.2142857142857144
+      "weighted_loss": 4.4523809523809526
     },
     {
       "fold": 2,
       "mae": 1.1428571428571428,
       "mean_theta": 3.9761904761904763,
       "vr": 0.3333333333333333,
-      "weighted_loss": -1.1428571428571432
+      "weighted_loss": 4.523809523809524
     },
     {
       "fold": 3,
       "mae": 1.4761904761904763,
       "mean_theta": 4.119047619047619,
       "vr": 0.2619047619047619,
-      "weighted_loss": -1.9999999999999991
+      "weighted_loss": 2.238095238095239
     },
     {
       "fold": 4,
       "mae": 1.0238095238095237,
       "mean_theta": 3.5476190476190474,
       "vr": 0.21428571428571427,
-      "weighted_loss": -1.9047619047619049
+      "weighted_loss": 1.3809523809523805
     }
   ],
   "deployable": true,
@@ -56,7 +56,7 @@
     "GI",
     "H_er"
   ],
-  "generated_utc": "2026-05-09T20:14:43.864270Z",
+  "generated_utc": "2026-05-09T20:17:01.684875Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/SSMC_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged.json",
   "model_class": "rf",

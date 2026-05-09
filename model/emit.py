@@ -27,6 +27,13 @@ static const double SCALER_STD[FEATURE_COUNT] = {{
 {std_lines}
 }};
 
+// Deployment-time rounding policy (set by trainer to operate at a chosen
+// VR/θ̂ tradeoff point; see model/model_meta.json:rounding_policy).
+//   USE_FLOOR=true  → fuzzy_number = (int)floor(score(input) + SCORE_SHIFT)
+//   USE_FLOOR=false → fuzzy_number = (int)round(score(input) + SCORE_SHIFT)
+static constexpr bool   USE_FLOOR   = {use_floor};
+static constexpr double SCORE_SHIFT = {score_shift};
+
 }}  // namespace chroma_predictor
 """
 
@@ -45,10 +52,15 @@ def _fmt_array(arr: np.ndarray) -> str:
 
 
 def write_scaler_header(scaler, model_class: str,
-                         feature_names: Sequence[str], path) -> None:
+                         feature_names: Sequence[str], path,
+                         use_floor: bool = False,
+                         score_shift: float = 0.0) -> None:
     """Emit scaler.h containing the inline mean/std arrays for a fitted
     sklearn StandardScaler. `model_class` is recorded for runtime checks
-    (linear vs tree models pick raw vs scaled inputs)."""
+    (linear vs tree models pick raw vs scaled inputs).
+
+    `use_floor` and `score_shift` set the deployment-time rounding policy
+    consumed by CHROMA.cu's --predict path."""
     mean = np.asarray(scaler.mean_, dtype=float)
     std  = np.asarray(scaler.scale_, dtype=float)   # .scale_ ≡ √var_
     if mean.size != len(feature_names):
@@ -62,6 +74,8 @@ def write_scaler_header(scaler, model_class: str,
         feature_order=", ".join(feature_names),
         mean_lines=_fmt_array(mean),
         std_lines=_fmt_array(std),
+        use_floor=("true" if use_floor else "false"),
+        score_shift=f"{float(score_shift):.17g}",
     )
     Path(path).write_text(text)
 
