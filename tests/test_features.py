@@ -79,3 +79,32 @@ def test_gini_star(canonical_egr_fixtures):
     """K_{1,9} deg=[9,1,...,1]. MAD = 2·1·9·8 = 144; mean=1.8; GI=144/(2·100·1.8)=0.4."""
     f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["star_K_1_9"]))
     assert f["GI"] == pytest.approx(0.4, abs=1e-9)
+
+
+def test_entropy_regular_one(canonical_egr_fixtures):
+    """Regular graphs: every pᵢ = 1/n → H = log₂ n → H_er = 1."""
+    for name in ("K_5", "C_10"):
+        f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures[name]))
+        assert f["H_er"] == pytest.approx(1.0, abs=1e-9), name
+
+
+def test_entropy_P10(canonical_egr_fixtures):
+    """P_10: 2 vertices p=1/18, 8 vertices p=2/18.
+       H = -2·(1/18)·log₂(1/18) - 8·(2/18)·log₂(2/18)
+         = log₂(18) - 16/18
+       H_er = H / log₂(10)"""
+    H = math.log2(18) - 16/18
+    expected = H / math.log2(10)
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["P_10"]))
+    assert f["H_er"] == pytest.approx(expected, abs=1e-9)
+
+
+def test_entropy_star(canonical_egr_fixtures):
+    """K_{1,9}: 1 hub p=9/18=0.5, 9 leaves p=1/18.
+       H = -1·0.5·log₂(0.5) - 9·(1/18)·log₂(1/18)
+         = 0.5 + 0.5·log₂(18)
+       H_er = H / log₂(10)"""
+    H = 0.5 + 0.5 * math.log2(18)
+    expected = H / math.log2(10)
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["star_K_1_9"]))
+    assert f["H_er"] == pytest.approx(expected, abs=1e-9)

@@ -64,6 +64,18 @@ def _gini(deg: np.ndarray) -> float:
     return float((coeffs * sorted_d).sum() / (n * s))
 
 
+def _relative_entropy(deg: np.ndarray, m: int) -> float:
+    """H_er = (−Σ pᵢ log₂ pᵢ) / log₂ n, pᵢ = dᵢ / m. Returns 1 for regular
+    graphs, 0 in the degenerate empty case."""
+    n = deg.size
+    if n <= 1 or m == 0:
+        return 0.0
+    p = deg.astype(np.float64) / float(m)
+    nz = p > 0                   # 0 log 0 ≡ 0
+    H = -np.sum(p[nz] * np.log2(p[nz]))
+    return float(H / np.log2(n))
+
+
 def compute_features(g: ECLGraph) -> dict:
     """Return dict with the 7 features defined in FEATURE_NAMES."""
     n = g.nodes
@@ -78,7 +90,6 @@ def compute_features(g: ECLGraph) -> dict:
     s = float(np.sqrt(((deg - d_mean) ** 2).mean()))
     r = (d_max - d_min) / d_mean if d_mean > 0 else 0.0
 
-    # Placeholders for H_er — wired in Task 5
     return {
         "V":    float(n),
         "E":    float(m),
@@ -86,5 +97,5 @@ def compute_features(g: ECLGraph) -> dict:
         "s":    s,
         "R":    float(r),
         "GI":   _gini(deg),
-        "H_er": 0.0,
+        "H_er": _relative_entropy(deg, m),
     }
