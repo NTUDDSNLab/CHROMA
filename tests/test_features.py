@@ -59,3 +59,23 @@ def test_basic_stats_C10(canonical_egr_fixtures):
     assert f["d"] == pytest.approx(2.0)
     assert f["s"] == pytest.approx(0.0)
     assert f["R"] == pytest.approx(0.0)
+
+
+def test_gini_regular_zero(canonical_egr_fixtures):
+    """K_5 (all deg 4) and C_10 (all deg 2) → GI = 0."""
+    for name in ("K_5", "C_10"):
+        f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures[name]))
+        assert f["GI"] == pytest.approx(0.0, abs=1e-12), name
+
+
+def test_gini_P10(canonical_egr_fixtures):
+    """P_10 deg=[1,1,2,2,2,2,2,2,2,2]. By MAD formula:
+       Σᵢ Σⱼ |dᵢ−dⱼ| = 2·(2 deg-1 × 8 deg-2) = 32; GI = 32 / (2·100·1.8) = 16/180 ≈ 0.0889."""
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["P_10"]))
+    assert f["GI"] == pytest.approx(16/180, abs=1e-9)
+
+
+def test_gini_star(canonical_egr_fixtures):
+    """K_{1,9} deg=[9,1,...,1]. MAD = 2·1·9·8 = 144; mean=1.8; GI=144/(2·100·1.8)=0.4."""
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["star_K_1_9"]))
+    assert f["GI"] == pytest.approx(0.4, abs=1e-9)

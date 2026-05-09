@@ -52,6 +52,18 @@ def _degree_array(g: ECLGraph) -> np.ndarray:
     return np.diff(g.nindex.astype(np.int64))
 
 
+def _gini(deg: np.ndarray) -> float:
+    """Sorted-rank Gini: G = (Σᵢ (2i−n−1) dᵢ) / (n · Σdᵢ), i = 1..n on sorted dᵢ.
+    Equivalent to the MAD form (Σᵢⱼ |dᵢ−dⱼ| / (2 n² μ)) — see plan task notes."""
+    n = deg.size
+    s = deg.sum()
+    if n == 0 or s == 0:
+        return 0.0
+    sorted_d = np.sort(deg.astype(np.float64))
+    coeffs   = (2.0 * np.arange(1, n + 1) - n - 1)
+    return float((coeffs * sorted_d).sum() / (n * s))
+
+
 def compute_features(g: ECLGraph) -> dict:
     """Return dict with the 7 features defined in FEATURE_NAMES."""
     n = g.nodes
@@ -66,13 +78,13 @@ def compute_features(g: ECLGraph) -> dict:
     s = float(np.sqrt(((deg - d_mean) ** 2).mean()))
     r = (d_max - d_min) / d_mean if d_mean > 0 else 0.0
 
-    # Placeholders for GI / H_er — wired in Tasks 4 + 5
+    # Placeholders for H_er — wired in Task 5
     return {
         "V":    float(n),
         "E":    float(m),
         "d":    d_mean,
         "s":    s,
         "R":    float(r),
-        "GI":   0.0,
+        "GI":   _gini(deg),
         "H_er": 0.0,
     }
