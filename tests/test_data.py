@@ -54,3 +54,39 @@ def test_keys_not_numeric_ignored():
         "1": {"color": 10, "runtime_ms": 800.0},
     }
     assert data.compute_max_theta(per, baseline_color=10) == 1
+
+
+import numpy as np
+from pathlib import Path
+
+FIXDIR = Path(__file__).parent / "fixtures"
+
+
+def test_prepare_train_data(canonical_egr_fixtures):
+    X, y, names = data.prepare_train_data(
+        json_path=FIXDIR / "tiny_training.json",
+        graph_dir=FIXDIR,
+    )
+    # 3 graphs, 7 features each
+    assert X.shape == (3, 7)
+    assert y.shape == (3,)
+    assert names == ["K_5.egr", "P_10.egr", "C_10.egr"]
+
+    # Spot-check K_5 row: V=5, E=20, d=4, s=0, R=0
+    k5_idx = names.index("K_5.egr")
+    assert X[k5_idx, 0] == pytest.approx(5)        # V
+    assert X[k5_idx, 1] == pytest.approx(20)       # E (from .egr, not JSON)
+    assert X[k5_idx, 2] == pytest.approx(4.0)      # d
+
+    # Targets: K_5 has 3 thetas all colour ≤ 5 with speedups 1.43, 1.4 — both ≥ 1.2 → max=2
+    assert y[k5_idx] == 2
+
+
+def test_prepare_train_data_skips_missing_egr(tmp_path):
+    """If a dataset's .egr isn't in graph_dir, the row is skipped with a warning."""
+    json_path = tmp_path / "j.json"
+    json_path.write_text('{"missing.egr": {"vertices": 1, "edges": 0, "0": {"color": 1, "runtime_ms": 1.0}}}')
+    X, y, names = data.prepare_train_data(json_path=json_path, graph_dir=tmp_path)
+    assert X.shape == (0, 7)
+    assert y.shape == (0,)
+    assert names == []
