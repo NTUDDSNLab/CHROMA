@@ -30,16 +30,18 @@ TARGET    := CHROMA
 SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu BB.cu BB_split.cu CHROMA.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp ../lib/io/graph_features.cpp
 
-ifeq ($(PRE_MODEL), 1)
-	CPP_SRCS += ../model/model.cpp
-	DC_FLAGS += -DPRED_MODEL
-	CXXFLAGS += -DPRED_MODEL
-endif
-
 V2_MODEL ?= 0
-ifeq ($(V2_MODEL), 1)
-	DC_FLAGS += -DHAVE_V2_MODEL
-	CXXFLAGS += -DHAVE_V2_MODEL
+
+ifeq ($(PRE_MODEL), 1)
+	ifeq ($(V2_MODEL), 1)
+		CPP_SRCS += ../model/model_v2.cpp
+		DC_FLAGS += -DPRED_MODEL -DHAVE_V2_MODEL -I../model
+		CXXFLAGS += -DPRED_MODEL -DHAVE_V2_MODEL -I../model
+	else
+		CPP_SRCS += ../model/model.cpp
+		DC_FLAGS += -DPRED_MODEL
+		CXXFLAGS += -DPRED_MODEL
+	endif
 endif
 
 ifeq ($(PROF), 1)

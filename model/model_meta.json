@@ -1,0 +1,76 @@
+{
+  "alpha": 10.0,
+  "best_params": {},
+  "beta": 1.0,
+  "cv_folds": 5,
+  "cv_results": [
+    {
+      "fold": 0,
+      "mae": 1.0,
+      "mean_theta": 1.3333333333333333,
+      "vr": 0.3333333333333333,
+      "weighted_loss": 1.4999999999999998
+    },
+    {
+      "fold": 1,
+      "mae": 23.0,
+      "mean_theta": -15.333333333333334,
+      "vr": 0.6666666666666666,
+      "weighted_loss": 21.5
+    },
+    {
+      "fold": 2,
+      "mae": 8.0,
+      "mean_theta": 5.0,
+      "vr": 0.3333333333333333,
+      "weighted_loss": -2.166666666666667
+    },
+    {
+      "fold": 3,
+      "mae": 1.5,
+      "mean_theta": 1.0,
+      "vr": 0.5,
+      "weighted_loss": 3.5
+    },
+    {
+      "fold": 4,
+      "mae": 5.5,
+      "mean_theta": -2.0,
+      "vr": 0.0,
+      "weighted_loss": 2.0
+    }
+  ],
+  "deployable": true,
+  "feature_count": 7,
+  "feature_names": [
+    "V",
+    "E",
+    "d",
+    "s",
+    "R",
+    "GI",
+    "H_er"
+  ],
+  "generated_utc": "2026-05-09T00:46:52.920020Z",
+  "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/EGR",
+  "input": "/home/chsieh45/PunchShadow/CHROMA/model/results_res_grid_a1_all_with_counts.json",
+  "model_class": "linear",
+  "sklearn_version": "1.7.2",
+  "training_samples": [
+    "Email-Enron.col.egr",
+    "Stanford.egr",
+    "as-skitter.egr",
+    "cit-Patents.egr",
+    "delaunay_n24.egr",
+    "europe_osm.egr",
+    "facebook.egr",
+    "le450_25d.egr",
+    "r4-2e23.sym.egr",
+    "school1.egr",
+    "soc-Epinions1.col.egr",
+    "wiki-Vote.col.egr",
+    "youtube.egr"
+  ],
+  "use_scaled": true,
+  "vr_cap": 0.05
+}
