@@ -25,3 +25,4 @@ CHROMA/CHROMA
 CHROMA_RGP/CHROMA_RGP
 JP-Series/JP-Series
 .claude/worktrees/
+tests/fixtures/*.egr
