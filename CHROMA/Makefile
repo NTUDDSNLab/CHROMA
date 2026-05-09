@@ -1,6 +1,7 @@
 # ================== Usage ==================
 # $ make                   Generate executable CHROMA
 # $ make PRE_MODEL=1       Enable predict model
+# $ make PRE_MODEL=1 V2_MODEL=1   Enable v2 predict model (requires model_v2.cpp + scaler.h, see T17)
 # $ make DEBUG=1         Enable debug mode (-lineinfo -O0)
 # $ make clean             Remove *.o and CHROMA
 # =================================================
@@ -27,12 +28,18 @@ TARGET    := CHROMA
 
 # ---- Source File List --------------------------------------
 SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu BB.cu BB_split.cu CHROMA.cu
-CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp
+CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp ../lib/io/graph_features.cpp
 
 ifeq ($(PRE_MODEL), 1)
 	CPP_SRCS += ../model/model.cpp
 	DC_FLAGS += -DPRED_MODEL
 	CXXFLAGS += -DPRED_MODEL
+endif
+
+V2_MODEL ?= 0
+ifeq ($(V2_MODEL), 1)
+	DC_FLAGS += -DHAVE_V2_MODEL
+	CXXFLAGS += -DHAVE_V2_MODEL
 endif
 
 ifeq ($(PROF), 1)
