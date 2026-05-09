@@ -44,7 +44,12 @@ def _per_fold_metrics(y_true, y_pred, alpha, beta, vr_cap):
 
 def run_v2(args) -> int:
     spec = get_spec(args.model)
-    print(f"[v2] model={spec.name}  deployable={spec.deployable}")
+    if args.model == "xgb_pinball":
+        from .models import set_xgb_pinball_quantile
+        set_xgb_pinball_quantile(args.xgb_quantile)
+        print(f"[v2] model={spec.name}  q={args.xgb_quantile}  deployable={spec.deployable}")
+    else:
+        print(f"[v2] model={spec.name}  deployable={spec.deployable}")
 
     X, y, names = prepare_train_data(args.input, args.graph_dir,
                                       speedup_decay=args.speedup_decay)
@@ -122,6 +127,7 @@ def run_v2(args) -> int:
         "cv_results":      fold_metrics,
         "rounding_policy": {"use_floor": args.use_floor,
                              "score_shift": args.score_shift},
+        "xgb_quantile":    args.xgb_quantile if args.model == "xgb_pinball" else None,
         "training_samples": names,
         "sklearn_version": sklearn.__version__,
         "input":           str(Path(args.input).resolve()),
@@ -176,6 +182,9 @@ def _build_parser():
     p.add_argument("--score-shift", type=float, default=0.0,
                    help="constant added to score(input) before round/floor at "
                         "deployment (negative = more conservative)")
+    p.add_argument("--xgb-quantile", type=float, default=0.15,
+                   help="q for xgb_pinball custom objective; q<0.5 → conservative "
+                        "predictions (default 0.15 → ~17-21%% VR on SSMC training set)")
     return p
 
 

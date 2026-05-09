@@ -18,6 +18,37 @@ def _xgb_factory():
                              objective="reg:squarederror", random_state=42)
 
 
+def _xgb_pinball_factory(q: float = 0.15):
+    """Return a 0-arg factory that builds an XGBRegressor with pinball/quantile
+    custom objective targeting the q-th quantile of y|x. q < 0.5 → predictions
+    are biased low (conservative). The custom objective is per-sample with
+    constant hessian = 1.0 (linear loss approximation that XGBoost handles well).
+    """
+    import numpy as np
+    import xgboost as xgb
+
+    def _pinball_obj(y_true, y_pred):
+        err = y_pred - y_true
+        grad = np.where(err > 0, 1.0 - q, -q)
+        hess = np.ones_like(err)
+        return grad, hess
+
+    def factory():
+        return xgb.XGBRegressor(
+            n_estimators=300, max_depth=5, learning_rate=0.1,
+            base_score=0.0, random_state=42, verbosity=0,
+            objective=_pinball_obj,
+        )
+    return factory
+
+
+def set_xgb_pinball_quantile(q: float) -> None:
+    """Override the q baked into the xgb_pinball spec's factory. Lets train.py
+    expose --xgb-quantile without having to re-register the spec."""
+    spec = get_spec("xgb_pinball")
+    spec.factory = _xgb_pinball_factory(q)
+
+
 def _lgbm_factory():
     import lightgbm as lgb
     return lgb.LGBMRegressor(n_estimators=100, max_depth=-1, learning_rate=0.1,
@@ -55,6 +86,12 @@ SPECS = [
               {"n_estimators": [100, 300],
                "max_depth":    [3, 6],
                "learning_rate":[0.05, 0.1]},
+              deployable=True),
+    ModelSpec("xgb_pinball",
+              _xgb_pinball_factory(0.15),  # default q; override via --xgb-quantile
+              {"n_estimators":  [200, 300, 500],
+               "max_depth":     [3, 5, 7],
+               "learning_rate": [0.05, 0.1]},
               deployable=True),
     ModelSpec("lgbm",
               _lgbm_factory,
