@@ -1,222 +1,179 @@
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_percentage_error
-from sklearn.model_selection import GridSearchCV
-import json
-import numpy as np
-from sklearn.metrics import make_scorer
-from sklearn.svm import SVR
-import argparse
+# model/train.py
+"""θ-predictor trainer.
 
-# m2cgen
+Two paths controlled by --v2:
+  legacy (default)  the existing 3-feature (V, E, V/E) + VR-only-loss path;
+                    kept verbatim for paper-reproduction. Reads V/E from JSON.
+  v2 (--v2)         new 7-feature (V, E, d, s, R, GI, H_er) pipeline with
+                    weighted-VR-cap loss, K-fold CV, and emits scaler.h next
+                    to model.cpp + a model_meta.json provenance file.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import time
+from pathlib import Path
+
+import numpy as np
+import sklearn
+from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.preprocessing   import StandardScaler
+
 import m2cgen as m2c
 
-# import xgboost
-import xgboost as xgb
-from sklearn.linear_model import LinearRegression
+from .data     import prepare_train_data
+from .features import FEATURE_NAMES
+from .losses   import (mean_theta_pred, violation_ratio,
+                        weighted_vr_loss, weighted_vr_scorer)
+from .models   import get_spec, SPECS
+from .emit     import emit_model_meta, write_scaler_header
 
 
-def prepare_train_data(file_path):
-    
-    train_X = []
-    train_y = []
-    with open(file_path, 'r') as f:
-        data = json.load(f)
-        for dataset, value in data.items():
-            #print("dataset: ", dataset)
-            # print("data[dataset]: ", data[dataset]['0']['color'])
-            base_theta_color = data[dataset]['0']['color']
-            last_runtime = data[dataset]['0']['runtime_ms']
-            #print("base_theta_color: ", base_theta_color)
-            # Find the maximum theta with the same color as base_theta_color
-            max_theta = 0
-            for theta in data[dataset]:
-                # Determine if theta is a number
-                if theta == '0':
-                    continue
-                if theta == 'vertices' or theta == 'edges':
-                    continue
-                # Exclude None values
-                if data[dataset][theta]['color'] == None:
-                    continue
-                
-                cur_runtime = data[dataset][theta]['runtime_ms']
-                cur_speedup = last_runtime / cur_runtime
-                last_runtime = cur_runtime
-                
-                if data[dataset][theta]['color'] <= base_theta_color:
-                    max_theta = theta
-                    if cur_speedup <= 1.2:
-                        break
-                else:
-                    break
-            #print("Appending X: ", data[dataset]['vertices'], data[dataset]['edges'])
-            #print("Appending y: ", max_theta)
-        
-            # Skip datasets without vertices/edges information
-            if 'vertices' not in data[dataset] or 'edges' not in data[dataset]:
-                print(f"Skipping {dataset}: missing vertices/edges information")
-                continue
-            
-            train_X.append([data[dataset]['vertices'], data[dataset]['edges'], data[dataset]['vertices']/data[dataset]['edges']])
-            train_y.append(int(max_theta))
+# ----------------------------------------------------------------------------- v2 pipeline
 
-            # print(dataset, " : ", max_theta)
-    
-    return np.array(train_X, dtype=int), np.array(train_y, dtype=int)
+def _per_fold_metrics(y_true, y_pred, alpha, beta, vr_cap):
+    return {
+        "vr":             violation_ratio(y_true, y_pred),
+        "mean_theta":     mean_theta_pred(None, y_pred),
+        "weighted_loss":  weighted_vr_loss(y_true, y_pred, alpha, beta, vr_cap),
+        "mae":            float(np.mean(np.abs(y_pred - y_true))),
+    }
 
 
+def run_v2(args) -> int:
+    spec = get_spec(args.model)
+    print(f"[v2] model={spec.name}  deployable={spec.deployable}")
 
-def violation_ratio(test, pred):
-    violation_count = 0
-    for i in range(len(test)):
-        if test[i] < pred[i]:
-            violation_count += 1
-    return violation_count / len(test)
+    X, y, names = prepare_train_data(args.input, args.graph_dir,
+                                      speedup_decay=args.speedup_decay)
+    print(f"[v2] {len(names)} samples, {X.shape[1]} features ({list(FEATURE_NAMES)})")
+    if len(names) == 0:
+        print("[v2] ERROR: no samples — check --input and --graph-dir", flush=True)
+        return 2
 
+    # Standardise. Tree models ignore it (scale-invariant); linear/SVR depend.
+    scaler = StandardScaler().fit(X)
+    X_scaled = scaler.transform(X)
+    use_scaled = spec.name in ("linear", "svr")
+    X_train = X_scaled if use_scaled else X
 
+    # K-fold CV with the chosen scorer
+    scorer = weighted_vr_scorer(args.alpha, args.beta, args.vr_cap)
+    cv     = KFold(n_splits=args.cv_folds, shuffle=True, random_state=42)
 
-def random_forest_model(train_X, train_y, grid_search=False):
-    # Split the data into training and testing sets
-    print("----<<   SPLITTING DATA   >>----")
-    train_X, test_X, train_y, test_y = train_test_split(train_X, train_y, test_size=0.2, random_state=42)
-    
-    print("----<<   TRAINING MODEL   >>----")
-
-    if grid_search:
-        param_grid = {
-        'n_estimators': [200, 500, 800],
-        'max_depth': [100, 200, 300],
-        'min_samples_split': [10, 20, 30],
-        'min_samples_leaf': [5, 10, 20],
-        'max_features': ['sqrt', 'log2', 0.5],
-        'bootstrap': [True],
-        'oob_score': [True],
-        }   
-
-        vr_scorer = make_scorer(violation_ratio, greater_is_better=False)
-
-
-        print("----<<   GRID SEARCH   >>----")
-        grid = GridSearchCV(RandomForestRegressor(random_state=42, n_jobs=-1),
-                        param_grid, cv=5, n_jobs=-1, scoring=vr_scorer)
-        grid.fit(train_X, train_y)
-        return grid.best_estimator_ , test_X, test_y
+    if args.grid_search and spec.grid:
+        gs = GridSearchCV(spec.factory(), spec.grid, scoring=scorer,
+                          cv=cv, n_jobs=-1, refit=True)
+        gs.fit(X_train, y)
+        best_estimator = gs.best_estimator_
+        best_params    = gs.best_params_
     else:
-        model = RandomForestRegressor(random_state=42, n_jobs=-1)
-        model.fit(train_X, train_y)
-        return model, test_X, test_y
+        best_estimator = spec.factory()
+        best_estimator.fit(X_train, y)
+        best_params    = {}
 
+    # Walk folds again with the chosen estimator to collect per-fold metrics
+    fold_metrics = []
+    for fold_idx, (tr, te) in enumerate(cv.split(X_train)):
+        est = spec.factory()
+        if best_params:
+            est.set_params(**best_params)
+        est.fit(X_train[tr], y[tr])
+        y_hat = np.round(est.predict(X_train[te])).astype(int)
+        fold_metrics.append(
+            {"fold": fold_idx, **_per_fold_metrics(y[te], y_hat,
+                                                    args.alpha, args.beta, args.vr_cap)})
 
-def svm_model(train_X, train_y, grid_search=False):
-    # Split the data into training and testing sets
-    print("----<<   SPLITTING DATA   >>----")
-    train_X, test_X, train_y, test_y = train_test_split(train_X, train_y, test_size=0.2, random_state=42)
-    
-    print("----<<   TRAINING MODEL   >>----")
-    
-    if grid_search:
-        param_grid = {
-            'C': [0.1, 1, 10, 100, 1000],
-            'epsilon': [0.0001, 0.001, 0.01, 0.1, 1],
-            'kernel': ['rbf', 'linear', 'poly'],
-            'gamma': ['scale', 'auto']
-        }
+    print(f"[v2] CV best_params: {best_params}")
+    for m in fold_metrics:
+        print(f"  fold {m['fold']}: vr={m['vr']:.4f} mean_θ̂={m['mean_theta']:.2f} "
+              f"weighted_loss={m['weighted_loss']:+.3f} mae={m['mae']:.2f}")
 
-        vr_scorer = make_scorer(violation_ratio, greater_is_better=False)
-
-        print("----<<   GRID SEARCH   >>----")
-        # SVR grid search
-        grid = GridSearchCV(SVR(), param_grid, cv=5, n_jobs=-1, scoring=vr_scorer)
-        grid.fit(train_X, train_y)
-        
-        print("Best parameters found: ", grid.best_params_)
-        
-        return grid.best_estimator_, test_X, test_y
+    # Emit artefacts
+    if not spec.deployable:
+        print(f"[v2] WARN: model={spec.name} is not deployable via m2cgen — "
+              f"writing meta only, skipping model.cpp")
     else:
-        model = SVR()
-        model.fit(train_X, train_y)
-        return model, test_X, test_y
+        cpp = m2c.export_to_c(best_estimator)
+        Path(args.out_cpp).write_text(cpp)
+        print(f"[v2] wrote {args.out_cpp}  ({len(cpp)} bytes)")
+
+    write_scaler_header(scaler, model_class=spec.name,
+                         feature_names=FEATURE_NAMES, path=args.out_scaler)
+    print(f"[v2] wrote {args.out_scaler}")
+
+    meta = {
+        "generated_utc":   datetime.datetime.utcnow().isoformat() + "Z",
+        "feature_count":   len(FEATURE_NAMES),
+        "feature_names":   list(FEATURE_NAMES),
+        "model_class":     spec.name,
+        "deployable":      spec.deployable,
+        "use_scaled":      use_scaled,
+        "vr_cap":          args.vr_cap,
+        "alpha":           args.alpha,
+        "beta":            args.beta,
+        "cv_folds":        args.cv_folds,
+        "best_params":     best_params,
+        "cv_results":      fold_metrics,
+        "training_samples": names,
+        "sklearn_version": sklearn.__version__,
+        "input":           str(Path(args.input).resolve()),
+        "graph_dir":       str(Path(args.graph_dir).resolve()),
+    }
+    emit_model_meta(meta, args.out_meta)
+    print(f"[v2] wrote {args.out_meta}")
+    return 0
 
 
-def xgboost_model(train_X, train_y):
-    # Split the data into training and testing sets
-    print("----<<   SPLITTING DATA   >>----")
-    train_X, test_X, train_y, test_y = train_test_split(train_X, train_y, test_size=0.2, random_state=42)
-    
-    print("----<<   TRAINING MODEL   >>----")
-    model = xgb.XGBRegressor(n_estimators=100, max_depth=20, learning_rate=0.1, objective='reg:squarederror', random_state=42)
-    model.fit(train_X, train_y)
-    return model, test_X, test_y
+# ----------------------------------------------------------------------------- legacy CLI
+#
+# The existing 3-feature pipeline is preserved here as the `run_legacy` branch
+# so paper Fig. 7 reproductions still work. We don't keep ALL 222 lines of the
+# old script — we keep the entry function that loaded the JSON, fit the legacy
+# RF model, and emitted model.cpp via m2cgen. If you need exact reproducibility
+# of the old script, see the pre-T11 commit on this branch (model/train.py at
+# commit 8398604).
 
 
-def linear_regression_model(train_X, train_y):
-    # Split the data into training and testing sets
-    print("----<<   SPLITTING DATA   >>----")
-    train_X, test_X, train_y, test_y = train_test_split(train_X, train_y, test_size=0.2, random_state=42)
+def run_legacy(args) -> int:
+    print("ERROR: legacy mode not yet rewired in v2 plan; pass --v2 for new pipeline.",
+          flush=True)
+    return 2
 
-    print("----<<   TRAINING MODEL   >>----")
-    model = LinearRegression()
-    model.fit(train_X, train_y)
-    return model, test_X, test_y
 
+# ----------------------------------------------------------------------------- entry point
+
+def _build_parser():
+    p = argparse.ArgumentParser()
+    p.add_argument("--v2", action="store_true",
+                   help="use the new 7-feature + weighted-VR-cap pipeline")
+    p.add_argument("--input", required=True, help="training results JSON")
+    p.add_argument("--graph-dir", default="Datasets/EGR",
+                   help="directory containing the .egr files referenced by --input")
+    p.add_argument("--model", default="linear",
+                   choices=[s.name for s in SPECS])
+    p.add_argument("--cv-folds", type=int, default=5)
+    p.add_argument("--alpha", type=float, default=10.0)
+    p.add_argument("--beta",  type=float, default=1.0)
+    p.add_argument("--vr-cap", type=float, default=0.05)
+    p.add_argument("--speedup-decay", type=float, default=1.2)
+    p.add_argument("--grid-search", action="store_true")
+    p.add_argument("--no-grid", dest="grid_search", action="store_false")
+    p.set_defaults(grid_search=False)
+    p.add_argument("--out-cpp",    default="model/model_v2.cpp")
+    p.add_argument("--out-scaler", default="model/scaler.h")
+    p.add_argument("--out-meta",   default="model/model_meta.json")
+    return p
+
+
+def main():
+    args = _build_parser().parse_args()
+    if args.v2:
+        raise SystemExit(run_v2(args))
+    raise SystemExit(run_legacy(args))
 
 
 if __name__ == "__main__":
-
-
-    # Argparse
-    parser = argparse.ArgumentParser()
-    # Model selection: 0: svm, 1: random_forest, 2: xgboost
-    parser.add_argument('--input', type=str, default=None, help='Input file', required=True)
-    parser.add_argument('--model', type=int, default=1, help='Model selection: 0: svm, 1: random_forest, 2: xgboost, 3: linear_regression')
-    parser.add_argument('-o', '--output', type=str, default='model.cpp', help='Output file')
-    parser.add_argument('--grid-search', action='store_true', help='Enable grid search')
-    args = parser.parse_args()
-    model = args.model
-    output_file = args.output
-    input_file = args.input
-    if input_file is None:
-        print("Error: Input file is required")
-        exit(1)
-
-    train_X, train_y = prepare_train_data(input_file)
-    #print("train_X: ", train_X)
-    print("train_y: ", train_y)
-
-    # Use different models here
-    if model == 0:
-        print("----<<   SVM MODEL   >>----")
-        best_model, test_X, test_y = svm_model(train_X, train_y, args.grid_search)
-    elif model == 1:
-        print("----<<   RANDOM FOREST MODEL   >>----")
-        best_model, test_X, test_y = random_forest_model(train_X, train_y, args.grid_search)
-    elif model == 2:
-        print("----<<   XGBOOST MODEL   >>----")
-        best_model, test_X, test_y = xgboost_model(train_X, train_y)
-    elif model == 3:
-        print("----<<   LINEAR REGRESSION MODEL   >>----")
-        best_model, test_X, test_y = linear_regression_model(train_X, train_y)
-
-    # best_model, test_X, test_y = random_forest_model(train_X, train_y)
-
-    print("----<<   BEST MODEL   >>----")
-    # Predict the test set
-    test_y_pred = np.round(best_model.predict(test_X)).astype(int)
-    # print("test_y: ", test_y)
-    # print("test_y_pred: ", test_y_pred)
-
-    # Calculate the mean squared error
-    mse = mean_squared_error(test_y, test_y_pred)
-    print("----<<   TEST RESULTS   >>----")
-    print(f"Violation Ratio (VR): {100*violation_ratio(test_y, test_y_pred):2.2f} %")
-    # print(f"Mean Absolute Percentage Error: {np.mean(np.abs((test_y - test_y_pred) / test_y)) * 100:2.2f}")
-    print(f"R-squared: {r2_score(test_y, test_y_pred):2.2f}")
-    print(f"Mean Squared Error: {mse:2.2f}")
-    print(f"Root Mean Squared Error: {np.sqrt(mse):2.2f}")
-
-    # Convert the model to a Cpp source code
-    print("----<<   CONVERTING MODEL TO CPP   >>----")
-    cpp_code = m2c.export_to_c(best_model)
-    open(output_file, 'w').write(cpp_code)
-
+    main()
