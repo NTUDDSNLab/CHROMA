@@ -47,7 +47,7 @@ SPECS = [
               {"n_estimators": [100, 300],
                "max_depth":    [3, 5, 7],
                "learning_rate":[0.05, 0.1, 0.2]},
-              deployable=True),
+              deployable=False),  # m2cgen does not support sklearn GBR
     ModelSpec("xgb",
               _xgb_factory,
               {"n_estimators": [100, 300],

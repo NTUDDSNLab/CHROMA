@@ -1,47 +1,43 @@
 {
   "alpha": 10.0,
-  "best_params": {
-    "max_depth": 10,
-    "min_samples_leaf": 1,
-    "n_estimators": 100
-  },
+  "best_params": {},
   "beta": 1.0,
   "cv_folds": 5,
   "cv_results": [
     {
       "fold": 0,
-      "mae": 1.8333333333333333,
-      "mean_theta": 5.555555555555555,
-      "vr": 0.3888888888888889,
-      "weighted_loss": -2.166666666666666
+      "mae": 3.5555555555555554,
+      "mean_theta": 3.611111111111111,
+      "vr": 0.4444444444444444,
+      "weighted_loss": 0.33333333333333304
     },
     {
       "fold": 1,
-      "mae": 1.6470588235294117,
-      "mean_theta": 4.294117647058823,
-      "vr": 0.29411764705882354,
-      "weighted_loss": -1.8529411764705879
+      "mae": 2.588235294117647,
+      "mean_theta": 4.647058823529412,
+      "vr": 0.5882352941176471,
+      "weighted_loss": 0.735294117647058
     },
     {
       "fold": 2,
-      "mae": 1.4705882352941178,
-      "mean_theta": 4.352941176470588,
-      "vr": 0.23529411764705882,
-      "weighted_loss": -2.4999999999999996
+      "mae": 3.0,
+      "mean_theta": 4.588235294117647,
+      "vr": 0.47058823529411764,
+      "weighted_loss": -0.3823529411764701
     },
     {
       "fold": 3,
-      "mae": 2.588235294117647,
-      "mean_theta": 5.352941176470588,
-      "vr": 0.5294117647058824,
-      "weighted_loss": -0.5588235294117645
+      "mae": 2.8823529411764706,
+      "mean_theta": 5.647058823529412,
+      "vr": 0.6470588235294118,
+      "weighted_loss": 0.3235294117647056
     },
     {
       "fold": 4,
-      "mae": 1.6470588235294117,
-      "mean_theta": 4.529411764705882,
-      "vr": 0.35294117647058826,
-      "weighted_loss": -1.4999999999999996
+      "mae": 2.5294117647058822,
+      "mean_theta": 4.470588235294118,
+      "vr": 0.5294117647058824,
+      "weighted_loss": 0.3235294117647056
     }
   ],
   "deployable": true,
@@ -55,10 +51,10 @@
     "GI",
     "H_er"
   ],
-  "generated_utc": "2026-05-09T18:29:59.584214Z",
+  "generated_utc": "2026-05-09T18:29:40.913757Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/SSMC_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged.json",
-  "model_class": "rf",
+  "model_class": "linear",
   "sklearn_version": "1.7.2",
   "training_samples": [
     "CollegeMsg.egr",
@@ -148,6 +144,6 @@
     "soc-sign-epinions.nl.egr",
     "web-NotreDame.nl.egr"
   ],
-  "use_scaled": false,
+  "use_scaled": true,
   "vr_cap": 0.05
 }
