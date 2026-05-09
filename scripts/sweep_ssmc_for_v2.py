@@ -50,11 +50,18 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--limit", type=int, default=None,
                     help="for testing: process only first N graphs")
+    ap.add_argument("--graph-list", default=None,
+                    help="text file with one graph filename per line; overrides dir glob")
     args = ap.parse_args()
 
     dataset_dir = Path(args.dataset_dir)
     max_bytes = args.max_size_mb * 1024 * 1024
-    graphs = sorted(p for p in dataset_dir.glob("*.egr") if p.stat().st_size <= max_bytes)
+    if args.graph_list:
+        names = Path(args.graph_list).read_text().splitlines()
+        graphs = [dataset_dir / n for n in names if n.strip()]
+        graphs = [g for g in graphs if g.is_file() and g.stat().st_size <= max_bytes]
+    else:
+        graphs = sorted(p for p in dataset_dir.glob("*.egr") if p.stat().st_size <= max_bytes)
     if args.limit:
         graphs = graphs[: args.limit]
     print(f"[sweep] {len(graphs)} graphs (≤{args.max_size_mb} MB)", file=sys.stderr)
