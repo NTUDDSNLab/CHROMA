@@ -3,46 +3,46 @@
   "best_params": {
     "max_depth": 10,
     "max_features": 1.0,
-    "min_samples_leaf": 1,
-    "n_estimators": 100
+    "min_samples_leaf": 2,
+    "n_estimators": 300
   },
   "beta": 1.0,
   "cv_folds": 5,
   "cv_results": [
     {
       "fold": 0,
-      "mae": 1.4047619047619047,
-      "mean_theta": 3.6904761904761907,
-      "vr": 0.2619047619047619,
-      "weighted_loss": -1.5714285714285712
+      "mae": 1.05,
+      "mean_theta": 3.575,
+      "vr": 0.275,
+      "weighted_loss": -1.3249999999999997
     },
     {
       "fold": 1,
-      "mae": 1.0476190476190477,
-      "mean_theta": 3.9523809523809526,
-      "vr": 0.2857142857142857,
-      "weighted_loss": -1.5952380952380953
+      "mae": 1.2,
+      "mean_theta": 3.8,
+      "vr": 0.35,
+      "weighted_loss": -0.7999999999999998
     },
     {
       "fold": 2,
-      "mae": 1.3571428571428572,
-      "mean_theta": 3.7857142857142856,
-      "vr": 0.3333333333333333,
-      "weighted_loss": -0.9523809523809526
+      "mae": 1.475,
+      "mean_theta": 3.9,
+      "vr": 0.275,
+      "weighted_loss": -1.6499999999999995
     },
     {
       "fold": 3,
-      "mae": 1.4285714285714286,
-      "mean_theta": 4.261904761904762,
-      "vr": 0.2857142857142857,
-      "weighted_loss": -1.9047619047619047
+      "mae": 1.3846153846153846,
+      "mean_theta": 4.076923076923077,
+      "vr": 0.3076923076923077,
+      "weighted_loss": -1.4999999999999996
     },
     {
       "fold": 4,
-      "mae": 1.2439024390243902,
-      "mean_theta": 4.048780487804878,
-      "vr": 0.3170731707317073,
-      "weighted_loss": -1.3780487804878048
+      "mae": 1.1025641025641026,
+      "mean_theta": 3.923076923076923,
+      "vr": 0.2564102564102564,
+      "weighted_loss": -1.858974358974359
     }
   ],
   "deployable": true,
@@ -56,9 +56,9 @@
     "GI",
     "H_er"
   ],
-  "generated_utc": "2026-05-09T21:48:26.970396Z",
+  "generated_utc": "2026-05-10T21:47:36.220074Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/SSMC_unified",
-  "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged.json",
+  "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged_clean.json",
   "model_class": "rf",
   "rounding_policy": {
     "score_shift": -0.5,
@@ -74,7 +74,6 @@
     "amazon0312.egr",
     "amazon0505.egr",
     "amazon0601.egr",
-    "as-Skitter.egr",
     "as-caida.egr",
     "caidaRouterLevel.egr",
     "citationCiteseer.egr",
@@ -97,7 +96,6 @@
     "delaunay_n20.egr",
     "delaunay_n21.egr",
     "delaunay_n22.egr",
-    "email-Enron.egr",
     "hugetrace-00000.egr",
     "hugetrace-00010.egr",
     "hugetric-00000.egr",
@@ -124,16 +122,12 @@
     "roadNet-PA.egr",
     "roadNet-TX.egr",
     "road_central.egr",
-    "soc-Epinions1.egr",
     "soc-sign-Slashdot081106.egr",
     "soc-sign-Slashdot090216.egr",
     "soc-sign-Slashdot090221.egr",
     "venturiLevel3.egr",
     "web-BerkStan.egr",
     "web-Google.egr",
-    "web-Stanford.egr",
-    "wiki-Talk.egr",
-    "wiki-Vote.egr",
     "as-735.nl.egr",
     "ca-AstroPh.nl.egr",
     "ca-CondMat.nl.egr",
@@ -142,10 +136,7 @@
     "ca-HepTh.nl.egr",
     "cit-HepPh.nl.egr",
     "cit-HepTh.nl.egr",
-    "cit-Patents.nl.egr",
     "email-EuAll.nl.egr",
-    "soc-Slashdot0811.nl.egr",
-    "soc-Slashdot0902.nl.egr",
     "soc-sign-epinions.nl.egr",
     "web-NotreDame.nl.egr",
     "144.egr",
@@ -167,14 +158,12 @@
     "channel-500x100x100-b050.egr",
     "co2010.egr",
     "com-LiveJournal.egr",
-    "com-Youtube.egr",
     "cs4.egr",
     "ct2010.egr",
     "cti.egr",
     "data.egr",
     "de2010.egr",
     "delaunay_n23.egr",
-    "delaunay_n24.egr",
     "email-Eu-core-temporal.egr",
     "email-Eu-core.nl.egr",
     "fe_4elt2.egr",

@@ -1,0 +1,9554 @@
+{
+  "CollegeMsg.egr": {
+    "0": {
+      "color": 11,
+      "runtime_ms": 3.503104
+    },
+    "1": {
+      "color": 12,
+      "runtime_ms": 1.95584
+    },
+    "2": {
+      "color": 12,
+      "runtime_ms": 1.39776
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 1.2032
+    },
+    "4": {
+      "color": 11,
+      "runtime_ms": 1.10592
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 0.973824
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 0.986112
+    },
+    "7": {
+      "color": 12,
+      "runtime_ms": 0.961536
+    },
+    "8": {
+      "color": 12,
+      "runtime_ms": 0.888832
+    },
+    "9": {
+      "color": 12,
+      "runtime_ms": 0.831488
+    },
+    "10": {
+      "color": 12,
+      "runtime_ms": 0.873472
+    },
+    "vertices": 1899,
+    "edges": 35250
+  },
+  "Oregon-1.egr": {
+    "0": {
+      "color": 13,
+      "runtime_ms": 2.804736
+    },
+    "1": {
+      "color": 14,
+      "runtime_ms": 4.72064
+    },
+    "2": {
+      "color": 14,
+      "runtime_ms": 3.981312
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 2.588672
+    },
+    "4": {
+      "color": 13,
+      "runtime_ms": 1.780736
+    },
+    "5": {
+      "color": 13,
+      "runtime_ms": 2.438144
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 2.398208
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 3.165184
+    },
+    "8": {
+      "color": 13,
+      "runtime_ms": 2.420736
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 4.209664
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 2.388992
+    },
+    "vertices": 11492,
+    "edges": 46818
+  },
+  "Oregon-2.egr": {
+    "0": {
+      "color": 23,
+      "runtime_ms": 7.638017
+    },
+    "1": {
+      "color": 23,
+      "runtime_ms": 7.534593
+    },
+    "2": {
+      "color": 24,
+      "runtime_ms": 3.468288
+    },
+    "3": {
+      "color": 24,
+      "runtime_ms": 2.80064
+    },
+    "4": {
+      "color": 24,
+      "runtime_ms": 3.764224
+    },
+    "5": {
+      "color": 24,
+      "runtime_ms": 4.40832
+    },
+    "6": {
+      "color": 23,
+      "runtime_ms": 2.613248
+    },
+    "7": {
+      "color": 24,
+      "runtime_ms": 1.032192
+    },
+    "8": {
+      "color": 24,
+      "runtime_ms": 2.550784
+    },
+    "9": {
+      "color": 23,
+      "runtime_ms": 2.489344
+    },
+    "10": {
+      "color": 23,
+      "runtime_ms": 2.88768
+    },
+    "vertices": 11806,
+    "edges": 65460
+  },
+  "adaptive.egr": {
+    "0": {
+      "color": 2,
+      "runtime_ms": 674.270203
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 206.949417
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.658176
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 6.337536
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 6.254592
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 4.344832
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 4.34176
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 5.951488
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 6.458368
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 6.068224
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 6.541313
+    },
+    "vertices": 6815744,
+    "edges": 27248640
+  },
+  "amazon0302.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 25.035778
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 10.955777
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 5.477376
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 4.194304
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 4.612096
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 3.735552
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 3.044352
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 1.728512
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 6.49216
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 6.298625
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.953344
+    },
+    "vertices": 262111,
+    "edges": 1799584
+  },
+  "amazon0312.egr": {
+    "0": {
+      "color": 11,
+      "runtime_ms": 191.120392
+    },
+    "1": {
+      "color": 11,
+      "runtime_ms": 86.651909
+    },
+    "2": {
+      "color": 11,
+      "runtime_ms": 28.839937
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 15.619073
+    },
+    "4": {
+      "color": 11,
+      "runtime_ms": 10.780672
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 7.288833
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 8.127488
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 7.405569
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 5.070848
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 5.018624
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 6.58944
+    },
+    "vertices": 400727,
+    "edges": 4699738
+  },
+  "amazon0505.egr": {
+    "0": {
+      "color": 11,
+      "runtime_ms": 205.570053
+    },
+    "1": {
+      "color": 11,
+      "runtime_ms": 90.556419
+    },
+    "2": {
+      "color": 11,
+      "runtime_ms": 29.601856
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 15.270913
+    },
+    "4": {
+      "color": 11,
+      "runtime_ms": 18.538498
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 14.280704
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 7.081024
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 5.686273
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 5.495809
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 10.438657
+    },
+    "10": {
+      "color": 12,
+      "runtime_ms": 3.895296
+    },
+    "vertices": 410236,
+    "edges": 4878874
+  },
+  "amazon0601.egr": {
+    "0": {
+      "color": 11,
+      "runtime_ms": 201.196548
+    },
+    "1": {
+      "color": 11,
+      "runtime_ms": 87.661575
+    },
+    "2": {
+      "color": 11,
+      "runtime_ms": 37.370884
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 16.103424
+    },
+    "4": {
+      "color": 11,
+      "runtime_ms": 16.897024
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 15.599617
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 14.344193
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 6.621184
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 7.896064
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 10.27072
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 6.58432
+    },
+    "vertices": 403394,
+    "edges": 4886816
+  },
+  "as-caida.egr": {
+    "0": {
+      "color": 18,
+      "runtime_ms": 4.206592
+    },
+    "1": {
+      "color": 17,
+      "runtime_ms": 4.601856
+    },
+    "2": {
+      "color": 18,
+      "runtime_ms": 3.402752
+    },
+    "3": {
+      "color": 17,
+      "runtime_ms": 2.255872
+    },
+    "4": {
+      "color": 17,
+      "runtime_ms": 2.316288
+    },
+    "5": {
+      "color": 17,
+      "runtime_ms": 3.004416
+    },
+    "6": {
+      "color": 17,
+      "runtime_ms": 1.772544
+    },
+    "7": {
+      "color": 17,
+      "runtime_ms": 8.605697
+    },
+    "8": {
+      "color": 17,
+      "runtime_ms": 2.661376
+    },
+    "9": {
+      "color": 17,
+      "runtime_ms": 3.250176
+    },
+    "10": {
+      "color": 17,
+      "runtime_ms": 2.51392
+    },
+    "vertices": 31379,
+    "edges": 205122
+  },
+  "caidaRouterLevel.egr": {
+    "0": {
+      "color": 18,
+      "runtime_ms": 36.376575
+    },
+    "1": {
+      "color": 18,
+      "runtime_ms": 15.137793
+    },
+    "2": {
+      "color": 18,
+      "runtime_ms": 8.822784
+    },
+    "3": {
+      "color": 19,
+      "runtime_ms": 5.833728
+    },
+    "4": {
+      "color": 18,
+      "runtime_ms": 3.9936
+    },
+    "5": {
+      "color": 19,
+      "runtime_ms": 3.222528
+    },
+    "6": {
+      "color": 18,
+      "runtime_ms": 2.767872
+    },
+    "7": {
+      "color": 18,
+      "runtime_ms": 2.454528
+    },
+    "8": {
+      "color": 18,
+      "runtime_ms": 2.169856
+    },
+    "9": {
+      "color": 18,
+      "runtime_ms": 2.039808
+    },
+    "10": {
+      "color": 18,
+      "runtime_ms": 2.07872
+    },
+    "vertices": 192244,
+    "edges": 1218132
+  },
+  "chesapeake.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 0.889856
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 0.728064
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 0.72192
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.797696
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.67584
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.673792
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.683008
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.694272
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.681984
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.68096
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.693248
+    },
+    "vertices": 39,
+    "edges": 340
+  },
+  "citationCiteseer.egr": {
+    "0": {
+      "color": 13,
+      "runtime_ms": 60.062725
+    },
+    "1": {
+      "color": 13,
+      "runtime_ms": 22.235136
+    },
+    "2": {
+      "color": 13,
+      "runtime_ms": 11.381761
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 7.380992
+    },
+    "4": {
+      "color": 13,
+      "runtime_ms": 5.46816
+    },
+    "5": {
+      "color": 13,
+      "runtime_ms": 4.446208
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 3.74784
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 3.151872
+    },
+    "8": {
+      "color": 13,
+      "runtime_ms": 2.945024
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 2.538496
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 2.552832
+    },
+    "vertices": 268495,
+    "edges": 2313294
+  },
+  "coAuthorsCiteseer.egr": {
+    "0": {
+      "color": 87,
+      "runtime_ms": 30.871553
+    },
+    "1": {
+      "color": 87,
+      "runtime_ms": 15.040513
+    },
+    "2": {
+      "color": 87,
+      "runtime_ms": 8.906752
+    },
+    "3": {
+      "color": 87,
+      "runtime_ms": 6.38976
+    },
+    "4": {
+      "color": 87,
+      "runtime_ms": 4.690944
+    },
+    "5": {
+      "color": 87,
+      "runtime_ms": 3.56352
+    },
+    "6": {
+      "color": 87,
+      "runtime_ms": 3.41504
+    },
+    "7": {
+      "color": 87,
+      "runtime_ms": 2.797568
+    },
+    "8": {
+      "color": 87,
+      "runtime_ms": 2.684928
+    },
+    "9": {
+      "color": 87,
+      "runtime_ms": 2.481152
+    },
+    "10": {
+      "color": 87,
+      "runtime_ms": 2.430976
+    },
+    "vertices": 227320,
+    "edges": 1628268
+  },
+  "coAuthorsDBLP.egr": {
+    "0": {
+      "color": 115,
+      "runtime_ms": 31.473667
+    },
+    "1": {
+      "color": 115,
+      "runtime_ms": 13.964289
+    },
+    "2": {
+      "color": 115,
+      "runtime_ms": 7.964673
+    },
+    "3": {
+      "color": 115,
+      "runtime_ms": 5.535745
+    },
+    "4": {
+      "color": 115,
+      "runtime_ms": 4.415488
+    },
+    "5": {
+      "color": 115,
+      "runtime_ms": 3.562496
+    },
+    "6": {
+      "color": 115,
+      "runtime_ms": 3.33824
+    },
+    "7": {
+      "color": 115,
+      "runtime_ms": 2.740224
+    },
+    "8": {
+      "color": 115,
+      "runtime_ms": 2.574336
+    },
+    "9": {
+      "color": 115,
+      "runtime_ms": 2.202624
+    },
+    "10": {
+      "color": 115,
+      "runtime_ms": 2.069504
+    },
+    "vertices": 299067,
+    "edges": 1955352
+  },
+  "coPapersCiteseer.egr": {
+    "0": {
+      "color": 845,
+      "runtime_ms": 335.866913
+    },
+    "1": {
+      "color": 845,
+      "runtime_ms": 203.844604
+    },
+    "2": {
+      "color": 845,
+      "runtime_ms": 140.121109
+    },
+    "3": {
+      "color": 845,
+      "runtime_ms": 108.284935
+    },
+    "4": {
+      "color": 845,
+      "runtime_ms": 86.123528
+    },
+    "5": {
+      "color": 845,
+      "runtime_ms": 70.792191
+    },
+    "6": {
+      "color": 845,
+      "runtime_ms": 62.895103
+    },
+    "7": {
+      "color": 845,
+      "runtime_ms": 53.428226
+    },
+    "8": {
+      "color": 845,
+      "runtime_ms": 48.254978
+    },
+    "9": {
+      "color": 845,
+      "runtime_ms": 43.80365
+    },
+    "10": {
+      "color": 845,
+      "runtime_ms": 37.901318
+    },
+    "vertices": 434102,
+    "edges": 32073440
+  },
+  "coPapersDBLP.egr": {
+    "0": {
+      "color": 337,
+      "runtime_ms": 694.858765
+    },
+    "1": {
+      "color": 337,
+      "runtime_ms": 378.53595
+    },
+    "2": {
+      "color": 337,
+      "runtime_ms": 261.720062
+    },
+    "3": {
+      "color": 337,
+      "runtime_ms": 186.481674
+    },
+    "4": {
+      "color": 337,
+      "runtime_ms": 136.805389
+    },
+    "5": {
+      "color": 337,
+      "runtime_ms": 110.92276
+    },
+    "6": {
+      "color": 337,
+      "runtime_ms": 93.477898
+    },
+    "7": {
+      "color": 337,
+      "runtime_ms": 74.393608
+    },
+    "8": {
+      "color": 337,
+      "runtime_ms": 64.739334
+    },
+    "9": {
+      "color": 337,
+      "runtime_ms": 55.891972
+    },
+    "10": {
+      "color": 337,
+      "runtime_ms": 48.516094
+    },
+    "vertices": 540486,
+    "edges": 30491458
+  },
+  "com-Amazon.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 19.298304
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 8.131584
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 4.537344
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 2.940928
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 2.024448
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 1.429504
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 1.27488
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 1.333248
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 1.092576
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 1.112064
+    },
+    "10": {
+      "color": 8,
+      "runtime_ms": 1.081344
+    },
+    "vertices": 334863,
+    "edges": 1851744
+  },
+  "com-DBLP.egr": {
+    "0": {
+      "color": 114,
+      "runtime_ms": 35.666943
+    },
+    "1": {
+      "color": 114,
+      "runtime_ms": 15.607809
+    },
+    "2": {
+      "color": 114,
+      "runtime_ms": 9.7024
+    },
+    "3": {
+      "color": 114,
+      "runtime_ms": 6.489088
+    },
+    "4": {
+      "color": 114,
+      "runtime_ms": 5.064704
+    },
+    "5": {
+      "color": 114,
+      "runtime_ms": 4.023296
+    },
+    "6": {
+      "color": 114,
+      "runtime_ms": 3.447808
+    },
+    "7": {
+      "color": 114,
+      "runtime_ms": 3.165184
+    },
+    "8": {
+      "color": 114,
+      "runtime_ms": 2.963456
+    },
+    "9": {
+      "color": 114,
+      "runtime_ms": 2.33984
+    },
+    "10": {
+      "color": 114,
+      "runtime_ms": 2.31424
+    },
+    "vertices": 317080,
+    "edges": 2099732
+  },
+  "delaunay_n10.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 2.479104
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.513472
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 0.746496
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.754688
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.70144
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.689152
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.771072
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.705536
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.664576
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.681984
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.685056
+    },
+    "vertices": 1024,
+    "edges": 6112
+  },
+  "delaunay_n11.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 3.20512
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.357824
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 0.804864
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.739328
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.693248
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.705536
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.67072
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.758784
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.707584
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.6912
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.677888
+    },
+    "vertices": 2048,
+    "edges": 12254
+  },
+  "delaunay_n12.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 5.419008
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.540096
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 0.837632
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.74752
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.85504
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.802816
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.712704
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.699392
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.688128
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.698368
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.750592
+    },
+    "vertices": 4096,
+    "edges": 24528
+  },
+  "delaunay_n13.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 7.8592
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.82272
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.01376
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.77824
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.797696
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.791552
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.781312
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.745472
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.697344
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.729088
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.70144
+    },
+    "vertices": 8192,
+    "edges": 49094
+  },
+  "delaunay_n14.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 10.856449
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.120128
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.08032
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.872448
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.790528
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.781312
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.77312
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.722944
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.705536
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.73728
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.771072
+    },
+    "vertices": 16384,
+    "edges": 98244
+  },
+  "delaunay_n15.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 13.180929
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.905088
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.40592
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.882688
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.864256
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.781312
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.832512
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.719872
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.80896
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.731136
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.717824
+    },
+    "vertices": 32768,
+    "edges": 196548
+  },
+  "delaunay_n16.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 20.134912
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.089728
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.560576
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.897024
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.971776
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.858112
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.900096
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.779264
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.69632
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.749568
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.743392
+    },
+    "vertices": 65536,
+    "edges": 393150
+  },
+  "delaunay_n17.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 31.616003
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.33184
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.994752
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.96256
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.014784
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.867328
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.8704
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.842752
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.892928
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.797696
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.786432
+    },
+    "vertices": 131072,
+    "edges": 786352
+  },
+  "delaunay_n18.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 48.733185
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 11.559937
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 3.034112
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.429504
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.149952
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.050624
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.007616
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.000448
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.927744
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.869376
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.881664
+    },
+    "vertices": 262144,
+    "edges": 1572792
+  },
+  "delaunay_n19.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 71.709702
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 20.301826
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 4.340736
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.483776
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.562624
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.379328
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.234944
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.212416
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.168384
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.056768
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.061888
+    },
+    "vertices": 524288,
+    "edges": 3145646
+  },
+  "delaunay_n20.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 174.403595
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 41.902084
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 7.422976
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 2.982912
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 2.10432
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.840128
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.885216
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.619968
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.523712
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.437696
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.417216
+    },
+    "vertices": 1048576,
+    "edges": 6291372
+  },
+  "delaunay_n21.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 367.199249
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 95.574013
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 13.367297
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 5.099521
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 4.120576
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 3.150848
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 2.907136
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 2.751488
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 2.345984
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 2.239488
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 2.122752
+    },
+    "vertices": 2097152,
+    "edges": 12582816
+  },
+  "delaunay_n22.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 737.896423
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 199.85817
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 24.089602
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 9.116672
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 7.267328
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 5.417984
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 5.021697
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 4.353024
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 3.841024
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 3.744768
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 3.628032
+    },
+    "vertices": 4194304,
+    "edges": 25165738
+  },
+  "hugetrace-00000.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 463.761444
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 110.500862
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 2.961408
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 2.902016
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 2.921472
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 2.890752
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 2.91328
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 2.915328
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 2.934784
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 2.971648
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 2.915328
+    },
+    "vertices": 4588484,
+    "edges": 13758266
+  },
+  "hugetrace-00010.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 2201.34082
+    },
+    "1": {
+      "color": 3,
+      "runtime_ms": 894.962708
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 6.890496
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 6.98368
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 6.991872
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 6.999073
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 7.059456
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 6.946816
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 6.985728
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 6.959105
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 7.058432
+    },
+    "vertices": 12057441,
+    "edges": 36164358
+  },
+  "hugetric-00000.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 632.294434
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 134.480911
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 3.535872
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 3.555328
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 3.488768
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 3.473408
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 3.514368
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 3.515392
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 3.520512
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 3.535872
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 3.467264
+    },
+    "vertices": 5824554,
+    "edges": 17467046
+  },
+  "hugetric-00010.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 913.64563
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 341.11795
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 4.610048
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 4.573184
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 4.622336
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 4.553696
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 4.588544
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 4.566017
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 4.562944
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 4.544512
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 4.57216
+    },
+    "vertices": 6592765,
+    "edges": 19771708
+  },
+  "hugetric-00020.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 1014.276123
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 198.717438
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 4.930561
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 4.902912
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 4.94592
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 4.927488
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 4.959232
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 4.953088
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 4.931584
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 4.898816
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 4.927488
+    },
+    "vertices": 7122792,
+    "edges": 21361554
+  },
+  "p2p-Gnutella04.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 4.243456
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.984512
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 1.4408
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 1.005568
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 0.886784
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 0.897024
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 0.979968
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 0.825344
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.858112
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.83968
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.842752
+    },
+    "vertices": 10879,
+    "edges": 79988
+  },
+  "p2p-Gnutella05.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 3.320832
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.692672
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.186816
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.99328
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.89088
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.955392
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.786432
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.771072
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.825344
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.857088
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.74752
+    },
+    "vertices": 8846,
+    "edges": 63678
+  },
+  "p2p-Gnutella06.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 3.3792
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.87904
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.288192
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 0.999424
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 0.907264
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.877568
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 0.83456
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 0.806912
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.812032
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.82432
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.781344
+    },
+    "vertices": 8717,
+    "edges": 63050
+  },
+  "p2p-Gnutella08.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 3.146752
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.463296
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 1.142784
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.9472
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 0.902144
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 0.929792
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 0.774144
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 0.792576
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.775168
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.85504
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.764928
+    },
+    "vertices": 6301,
+    "edges": 41554
+  },
+  "p2p-Gnutella09.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 3.006464
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.595392
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 1.127424
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 0.889856
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.852992
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 0.805888
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.837632
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 0.809984
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.786432
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.094656
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.769024
+    },
+    "vertices": 8114,
+    "edges": 52026
+  },
+  "p2p-Gnutella24.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 3.764224
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.831936
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.215488
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.08544
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.068032
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.893952
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.868352
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.833536
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.837632
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.857056
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.838656
+    },
+    "vertices": 26518,
+    "edges": 130738
+  },
+  "p2p-Gnutella25.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 3.60448
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 1.654784
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.190912
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.027072
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.881664
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.83968
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.831488
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.807936
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.805888
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.807936
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.862208
+    },
+    "vertices": 22687,
+    "edges": 109410
+  },
+  "p2p-Gnutella30.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 5.506049
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 2.338816
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.460224
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.23904
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.04656
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.05984
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.974848
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.9472
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.841728
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.881664
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.830464
+    },
+    "vertices": 36682,
+    "edges": 176656
+  },
+  "p2p-Gnutella31.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 7.54688
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 2.83136
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.765376
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.39264
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.197056
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.204224
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.122304
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.975872
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.980992
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.925696
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.82944
+    },
+    "vertices": 62586,
+    "edges": 295784
+  },
+  "packing-500x100x100-b050.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 1850.244263
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 489.10849
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 229.25415
+    },
+    "3": {
+      "color": 9,
+      "runtime_ms": 115.534859
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 65.805313
+    },
+    "5": {
+      "color": 9,
+      "runtime_ms": 46.430206
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 36.55674
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 30.295042
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 23.896067
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 18.77504
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 14.403584
+    },
+    "vertices": 2145852,
+    "edges": 34976486
+  },
+  "rgg_n_2_15_s0.egr": {
+    "0": {
+      "color": 13,
+      "runtime_ms": 22.62221
+    },
+    "1": {
+      "color": 13,
+      "runtime_ms": 8.216576
+    },
+    "2": {
+      "color": 13,
+      "runtime_ms": 3.915776
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 2.37056
+    },
+    "4": {
+      "color": 13,
+      "runtime_ms": 1.723392
+    },
+    "5": {
+      "color": 13,
+      "runtime_ms": 1.518592
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 1.26464
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 1.222656
+    },
+    "8": {
+      "color": 13,
+      "runtime_ms": 1.088512
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 0.99328
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 0.882688
+    },
+    "vertices": 32768,
+    "edges": 320480
+  },
+  "rgg_n_2_16_s0.egr": {
+    "0": {
+      "color": 14,
+      "runtime_ms": 45.271042
+    },
+    "1": {
+      "color": 14,
+      "runtime_ms": 14.976001
+    },
+    "2": {
+      "color": 14,
+      "runtime_ms": 7.201792
+    },
+    "3": {
+      "color": 14,
+      "runtime_ms": 4.143105
+    },
+    "4": {
+      "color": 14,
+      "runtime_ms": 2.686976
+    },
+    "5": {
+      "color": 14,
+      "runtime_ms": 2.384896
+    },
+    "6": {
+      "color": 14,
+      "runtime_ms": 1.869824
+    },
+    "7": {
+      "color": 14,
+      "runtime_ms": 1.74592
+    },
+    "8": {
+      "color": 14,
+      "runtime_ms": 1.616896
+    },
+    "9": {
+      "color": 14,
+      "runtime_ms": 1.288192
+    },
+    "10": {
+      "color": 14,
+      "runtime_ms": 1.093632
+    },
+    "vertices": 65536,
+    "edges": 684254
+  },
+  "rgg_n_2_17_s0.egr": {
+    "0": {
+      "color": 15,
+      "runtime_ms": 80.305161
+    },
+    "1": {
+      "color": 15,
+      "runtime_ms": 25.706467
+    },
+    "2": {
+      "color": 15,
+      "runtime_ms": 10.909697
+    },
+    "3": {
+      "color": 15,
+      "runtime_ms": 7.02464
+    },
+    "4": {
+      "color": 15,
+      "runtime_ms": 4.902912
+    },
+    "5": {
+      "color": 15,
+      "runtime_ms": 3.90656
+    },
+    "6": {
+      "color": 15,
+      "runtime_ms": 3.504128
+    },
+    "7": {
+      "color": 15,
+      "runtime_ms": 2.601984
+    },
+    "8": {
+      "color": 15,
+      "runtime_ms": 2.08592
+    },
+    "9": {
+      "color": 15,
+      "runtime_ms": 1.569792
+    },
+    "10": {
+      "color": 15,
+      "runtime_ms": 1.422336
+    },
+    "vertices": 131072,
+    "edges": 1457506
+  },
+  "rgg_n_2_18_s0.egr": {
+    "0": {
+      "color": 16,
+      "runtime_ms": 153.408508
+    },
+    "1": {
+      "color": 16,
+      "runtime_ms": 47.292419
+    },
+    "2": {
+      "color": 16,
+      "runtime_ms": 24.471554
+    },
+    "3": {
+      "color": 16,
+      "runtime_ms": 11.615232
+    },
+    "4": {
+      "color": 16,
+      "runtime_ms": 7.786497
+    },
+    "5": {
+      "color": 16,
+      "runtime_ms": 6.055936
+    },
+    "6": {
+      "color": 16,
+      "runtime_ms": 5.337089
+    },
+    "7": {
+      "color": 16,
+      "runtime_ms": 4.318208
+    },
+    "8": {
+      "color": 16,
+      "runtime_ms": 3.429376
+    },
+    "9": {
+      "color": 16,
+      "runtime_ms": 2.456576
+    },
+    "10": {
+      "color": 16,
+      "runtime_ms": 1.94048
+    },
+    "vertices": 262144,
+    "edges": 3094566
+  },
+  "rgg_n_2_19_s0.egr": {
+    "0": {
+      "color": 18,
+      "runtime_ms": 326.718475
+    },
+    "1": {
+      "color": 18,
+      "runtime_ms": 95.511559
+    },
+    "2": {
+      "color": 18,
+      "runtime_ms": 47.838211
+    },
+    "3": {
+      "color": 18,
+      "runtime_ms": 27.295746
+    },
+    "4": {
+      "color": 18,
+      "runtime_ms": 17.250303
+    },
+    "5": {
+      "color": 18,
+      "runtime_ms": 11.761665
+    },
+    "6": {
+      "color": 18,
+      "runtime_ms": 10.080256
+    },
+    "7": {
+      "color": 18,
+      "runtime_ms": 8.231937
+    },
+    "8": {
+      "color": 18,
+      "runtime_ms": 6.1696
+    },
+    "9": {
+      "color": 18,
+      "runtime_ms": 4.674561
+    },
+    "10": {
+      "color": 18,
+      "runtime_ms": 3.293184
+    },
+    "vertices": 524288,
+    "edges": 6539532
+  },
+  "rgg_n_2_20_s0.egr": {
+    "0": {
+      "color": 17,
+      "runtime_ms": 1140.610107
+    },
+    "1": {
+      "color": 17,
+      "runtime_ms": 355.768311
+    },
+    "2": {
+      "color": 17,
+      "runtime_ms": 142.124039
+    },
+    "3": {
+      "color": 17,
+      "runtime_ms": 74.354691
+    },
+    "4": {
+      "color": 17,
+      "runtime_ms": 45.849602
+    },
+    "5": {
+      "color": 17,
+      "runtime_ms": 30.383106
+    },
+    "6": {
+      "color": 17,
+      "runtime_ms": 21.261314
+    },
+    "7": {
+      "color": 17,
+      "runtime_ms": 17.086466
+    },
+    "8": {
+      "color": 17,
+      "runtime_ms": 12.570625
+    },
+    "9": {
+      "color": 17,
+      "runtime_ms": 8.79104
+    },
+    "10": {
+      "color": 17,
+      "runtime_ms": 6.350848
+    },
+    "vertices": 1048576,
+    "edges": 13783240
+  },
+  "rgg_n_2_21_s0.egr": {
+    "0": {
+      "color": 19,
+      "runtime_ms": 3282.988281
+    },
+    "1": {
+      "color": 19,
+      "runtime_ms": 909.115417
+    },
+    "2": {
+      "color": 19,
+      "runtime_ms": 376.16333
+    },
+    "3": {
+      "color": 19,
+      "runtime_ms": 193.802246
+    },
+    "4": {
+      "color": 19,
+      "runtime_ms": 104.341515
+    },
+    "5": {
+      "color": 19,
+      "runtime_ms": 71.773186
+    },
+    "6": {
+      "color": 19,
+      "runtime_ms": 51.778561
+    },
+    "7": {
+      "color": 19,
+      "runtime_ms": 36.415493
+    },
+    "8": {
+      "color": 19,
+      "runtime_ms": 25.827295
+    },
+    "9": {
+      "color": 19,
+      "runtime_ms": 19.367937
+    },
+    "10": {
+      "color": 19,
+      "runtime_ms": 14.006273
+    },
+    "vertices": 2097152,
+    "edges": 28975990
+  },
+  "roadNet-CA.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 32.779266
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 13.934592
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 3.591168
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 1.7408
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 1.701888
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 1.626112
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 1.641472
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 1.608704
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 1.613824
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 1.60768
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 1.604608
+    },
+    "vertices": 1971281,
+    "edges": 5533214
+  },
+  "roadNet-PA.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 17.552385
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 7.474176
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 2.230272
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 1.32608
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 1.180672
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 1.22368
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 1.197088
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 1.170432
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 1.178624
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 1.163264
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 1.214464
+    },
+    "vertices": 1090920,
+    "edges": 3083796
+  },
+  "roadNet-TX.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 26.48064
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 9.754625
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 2.942976
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 1.453056
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 1.309664
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 1.374208
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 1.376256
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 1.378304
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 1.3824
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 1.336352
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 1.440768
+    },
+    "vertices": 1393383,
+    "edges": 3843320
+  },
+  "road_central.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 180.530197
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 68.245506
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 20.850691
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 9.864192
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 9.46176
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 9.336833
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 9.355264
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 9.13408
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 9.176064
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 9.137152
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 9.16992
+    },
+    "vertices": 14081816,
+    "edges": 33866826
+  },
+  "soc-sign-Slashdot081106.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 15.474689
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 7.149568
+    },
+    "2": {
+      "color": 31,
+      "runtime_ms": 4.928513
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 3.44064
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 3.059712
+    },
+    "5": {
+      "color": 32,
+      "runtime_ms": 2.60096
+    },
+    "6": {
+      "color": 31,
+      "runtime_ms": 2.336768
+    },
+    "7": {
+      "color": 32,
+      "runtime_ms": 2.143232
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 1.883136
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 1.75616
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 1.81248
+    },
+    "vertices": 77357,
+    "edges": 940884
+  },
+  "soc-sign-Slashdot090216.egr": {
+    "0": {
+      "color": 33,
+      "runtime_ms": 15.798272
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 7.583745
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 4.803585
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 3.970048
+    },
+    "4": {
+      "color": 33,
+      "runtime_ms": 2.998272
+    },
+    "5": {
+      "color": 33,
+      "runtime_ms": 2.679808
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 2.395136
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 2.103296
+    },
+    "8": {
+      "color": 33,
+      "runtime_ms": 1.895424
+    },
+    "9": {
+      "color": 33,
+      "runtime_ms": 1.946624
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 1.956864
+    },
+    "vertices": 81871,
+    "edges": 999356
+  },
+  "soc-sign-Slashdot090221.egr": {
+    "0": {
+      "color": 33,
+      "runtime_ms": 15.84333
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 7.364608
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 4.914176
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 3.735552
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 3.03616
+    },
+    "5": {
+      "color": 33,
+      "runtime_ms": 2.62144
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 2.531328
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 2.208768
+    },
+    "8": {
+      "color": 33,
+      "runtime_ms": 1.912832
+    },
+    "9": {
+      "color": 33,
+      "runtime_ms": 1.937408
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 2.105344
+    },
+    "vertices": 82144,
+    "edges": 1004860
+  },
+  "venturiLevel3.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 4329.525391
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 217.621521
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.244032
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 2.909184
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 2.80576
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 2.799616
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 2.766848
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 2.788352
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 2.782208
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 2.75456
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 2.755584
+    },
+    "vertices": 4026819,
+    "edges": 16108474
+  },
+  "web-BerkStan.egr": {
+    "0": {
+      "color": 201,
+      "runtime_ms": 272.366577
+    },
+    "1": {
+      "color": 201,
+      "runtime_ms": 92.437515
+    },
+    "2": {
+      "color": 201,
+      "runtime_ms": 55.100418
+    },
+    "3": {
+      "color": 201,
+      "runtime_ms": 37.510147
+    },
+    "4": {
+      "color": 201,
+      "runtime_ms": 28.933123
+    },
+    "5": {
+      "color": 201,
+      "runtime_ms": 24.031235
+    },
+    "6": {
+      "color": 201,
+      "runtime_ms": 21.439489
+    },
+    "7": {
+      "color": 201,
+      "runtime_ms": 18.809856
+    },
+    "8": {
+      "color": 201,
+      "runtime_ms": 16.749571
+    },
+    "9": {
+      "color": 201,
+      "runtime_ms": 14.838785
+    },
+    "10": {
+      "color": 201,
+      "runtime_ms": 14.738433
+    },
+    "vertices": 685230,
+    "edges": 13298940
+  },
+  "web-Google.egr": {
+    "0": {
+      "color": 44,
+      "runtime_ms": 316.726257
+    },
+    "1": {
+      "color": 44,
+      "runtime_ms": 127.92218
+    },
+    "2": {
+      "color": 44,
+      "runtime_ms": 60.521477
+    },
+    "3": {
+      "color": 44,
+      "runtime_ms": 34.891781
+    },
+    "4": {
+      "color": 44,
+      "runtime_ms": 24.898561
+    },
+    "5": {
+      "color": 44,
+      "runtime_ms": 18.221056
+    },
+    "6": {
+      "color": 44,
+      "runtime_ms": 14.826497
+    },
+    "7": {
+      "color": 44,
+      "runtime_ms": 14.575617
+    },
+    "8": {
+      "color": 44,
+      "runtime_ms": 10.301441
+    },
+    "9": {
+      "color": 44,
+      "runtime_ms": 9.37472
+    },
+    "10": {
+      "color": 44,
+      "runtime_ms": 7.72608
+    },
+    "vertices": 916428,
+    "edges": 8644102
+  },
+  "as-735.nl.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 1.705984
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 2.18416
+    },
+    "2": {
+      "color": 10,
+      "runtime_ms": 2.635776
+    },
+    "3": {
+      "color": 10,
+      "runtime_ms": 0.95232
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 4.10624
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 0.818176
+    },
+    "6": {
+      "color": 10,
+      "runtime_ms": 0.84992
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 2.087936
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 0.785408
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 1.92
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 0.897024
+    },
+    "vertices": 7716,
+    "edges": 25144
+  },
+  "ca-AstroPh.nl.egr": {
+    "0": {
+      "color": 57,
+      "runtime_ms": 29.846529
+    },
+    "1": {
+      "color": 57,
+      "runtime_ms": 17.509377
+    },
+    "2": {
+      "color": 57,
+      "runtime_ms": 11.264
+    },
+    "3": {
+      "color": 57,
+      "runtime_ms": 8.364032
+    },
+    "4": {
+      "color": 57,
+      "runtime_ms": 6.610944
+    },
+    "5": {
+      "color": 57,
+      "runtime_ms": 5.488608
+    },
+    "6": {
+      "color": 57,
+      "runtime_ms": 2.881536
+    },
+    "7": {
+      "color": 57,
+      "runtime_ms": 3.963904
+    },
+    "8": {
+      "color": 57,
+      "runtime_ms": 2.584576
+    },
+    "9": {
+      "color": 57,
+      "runtime_ms": 2.077696
+    },
+    "10": {
+      "color": 57,
+      "runtime_ms": 2.254848
+    },
+    "vertices": 18772,
+    "edges": 396100
+  },
+  "ca-CondMat.nl.egr": {
+    "0": {
+      "color": 26,
+      "runtime_ms": 11.94496
+    },
+    "1": {
+      "color": 26,
+      "runtime_ms": 11.891712
+    },
+    "2": {
+      "color": 26,
+      "runtime_ms": 10.11712
+    },
+    "3": {
+      "color": 26,
+      "runtime_ms": 6.525952
+    },
+    "4": {
+      "color": 26,
+      "runtime_ms": 2.213888
+    },
+    "5": {
+      "color": 26,
+      "runtime_ms": 3.155968
+    },
+    "6": {
+      "color": 26,
+      "runtime_ms": 5.718017
+    },
+    "7": {
+      "color": 26,
+      "runtime_ms": 2.609152
+    },
+    "8": {
+      "color": 26,
+      "runtime_ms": 2.899968
+    },
+    "9": {
+      "color": 26,
+      "runtime_ms": 17.510401
+    },
+    "10": {
+      "color": 26,
+      "runtime_ms": 1.140736
+    },
+    "vertices": 23133,
+    "edges": 186878
+  },
+  "ca-GrQc.nl.egr": {
+    "0": {
+      "color": 44,
+      "runtime_ms": 4.806656
+    },
+    "1": {
+      "color": 44,
+      "runtime_ms": 18.000896
+    },
+    "2": {
+      "color": 44,
+      "runtime_ms": 1.488896
+    },
+    "3": {
+      "color": 44,
+      "runtime_ms": 3.21536
+    },
+    "4": {
+      "color": 44,
+      "runtime_ms": 4.164608
+    },
+    "5": {
+      "color": 44,
+      "runtime_ms": 2.436096
+    },
+    "6": {
+      "color": 44,
+      "runtime_ms": 3.448832
+    },
+    "7": {
+      "color": 44,
+      "runtime_ms": 17.165312
+    },
+    "8": {
+      "color": 44,
+      "runtime_ms": 2.33984
+    },
+    "9": {
+      "color": 44,
+      "runtime_ms": 2.768896
+    },
+    "10": {
+      "color": 44,
+      "runtime_ms": 3.134464
+    },
+    "vertices": 5242,
+    "edges": 28968
+  },
+  "ca-HepPh.nl.egr": {
+    "0": {
+      "color": 239,
+      "runtime_ms": 27.514881
+    },
+    "1": {
+      "color": 239,
+      "runtime_ms": 7.878656
+    },
+    "2": {
+      "color": 239,
+      "runtime_ms": 6.028288
+    },
+    "3": {
+      "color": 239,
+      "runtime_ms": 5.38624
+    },
+    "4": {
+      "color": 239,
+      "runtime_ms": 2.904064
+    },
+    "5": {
+      "color": 239,
+      "runtime_ms": 2.48832
+    },
+    "6": {
+      "color": 239,
+      "runtime_ms": 2.281472
+    },
+    "7": {
+      "color": 239,
+      "runtime_ms": 4.762624
+    },
+    "8": {
+      "color": 239,
+      "runtime_ms": 2.57024
+    },
+    "9": {
+      "color": 239,
+      "runtime_ms": 3.636224
+    },
+    "10": {
+      "color": 239,
+      "runtime_ms": 3.637248
+    },
+    "vertices": 12008,
+    "edges": 236978
+  },
+  "ca-HepTh.nl.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 6.664192
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 2.131968
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 1.47456
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 2.674688
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 3.245056
+    },
+    "5": {
+      "color": 32,
+      "runtime_ms": 2.402304
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 2.377728
+    },
+    "7": {
+      "color": 32,
+      "runtime_ms": 2.378752
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 2.316288
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 2.286592
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 2.42176
+    },
+    "vertices": 9877,
+    "edges": 51946
+  },
+  "cit-HepPh.nl.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 54.296577
+    },
+    "1": {
+      "color": 20,
+      "runtime_ms": 21.477377
+    },
+    "2": {
+      "color": 21,
+      "runtime_ms": 9.286657
+    },
+    "3": {
+      "color": 21,
+      "runtime_ms": 6.417408
+    },
+    "4": {
+      "color": 21,
+      "runtime_ms": 7.153664
+    },
+    "5": {
+      "color": 20,
+      "runtime_ms": 5.905408
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 4.600832
+    },
+    "7": {
+      "color": 21,
+      "runtime_ms": 4.0192
+    },
+    "8": {
+      "color": 21,
+      "runtime_ms": 5.199872
+    },
+    "9": {
+      "color": 22,
+      "runtime_ms": 3.534848
+    },
+    "10": {
+      "color": 20,
+      "runtime_ms": 4.071424
+    },
+    "vertices": 34546,
+    "edges": 841754
+  },
+  "cit-HepTh.nl.egr": {
+    "0": {
+      "color": 26,
+      "runtime_ms": 48.572418
+    },
+    "1": {
+      "color": 26,
+      "runtime_ms": 18.828287
+    },
+    "2": {
+      "color": 26,
+      "runtime_ms": 12.848128
+    },
+    "3": {
+      "color": 25,
+      "runtime_ms": 6.843392
+    },
+    "4": {
+      "color": 25,
+      "runtime_ms": 4.432896
+    },
+    "5": {
+      "color": 26,
+      "runtime_ms": 5.966848
+    },
+    "6": {
+      "color": 25,
+      "runtime_ms": 5.284864
+    },
+    "7": {
+      "color": 25,
+      "runtime_ms": 3.011584
+    },
+    "8": {
+      "color": 26,
+      "runtime_ms": 4.72064
+    },
+    "9": {
+      "color": 26,
+      "runtime_ms": 4.645888
+    },
+    "10": {
+      "color": 25,
+      "runtime_ms": 3.198976
+    },
+    "vertices": 27770,
+    "edges": 704570
+  },
+  "email-EuAll.nl.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 12.419073
+    },
+    "1": {
+      "color": 21,
+      "runtime_ms": 7.048193
+    },
+    "2": {
+      "color": 22,
+      "runtime_ms": 3.892224
+    },
+    "3": {
+      "color": 22,
+      "runtime_ms": 6.675456
+    },
+    "4": {
+      "color": 23,
+      "runtime_ms": 5.045248
+    },
+    "5": {
+      "color": 22,
+      "runtime_ms": 4.016129
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 1.995776
+    },
+    "7": {
+      "color": 22,
+      "runtime_ms": 4.867072
+    },
+    "8": {
+      "color": 23,
+      "runtime_ms": 3.485696
+    },
+    "9": {
+      "color": 21,
+      "runtime_ms": 3.0208
+    },
+    "10": {
+      "color": 21,
+      "runtime_ms": 8.505344
+    },
+    "vertices": 265214,
+    "edges": 728962
+  },
+  "soc-sign-epinions.nl.egr": {
+    "0": {
+      "color": 94,
+      "runtime_ms": 26.523647
+    },
+    "1": {
+      "color": 94,
+      "runtime_ms": 19.223555
+    },
+    "2": {
+      "color": 94,
+      "runtime_ms": 8.387585
+    },
+    "3": {
+      "color": 95,
+      "runtime_ms": 6.18496
+    },
+    "4": {
+      "color": 94,
+      "runtime_ms": 5.204992
+    },
+    "5": {
+      "color": 94,
+      "runtime_ms": 7.539712
+    },
+    "6": {
+      "color": 95,
+      "runtime_ms": 6.395905
+    },
+    "7": {
+      "color": 94,
+      "runtime_ms": 5.095425
+    },
+    "8": {
+      "color": 94,
+      "runtime_ms": 4.639744
+    },
+    "9": {
+      "color": 94,
+      "runtime_ms": 6.938624
+    },
+    "10": {
+      "color": 94,
+      "runtime_ms": 4.037632
+    },
+    "vertices": 131828,
+    "edges": 1427826
+  },
+  "web-NotreDame.nl.egr": {
+    "0": {
+      "color": 155,
+      "runtime_ms": 46.228485
+    },
+    "1": {
+      "color": 155,
+      "runtime_ms": 14.158849
+    },
+    "2": {
+      "color": 155,
+      "runtime_ms": 8.35584
+    },
+    "3": {
+      "color": 155,
+      "runtime_ms": 9.615361
+    },
+    "4": {
+      "color": 155,
+      "runtime_ms": 9.487361
+    },
+    "5": {
+      "color": 155,
+      "runtime_ms": 4.151296
+    },
+    "6": {
+      "color": 155,
+      "runtime_ms": 4.867072
+    },
+    "7": {
+      "color": 155,
+      "runtime_ms": 11.736064
+    },
+    "8": {
+      "color": 155,
+      "runtime_ms": 3.90144
+    },
+    "9": {
+      "color": 155,
+      "runtime_ms": 12.299265
+    },
+    "10": {
+      "color": 155,
+      "runtime_ms": 9.695232
+    },
+    "vertices": 325729,
+    "edges": 2180216
+  },
+  "144.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 188.680206
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 44.700676
+    },
+    "2": {
+      "color": 10,
+      "runtime_ms": 14.302209
+    },
+    "3": {
+      "color": 10,
+      "runtime_ms": 6.632449
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 4.5824
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 5.03808
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 3.890176
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 3.033088
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 2.39616
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 1.721344
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 1.265664
+    },
+    "vertices": 144649,
+    "edges": 2148786
+  },
+  "333SP.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 2680.377441
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 370.659363
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 40.434692
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 25.851906
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 11.315201
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 6.013952
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 4.595712
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 3.992576
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 3.851264
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 3.887104
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 3.844064
+    },
+    "vertices": 3712815,
+    "edges": 22217266
+  },
+  "598a.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 71.588875
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 20.274178
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 5.479424
+    },
+    "3": {
+      "color": 9,
+      "runtime_ms": 4.073472
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 3.227648
+    },
+    "5": {
+      "color": 9,
+      "runtime_ms": 2.835456
+    },
+    "6": {
+      "color": 10,
+      "runtime_ms": 2.14528
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 2.070528
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 1.887232
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 1.71008
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 1.394688
+    },
+    "vertices": 110971,
+    "edges": 1483868
+  },
+  "AS365.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 1715.25647
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 386.076691
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 74.731491
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 17.926146
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 10.590209
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 9.024513
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 6.329344
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 5.319681
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 5.108737
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 5.057504
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 5.059585
+    },
+    "vertices": 3799275,
+    "edges": 22736152
+  },
+  "G_n_pin_pout.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 10.430465
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 4.277248
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 2.55488
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 1.95072
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 1.85344
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 1.364992
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 1.185792
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 1.051648
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.945152
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.954368
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.858112
+    },
+    "vertices": 100000,
+    "edges": 1002396
+  },
+  "M6.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 1499.515869
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 323.147766
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 34.799622
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 8.749057
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 11.679745
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 8.367104
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 6.033409
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 5.036032
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 4.832256
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 4.699136
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 4.698112
+    },
+    "vertices": 3501776,
+    "edges": 21003872
+  },
+  "NACA0015.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 360.916992
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 84.126717
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 9.895969
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 2.410496
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 3.383296
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 2.301952
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.855488
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.622016
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.570816
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.497088
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.496064
+    },
+    "vertices": 1039183,
+    "edges": 6229636
+  },
+  "NLR.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 1868.07605
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 390.991882
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 42.123264
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 23.445503
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 17.186817
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 10.110977
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 7.208961
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 6.069249
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 5.761024
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 5.799936
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 5.718017
+    },
+    "vertices": 4163763,
+    "edges": 24975952
+  },
+  "ak2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 8.214529
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.776064
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.288192
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.069056
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.881664
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.77312
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.822272
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.782336
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.807936
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.8192
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.8192
+    },
+    "vertices": 45292,
+    "edges": 217098
+  },
+  "al2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 17.233919
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.36416
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.854336
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.550336
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.045504
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.063936
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.92672
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.978944
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.093632
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.953344
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.96256
+    },
+    "vertices": 252266,
+    "edges": 1230482
+  },
+  "ar2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 14.834689
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.1456
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.702336
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.441792
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.959488
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.861184
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.89088
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.9216
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.882688
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.887776
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.903168
+    },
+    "vertices": 186211,
+    "edges": 904310
+  },
+  "asia_osm.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 3246.084229
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 25.0368
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 9.27232
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 6.23616
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 5.963776
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 5.971969
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 5.963776
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 5.9904
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 5.779456
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 5.736448
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 5.699584
+    },
+    "vertices": 11950757,
+    "edges": 25423206
+  },
+  "auto.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 247.10965
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 61.604866
+    },
+    "2": {
+      "color": 10,
+      "runtime_ms": 23.461887
+    },
+    "3": {
+      "color": 10,
+      "runtime_ms": 15.522817
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 14.035968
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 11.078656
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 8.161281
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 7.488513
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 5.063681
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 3.60448
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 2.408448
+    },
+    "vertices": 448695,
+    "edges": 6629222
+  },
+  "az2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.640322
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.241728
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 2.989056
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.637376
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.093632
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.036288
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.929792
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.96768
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.953344
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.99328
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.01888
+    },
+    "vertices": 241666,
+    "edges": 1196094
+  },
+  "belgium_osm.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 15.089665
+    },
+    "1": {
+      "color": 3,
+      "runtime_ms": 3.155968
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 1.618944
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 1.384448
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 1.325056
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 1.348608
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 1.330176
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 1.30048
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 1.314816
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 1.325056
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 1.270784
+    },
+    "vertices": 1441295,
+    "edges": 3099940
+  },
+  "ca2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 52.726788
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 15.368193
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 8.274944
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 2.74432
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.615872
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.507328
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.444864
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.354752
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.325056
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.323008
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.319936
+    },
+    "vertices": 710145,
+    "edges": 3489366
+  },
+  "channel-500x100x100-b050.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 293.759003
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 134.205444
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 77.851654
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 56.269829
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 55.988228
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 33.868805
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 33.577988
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 24.546307
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 24.720387
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 24.568834
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 7.093248
+    },
+    "vertices": 4802000,
+    "edges": 85362744
+  },
+  "co2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.191809
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.079488
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.081216
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.631232
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.038336
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.995328
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.897024
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.912384
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.886784
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.95232
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.95232
+    },
+    "vertices": 201062,
+    "edges": 974574
+  },
+  "com-LiveJournal.egr": {
+    "0": {
+      "color": 327,
+      "runtime_ms": 3414.32959
+    },
+    "1": {
+      "color": 327,
+      "runtime_ms": 1379.874878
+    },
+    "2": {
+      "color": 327,
+      "runtime_ms": 721.645569
+    },
+    "3": {
+      "color": 327,
+      "runtime_ms": 461.059082
+    },
+    "4": {
+      "color": 327,
+      "runtime_ms": 316.103699
+    },
+    "5": {
+      "color": 327,
+      "runtime_ms": 239.009842
+    },
+    "6": {
+      "color": 327,
+      "runtime_ms": 188.686356
+    },
+    "7": {
+      "color": 327,
+      "runtime_ms": 154.268677
+    },
+    "8": {
+      "color": 327,
+      "runtime_ms": 129.551361
+    },
+    "9": {
+      "color": 327,
+      "runtime_ms": 115.559425
+    },
+    "10": {
+      "color": 327,
+      "runtime_ms": 99.779594
+    },
+    "vertices": 3997962,
+    "edges": 69362378
+  },
+  "cs4.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 3.74272
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 0.692224
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 0.753664
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 0.68608
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 0.663552
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 0.79872
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 0.717824
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 0.662528
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 0.662528
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 0.688128
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 0.66048
+    },
+    "vertices": 22499,
+    "edges": 87716
+  },
+  "ct2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 11.136
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.713024
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.993728
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.298432
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.914432
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.882688
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.799744
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.804864
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.791552
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.771072
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.9216
+    },
+    "vertices": 67578,
+    "edges": 336352
+  },
+  "cti.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 2.604032
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.44896
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.106944
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.690176
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.7424
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.6656
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.667648
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.678912
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.982016
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.687104
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.688128
+    },
+    "vertices": 16840,
+    "edges": 96464
+  },
+  "data.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 3.218432
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 2.024448
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 1.307648
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 1.092608
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 0.996352
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 0.97792
+    },
+    "6": {
+      "color": 8,
+      "runtime_ms": 0.857056
+    },
+    "7": {
+      "color": 8,
+      "runtime_ms": 0.816128
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 0.70656
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 0.724992
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 0.726016
+    },
+    "vertices": 2851,
+    "edges": 30186
+  },
+  "de2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 6.153216
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.340864
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.26464
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.95744
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.765952
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.768
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.769024
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.813056
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.750592
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.708608
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.766976
+    },
+    "vertices": 24115,
+    "edges": 116056
+  },
+  "delaunay_n23.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 1647.892456
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 443.054108
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 46.025726
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 17.028095
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 13.413376
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 9.935905
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 9.178112
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 7.986177
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 6.965249
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 6.543361
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 6.443008
+    },
+    "vertices": 8388608,
+    "edges": 50331568
+  },
+  "email-Eu-core-temporal.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 4.805633
+    },
+    "1": {
+      "color": 21,
+      "runtime_ms": 2.855936
+    },
+    "2": {
+      "color": 22,
+      "runtime_ms": 2.066432
+    },
+    "3": {
+      "color": 22,
+      "runtime_ms": 1.683456
+    },
+    "4": {
+      "color": 23,
+      "runtime_ms": 1.460288
+    },
+    "5": {
+      "color": 22,
+      "runtime_ms": 1.373184
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 1.211392
+    },
+    "7": {
+      "color": 22,
+      "runtime_ms": 1.155072
+    },
+    "8": {
+      "color": 22,
+      "runtime_ms": 1.102848
+    },
+    "9": {
+      "color": 22,
+      "runtime_ms": 1.03424
+    },
+    "10": {
+      "color": 22,
+      "runtime_ms": 1.010688
+    },
+    "vertices": 1005,
+    "edges": 46280
+  },
+  "email-Eu-core.nl.egr": {
+    "0": {
+      "color": 22,
+      "runtime_ms": 3.478528
+    },
+    "1": {
+      "color": 23,
+      "runtime_ms": 2.085888
+    },
+    "2": {
+      "color": 22,
+      "runtime_ms": 1.507328
+    },
+    "3": {
+      "color": 22,
+      "runtime_ms": 1.360896
+    },
+    "4": {
+      "color": 22,
+      "runtime_ms": 1.133568
+    },
+    "5": {
+      "color": 23,
+      "runtime_ms": 1.08032
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 0.968704
+    },
+    "7": {
+      "color": 22,
+      "runtime_ms": 0.919552
+    },
+    "8": {
+      "color": 22,
+      "runtime_ms": 0.913408
+    },
+    "9": {
+      "color": 21,
+      "runtime_ms": 0.84176
+    },
+    "10": {
+      "color": 21,
+      "runtime_ms": 0.835584
+    },
+    "vertices": 1005,
+    "edges": 32128
+  },
+  "fe_4elt2.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 10.112
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.532352
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.339392
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.001472
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.822272
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.69632
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.702464
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.694272
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.697344
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.729088
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.724992
+    },
+    "vertices": 11143,
+    "edges": 65636
+  },
+  "fe_body.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 30.905313
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 7.73632
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 2.7648
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 1.545216
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.437696
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.288224
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 0.996352
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 0.790528
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 0.799744
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 0.780288
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.909312
+    },
+    "vertices": 45087,
+    "edges": 327468
+  },
+  "fe_ocean.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 10.769409
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.440512
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 4.32128
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 2.39104
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.554432
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.779264
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.754688
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.771072
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.943104
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.75776
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.782336
+    },
+    "vertices": 143437,
+    "edges": 819186
+  },
+  "fe_rotor.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 168.726532
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 35.358719
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 14.584833
+    },
+    "3": {
+      "color": 9,
+      "runtime_ms": 5.766144
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 3.117056
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 2.620416
+    },
+    "6": {
+      "color": 10,
+      "runtime_ms": 2.20672
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 1.904672
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 1.696768
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 1.521664
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 1.380352
+    },
+    "vertices": 99617,
+    "edges": 1324862
+  },
+  "fe_sphere.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 1.959936
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 0.704512
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 0.6912
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 0.695296
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.677888
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.699392
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.719872
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.665632
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.699392
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.677888
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.685056
+    },
+    "vertices": 16386,
+    "edges": 98304
+  },
+  "fe_tooth.egr": {
+    "0": {
+      "color": 8,
+      "runtime_ms": 47.873028
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 11.899905
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 3.746816
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 2.226208
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 1.85344
+    },
+    "5": {
+      "color": 9,
+      "runtime_ms": 1.603584
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 1.558528
+    },
+    "7": {
+      "color": 9,
+      "runtime_ms": 1.539072
+    },
+    "8": {
+      "color": 9,
+      "runtime_ms": 1.255424
+    },
+    "9": {
+      "color": 9,
+      "runtime_ms": 1.123328
+    },
+    "10": {
+      "color": 9,
+      "runtime_ms": 1.063936
+    },
+    "vertices": 78136,
+    "edges": 905182
+  },
+  "fl2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 30.592001
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 11.079681
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 5.755905
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 2.246656
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.435648
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.275904
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.21856
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.153024
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 1.219584
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 1.191936
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.16736
+    },
+    "vertices": 484481,
+    "edges": 2346294
+  },
+  "ga2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.633154
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.234112
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.334592
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.72032
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 1.036288
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.036288
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.019904
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.006592
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.08032
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.979968
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.984064
+    },
+    "vertices": 291086,
+    "edges": 1418056
+  },
+  "germany_osm.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 147.302399
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 18.042879
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 8.100864
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 6.173697
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 6.13888
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 5.957633
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 5.965824
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 5.846016
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 5.982208
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 5.886976
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 6.01296
+    },
+    "vertices": 11548845,
+    "edges": 24738362
+  },
+  "great-britain_osm.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 198.027283
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 13.021184
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 5.327872
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 4.076544
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 4.13696
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 4.187137
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 4.041728
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 3.940352
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 3.974144
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 3.963904
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 3.961856
+    },
+    "vertices": 7733822,
+    "edges": 16313034
+  },
+  "hi2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 6.260736
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.464768
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.221632
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.050624
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.816128
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.789504
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.785408
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.715776
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.774144
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.694272
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.690176
+    },
+    "vertices": 25016,
+    "edges": 124126
+  },
+  "higgs-twitter.nl.egr": {
+    "0": {
+      "color": 73,
+      "runtime_ms": 247.185425
+    },
+    "1": {
+      "color": 73,
+      "runtime_ms": 135.559189
+    },
+    "2": {
+      "color": 73,
+      "runtime_ms": 96.299011
+    },
+    "3": {
+      "color": 73,
+      "runtime_ms": 77.291489
+    },
+    "4": {
+      "color": 73,
+      "runtime_ms": 65.991676
+    },
+    "5": {
+      "color": 72,
+      "runtime_ms": 57.80685
+    },
+    "6": {
+      "color": 73,
+      "runtime_ms": 51.82362
+    },
+    "7": {
+      "color": 72,
+      "runtime_ms": 48.062469
+    },
+    "8": {
+      "color": 73,
+      "runtime_ms": 43.897861
+    },
+    "9": {
+      "color": 72,
+      "runtime_ms": 40.696835
+    },
+    "10": {
+      "color": 73,
+      "runtime_ms": 38.592514
+    },
+    "vertices": 456626,
+    "edges": 25016826
+  },
+  "hugebubbles-00000.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 3206.830322
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 570.615845
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 10.072096
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 10.035201
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 9.97376
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 10.025985
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 9.959425
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 9.976833
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 10.066944
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 9.982976
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 9.966592
+    },
+    "vertices": 18318143,
+    "edges": 54940162
+  },
+  "hugebubbles-00010.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 3829.901367
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 247.744522
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 13.843457
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 13.935616
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 13.848577
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 13.939713
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 13.943809
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 13.860865
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 13.932545
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 13.888513
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 13.938688
+    },
+    "vertices": 19458087,
+    "edges": 58359528
+  },
+  "hugebubbles-00020.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 4250.864258
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 873.533508
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 14.740481
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 14.903296
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 15.080449
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 14.945281
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 14.999553
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 14.913537
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 14.811137
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 14.830593
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 14.949377
+    },
+    "vertices": 21198119,
+    "edges": 63580358
+  },
+  "hugetrace-00020.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 2907.065674
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 814.548035
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 9.819136
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 9.731073
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 9.723905
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 9.67168
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 9.744385
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 9.796608
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 9.663488
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 9.84576
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 9.662464
+    },
+    "vertices": 16002413,
+    "edges": 47997626
+  },
+  "ia2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.682018
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.468193
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.003392
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.28
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.966656
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.913408
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.899072
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.907264
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.886784
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.90112
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.928768
+    },
+    "vertices": 216007,
+    "edges": 1021170
+  },
+  "id2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 15.002625
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.442561
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.828288
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.512448
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.969728
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.975872
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.856064
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.867328
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.854016
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.920576
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.92672
+    },
+    "vertices": 149842,
+    "edges": 728264
+  },
+  "il2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 25.966595
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 9.734144
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 5.700576
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.811456
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.220608
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.097728
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.08544
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.088512
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.043456
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.061856
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.053696
+    },
+    "vertices": 451554,
+    "edges": 2164464
+  },
+  "in2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.304449
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.742016
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.878912
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.57696
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.07008
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.95232
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.953344
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.956416
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.987136
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.918528
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.964608
+    },
+    "vertices": 267071,
+    "edges": 1281716
+  },
+  "italy_osm.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 430.383148
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 11.899873
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 5.10976
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 3.666944
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 3.6096
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 3.648512
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 3.61472
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 3.569664
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 3.526656
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 3.513344
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 3.458048
+    },
+    "vertices": 6686493,
+    "edges": 14027956
+  },
+  "kron_g500-logn16.nl.egr": {
+    "0": {
+      "color": 165,
+      "runtime_ms": 43.740166
+    },
+    "1": {
+      "color": 169,
+      "runtime_ms": 19.487743
+    },
+    "2": {
+      "color": 167,
+      "runtime_ms": 12.570625
+    },
+    "3": {
+      "color": 166,
+      "runtime_ms": 9.203712
+    },
+    "4": {
+      "color": 168,
+      "runtime_ms": 7.596033
+    },
+    "5": {
+      "color": 166,
+      "runtime_ms": 6.787072
+    },
+    "6": {
+      "color": 165,
+      "runtime_ms": 5.78048
+    },
+    "7": {
+      "color": 171,
+      "runtime_ms": 5.116929
+    },
+    "8": {
+      "color": 167,
+      "runtime_ms": 4.325377
+    },
+    "9": {
+      "color": 166,
+      "runtime_ms": 4.056065
+    },
+    "10": {
+      "color": 165,
+      "runtime_ms": 4.707328
+    },
+    "vertices": 65536,
+    "edges": 4912142
+  },
+  "kron_g500-logn17.nl.egr": {
+    "0": {
+      "color": 207,
+      "runtime_ms": 73.772034
+    },
+    "1": {
+      "color": 208,
+      "runtime_ms": 33.64864
+    },
+    "2": {
+      "color": 209,
+      "runtime_ms": 22.230019
+    },
+    "3": {
+      "color": 207,
+      "runtime_ms": 16.644098
+    },
+    "4": {
+      "color": 206,
+      "runtime_ms": 13.463553
+    },
+    "5": {
+      "color": 206,
+      "runtime_ms": 11.780096
+    },
+    "6": {
+      "color": 205,
+      "runtime_ms": 10.232832
+    },
+    "7": {
+      "color": 206,
+      "runtime_ms": 9.230336
+    },
+    "8": {
+      "color": 207,
+      "runtime_ms": 8.073217
+    },
+    "9": {
+      "color": 206,
+      "runtime_ms": 7.614464
+    },
+    "10": {
+      "color": 206,
+      "runtime_ms": 7.475201
+    },
+    "vertices": 131072,
+    "edges": 10227970
+  },
+  "kron_g500-logn18.nl.egr": {
+    "0": {
+      "color": 262,
+      "runtime_ms": 131.021805
+    },
+    "1": {
+      "color": 256,
+      "runtime_ms": 59.577347
+    },
+    "2": {
+      "color": 256,
+      "runtime_ms": 39.591934
+    },
+    "3": {
+      "color": 257,
+      "runtime_ms": 30.787586
+    },
+    "4": {
+      "color": 256,
+      "runtime_ms": 25.316355
+    },
+    "5": {
+      "color": 257,
+      "runtime_ms": 21.468163
+    },
+    "6": {
+      "color": 258,
+      "runtime_ms": 19.245056
+    },
+    "7": {
+      "color": 258,
+      "runtime_ms": 15.996929
+    },
+    "8": {
+      "color": 257,
+      "runtime_ms": 14.405632
+    },
+    "9": {
+      "color": 257,
+      "runtime_ms": 13.318145
+    },
+    "10": {
+      "color": 255,
+      "runtime_ms": 15.122433
+    },
+    "vertices": 262144,
+    "edges": 21165372
+  },
+  "kron_g500-logn19.nl.egr": {
+    "0": {
+      "color": 314,
+      "runtime_ms": 234.39566
+    },
+    "1": {
+      "color": 315,
+      "runtime_ms": 109.836296
+    },
+    "2": {
+      "color": 317,
+      "runtime_ms": 74.245117
+    },
+    "3": {
+      "color": 316,
+      "runtime_ms": 56.854496
+    },
+    "4": {
+      "color": 322,
+      "runtime_ms": 45.565956
+    },
+    "5": {
+      "color": 319,
+      "runtime_ms": 38.396961
+    },
+    "6": {
+      "color": 317,
+      "runtime_ms": 35.879936
+    },
+    "7": {
+      "color": 319,
+      "runtime_ms": 28.635138
+    },
+    "8": {
+      "color": 318,
+      "runtime_ms": 30.199808
+    },
+    "9": {
+      "color": 320,
+      "runtime_ms": 27.471874
+    },
+    "10": {
+      "color": 316,
+      "runtime_ms": 29.589506
+    },
+    "vertices": 524288,
+    "edges": 43561574
+  },
+  "ks2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.864258
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.942273
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.733504
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.411072
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.031168
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.95232
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.935936
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.924672
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.94208
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.928768
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.956416
+    },
+    "vertices": 238600,
+    "edges": 1121798
+  },
+  "ky2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 14.280704
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.566464
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.952192
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.378304
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.98816
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.86016
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.871424
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.878592
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.015808
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.896
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.897024
+    },
+    "vertices": 161672,
+    "edges": 787778
+  },
+  "la2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 18.279427
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.078465
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.652576
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.516544
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.02608
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.933888
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.96256
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.9728
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.923648
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.036288
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.919552
+    },
+    "vertices": 204447,
+    "edges": 980634
+  },
+  "loc-Brightkite.egr": {
+    "0": {
+      "color": 39,
+      "runtime_ms": 13.923329
+    },
+    "1": {
+      "color": 38,
+      "runtime_ms": 6.550529
+    },
+    "2": {
+      "color": 37,
+      "runtime_ms": 4.087809
+    },
+    "3": {
+      "color": 38,
+      "runtime_ms": 3.001344
+    },
+    "4": {
+      "color": 38,
+      "runtime_ms": 2.393088
+    },
+    "5": {
+      "color": 38,
+      "runtime_ms": 2.102272
+    },
+    "6": {
+      "color": 38,
+      "runtime_ms": 1.90976
+    },
+    "7": {
+      "color": 38,
+      "runtime_ms": 1.75616
+    },
+    "8": {
+      "color": 38,
+      "runtime_ms": 1.539072
+    },
+    "9": {
+      "color": 39,
+      "runtime_ms": 1.50016
+    },
+    "10": {
+      "color": 38,
+      "runtime_ms": 1.43872
+    },
+    "vertices": 58228,
+    "edges": 428156
+  },
+  "loc-Gowalla.egr": {
+    "0": {
+      "color": 29,
+      "runtime_ms": 43.770882
+    },
+    "1": {
+      "color": 29,
+      "runtime_ms": 19.725311
+    },
+    "2": {
+      "color": 29,
+      "runtime_ms": 12.165121
+    },
+    "3": {
+      "color": 29,
+      "runtime_ms": 8.094721
+    },
+    "4": {
+      "color": 29,
+      "runtime_ms": 6.567936
+    },
+    "5": {
+      "color": 29,
+      "runtime_ms": 5.626881
+    },
+    "6": {
+      "color": 29,
+      "runtime_ms": 4.649984
+    },
+    "7": {
+      "color": 29,
+      "runtime_ms": 4.248576
+    },
+    "8": {
+      "color": 29,
+      "runtime_ms": 3.723264
+    },
+    "9": {
+      "color": 29,
+      "runtime_ms": 3.344384
+    },
+    "10": {
+      "color": 29,
+      "runtime_ms": 3.05152
+    },
+    "vertices": 196591,
+    "edges": 1900654
+  },
+  "luxembourg_osm.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 3.749888
+    },
+    "1": {
+      "color": 3,
+      "runtime_ms": 0.946176
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 0.749568
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 0.719872
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 0.720896
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 0.68096
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 0.776192
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 0.712704
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 0.72704
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 0.68608
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 0.714752
+    },
+    "vertices": 114599,
+    "edges": 239332
+  },
+  "m14b.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 198.175751
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 50.220036
+    },
+    "2": {
+      "color": 10,
+      "runtime_ms": 17.123329
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 10.25024
+    },
+    "4": {
+      "color": 11,
+      "runtime_ms": 7.832577
+    },
+    "5": {
+      "color": 11,
+      "runtime_ms": 6.12864
+    },
+    "6": {
+      "color": 11,
+      "runtime_ms": 5.337089
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 4.227072
+    },
+    "8": {
+      "color": 11,
+      "runtime_ms": 3.825664
+    },
+    "9": {
+      "color": 11,
+      "runtime_ms": 2.2784
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 1.52064
+    },
+    "vertices": 214765,
+    "edges": 3358036
+  },
+  "ma2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.514048
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.244928
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.035136
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.466368
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.001472
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.864256
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.85504
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.838656
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.872448
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.868352
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.900096
+    },
+    "vertices": 157508,
+    "edges": 776610
+  },
+  "md2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 14.946305
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.178368
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.77664
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.449984
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.959488
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.866272
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.837632
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.873472
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.971776
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.855072
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.847872
+    },
+    "vertices": 145247,
+    "edges": 700378
+  },
+  "me2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 10.206208
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.85024
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.125824
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.282048
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.884736
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.80384
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.771072
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.795648
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.769024
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.77824
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.8192
+    },
+    "vertices": 69518,
+    "edges": 335476
+  },
+  "mi2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 22.188034
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.519232
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.289536
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.60256
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.097728
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.999424
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.024
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.997376
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.03936
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.978944
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.973824
+    },
+    "vertices": 329885,
+    "edges": 1578090
+  },
+  "mn2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 17.535999
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.882881
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.30752
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.521664
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.015808
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.939008
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.949248
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.929792
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.927744
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.960512
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.932864
+    },
+    "vertices": 259777,
+    "edges": 1227102
+  },
+  "mo2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.803139
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.19872
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.468736
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.719296
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.096704
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.086464
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.047552
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.024
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.01376
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.038336
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.037312
+    },
+    "vertices": 343565,
+    "edges": 1656568
+  },
+  "ms2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 13.962241
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.106688
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.486272
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.468416
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.979968
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.867328
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.88576
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.893952
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.90112
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.924672
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.907264
+    },
+    "vertices": 171778,
+    "edges": 839980
+  },
+  "mt2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 12.807169
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 4.182016
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.547712
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.406976
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.93184
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.841728
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.854016
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.900096
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.877568
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.872448
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.858112
+    },
+    "vertices": 132288,
+    "edges": 638668
+  },
+  "nc2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 18.798594
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.759425
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.760128
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.664
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.053696
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.037312
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.976896
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.99328
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.96256
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.974848
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.963584
+    },
+    "vertices": 288987,
+    "edges": 1416620
+  },
+  "nd2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 12.268545
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.851264
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.526208
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.267712
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.956416
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.83968
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.82432
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.830464
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.812032
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.838656
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.848896
+    },
+    "vertices": 133769,
+    "edges": 625946
+  },
+  "ne2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.098305
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.38624
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.894848
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.33632
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.00864
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.877568
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.877568
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.89088
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.886784
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.873472
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.904192
+    },
+    "vertices": 193352,
+    "edges": 913854
+  },
+  "netherlands_osm.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 16.148479
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 4.851712
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 2.06336
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 1.69984
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 1.678336
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 1.784832
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 1.652736
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 1.748992
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 1.641472
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 1.659904
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 1.642496
+    },
+    "vertices": 2216688,
+    "edges": 4882476
+  },
+  "nh2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 8.395776
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.207168
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.403904
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.117184
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.969728
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.787456
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.756736
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.856064
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.775168
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.745472
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.707584
+    },
+    "vertices": 48837,
+    "edges": 234550
+  },
+  "nj2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 17.596418
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.469633
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.834432
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.502208
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.945152
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.852992
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.866272
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.943104
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.910336
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.905216
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.871424
+    },
+    "vertices": 169588,
+    "edges": 829912
+  },
+  "nm2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.523233
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.846016
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.910208
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.549312
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.040384
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.984064
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.913408
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.894976
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.919552
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.914432
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.903168
+    },
+    "vertices": 168609,
+    "edges": 830970
+  },
+  "nv2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 11.441153
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 4.0448
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.061344
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.253376
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.896
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.804864
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.825344
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.833536
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.846816
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.856064
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.85504
+    },
+    "vertices": 84538,
+    "edges": 416998
+  },
+  "ny2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 25.454594
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.902208
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.695041
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.796096
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.215488
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.995328
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.052672
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.005568
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.040384
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.01376
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.006592
+    },
+    "vertices": 350169,
+    "edges": 1709544
+  },
+  "oh2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 22.091776
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 7.986177
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.238337
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.692672
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.14688
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.022976
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.014784
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.04448
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.00864
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.001472
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.042432
+    },
+    "vertices": 365344,
+    "edges": 1768240
+  },
+  "ok2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 18.886658
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.697984
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 4.046848
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.522688
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.031168
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.95744
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.953344
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.953344
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.06496
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.949248
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.96256
+    },
+    "vertices": 269118,
+    "edges": 1274148
+  },
+  "or2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.746819
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.179392
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.278848
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.734656
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.997376
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 1.001472
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.898048
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.902144
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.941056
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.970752
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.922624
+    },
+    "vertices": 196621,
+    "edges": 979512
+  },
+  "pa2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 24.168449
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 9.088
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 5.025793
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.849344
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.230848
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.202176
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 1.102848
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.11616
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.098752
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.09056
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 1.081344
+    },
+    "vertices": 421545,
+    "edges": 2058462
+  },
+  "preferentialAttachment.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 2.400256
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 2.102272
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 1.63328
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 1.562624
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 1.27488
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 1.339392
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 1.2544
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 1.370112
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 1.198112
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 1.188864
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 1.33632
+    },
+    "vertices": 100000,
+    "edges": 999970
+  },
+  "rgg_n_2_22_s0.egr": {
+    "0": {
+      "color": 20,
+      "runtime_ms": 10349.15918
+    },
+    "1": {
+      "color": 20,
+      "runtime_ms": 2834.516113
+    },
+    "2": {
+      "color": 20,
+      "runtime_ms": 1267.067871
+    },
+    "3": {
+      "color": 20,
+      "runtime_ms": 670.005249
+    },
+    "4": {
+      "color": 20,
+      "runtime_ms": 351.209534
+    },
+    "5": {
+      "color": 20,
+      "runtime_ms": 185.345016
+    },
+    "6": {
+      "color": 20,
+      "runtime_ms": 121.333771
+    },
+    "7": {
+      "color": 20,
+      "runtime_ms": 86.27507
+    },
+    "8": {
+      "color": 20,
+      "runtime_ms": 61.396996
+    },
+    "9": {
+      "color": 20,
+      "runtime_ms": 47.241219
+    },
+    "10": {
+      "color": 20,
+      "runtime_ms": 30.895105
+    },
+    "vertices": 4194304,
+    "edges": 60718396
+  },
+  "ri2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 7.195649
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.540544
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.439744
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.031168
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.77312
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.77824
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.799744
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.72704
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.713728
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.719872
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.707584
+    },
+    "vertices": 25181,
+    "edges": 125750
+  },
+  "road_usa.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 381.782013
+    },
+    "1": {
+      "color": 4,
+      "runtime_ms": 114.23745
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 29.85677
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 13.195264
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 12.68224
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 12.668929
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 12.688384
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 12.557313
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 12.236801
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 12.288992
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 12.386304
+    },
+    "vertices": 23947347,
+    "edges": 57708624
+  },
+  "sc2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 15.821826
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.025217
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.111936
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.603584
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.949248
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.919552
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.918528
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.896
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.912384
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.90112
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.862176
+    },
+    "vertices": 181908,
+    "edges": 893160
+  },
+  "sd2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 10.537985
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.289088
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.924096
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.055744
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.903168
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.869376
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.864256
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.82944
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.806912
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.835584
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.764928
+    },
+    "vertices": 88360,
+    "edges": 410722
+  },
+  "smallworld.egr": {
+    "0": {
+      "color": 8,
+      "runtime_ms": 58.592255
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 15.686657
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 4.763649
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 3.162112
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 1.153024
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 0.953344
+    },
+    "6": {
+      "color": 8,
+      "runtime_ms": 0.932896
+    },
+    "7": {
+      "color": 8,
+      "runtime_ms": 0.933888
+    },
+    "8": {
+      "color": 8,
+      "runtime_ms": 0.90112
+    },
+    "9": {
+      "color": 8,
+      "runtime_ms": 0.8192
+    },
+    "10": {
+      "color": 8,
+      "runtime_ms": 0.864256
+    },
+    "vertices": 100000,
+    "edges": 999996
+  },
+  "soc-LiveJournal1.nl.egr": {
+    "0": {
+      "color": 321,
+      "runtime_ms": 4324.78125
+    },
+    "1": {
+      "color": 321,
+      "runtime_ms": 1830.639771
+    },
+    "2": {
+      "color": 321,
+      "runtime_ms": 989.839355
+    },
+    "3": {
+      "color": 321,
+      "runtime_ms": 636.405762
+    },
+    "4": {
+      "color": 321,
+      "runtime_ms": 445.411316
+    },
+    "5": {
+      "color": 321,
+      "runtime_ms": 340.797485
+    },
+    "6": {
+      "color": 321,
+      "runtime_ms": 261.007355
+    },
+    "7": {
+      "color": 321,
+      "runtime_ms": 223.742996
+    },
+    "8": {
+      "color": 321,
+      "runtime_ms": 194.584595
+    },
+    "9": {
+      "color": 321,
+      "runtime_ms": 162.306061
+    },
+    "10": {
+      "color": 321,
+      "runtime_ms": 146.281479
+    },
+    "vertices": 4847571,
+    "edges": 85702474
+  },
+  "soc-sign-bitcoin-alpha.egr": {
+    "0": {
+      "color": 14,
+      "runtime_ms": 3.163136
+    },
+    "1": {
+      "color": 14,
+      "runtime_ms": 1.825792
+    },
+    "2": {
+      "color": 14,
+      "runtime_ms": 1.328128
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 1.148928
+    },
+    "4": {
+      "color": 14,
+      "runtime_ms": 1.03936
+    },
+    "5": {
+      "color": 14,
+      "runtime_ms": 1.002496
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 0.948224
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 0.888832
+    },
+    "8": {
+      "color": 15,
+      "runtime_ms": 0.88064
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 0.831488
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 0.859136
+    },
+    "vertices": 3783,
+    "edges": 33964
+  },
+  "soc-sign-bitcoin-otc.egr": {
+    "0": {
+      "color": 14,
+      "runtime_ms": 3.736576
+    },
+    "1": {
+      "color": 14,
+      "runtime_ms": 2.143232
+    },
+    "2": {
+      "color": 14,
+      "runtime_ms": 1.657856
+    },
+    "3": {
+      "color": 14,
+      "runtime_ms": 1.26976
+    },
+    "4": {
+      "color": 14,
+      "runtime_ms": 1.176544
+    },
+    "5": {
+      "color": 15,
+      "runtime_ms": 1.124352
+    },
+    "6": {
+      "color": 14,
+      "runtime_ms": 1.061888
+    },
+    "7": {
+      "color": 14,
+      "runtime_ms": 0.985088
+    },
+    "8": {
+      "color": 14,
+      "runtime_ms": 0.925696
+    },
+    "9": {
+      "color": 14,
+      "runtime_ms": 1.022976
+    },
+    "10": {
+      "color": 14,
+      "runtime_ms": 1.048576
+    },
+    "vertices": 5881,
+    "edges": 50934
+  },
+  "sx-askubuntu.nl.egr": {
+    "0": {
+      "color": 28,
+      "runtime_ms": 12.233728
+    },
+    "1": {
+      "color": 29,
+      "runtime_ms": 6.51264
+    },
+    "2": {
+      "color": 28,
+      "runtime_ms": 4.558848
+    },
+    "3": {
+      "color": 28,
+      "runtime_ms": 3.443712
+    },
+    "4": {
+      "color": 29,
+      "runtime_ms": 2.816
+    },
+    "5": {
+      "color": 29,
+      "runtime_ms": 2.650112
+    },
+    "6": {
+      "color": 28,
+      "runtime_ms": 2.392064
+    },
+    "7": {
+      "color": 29,
+      "runtime_ms": 2.147328
+    },
+    "8": {
+      "color": 28,
+      "runtime_ms": 2.056192
+    },
+    "9": {
+      "color": 28,
+      "runtime_ms": 1.946624
+    },
+    "10": {
+      "color": 29,
+      "runtime_ms": 1.918976
+    },
+    "vertices": 159316,
+    "edges": 988536
+  },
+  "sx-mathoverflow.nl.egr": {
+    "0": {
+      "color": 42,
+      "runtime_ms": 10.25024
+    },
+    "1": {
+      "color": 40,
+      "runtime_ms": 5.51424
+    },
+    "2": {
+      "color": 39,
+      "runtime_ms": 3.67616
+    },
+    "3": {
+      "color": 39,
+      "runtime_ms": 2.965504
+    },
+    "4": {
+      "color": 40,
+      "runtime_ms": 2.381824
+    },
+    "5": {
+      "color": 40,
+      "runtime_ms": 2.182144
+    },
+    "6": {
+      "color": 40,
+      "runtime_ms": 1.928192
+    },
+    "7": {
+      "color": 40,
+      "runtime_ms": 1.764352
+    },
+    "8": {
+      "color": 40,
+      "runtime_ms": 1.660928
+    },
+    "9": {
+      "color": 41,
+      "runtime_ms": 1.583104
+    },
+    "10": {
+      "color": 40,
+      "runtime_ms": 1.57184
+    },
+    "vertices": 24818,
+    "edges": 419276
+  },
+  "sx-stackoverflow.nl.egr": {
+    "0": {
+      "color": 74,
+      "runtime_ms": 526.642212
+    },
+    "1": {
+      "color": 75,
+      "runtime_ms": 259.50415
+    },
+    "2": {
+      "color": 74,
+      "runtime_ms": 164.907028
+    },
+    "3": {
+      "color": 74,
+      "runtime_ms": 126.97908
+    },
+    "4": {
+      "color": 74,
+      "runtime_ms": 104.639496
+    },
+    "5": {
+      "color": 75,
+      "runtime_ms": 90.125313
+    },
+    "6": {
+      "color": 74,
+      "runtime_ms": 82.413567
+    },
+    "7": {
+      "color": 75,
+      "runtime_ms": 73.436165
+    },
+    "8": {
+      "color": 73,
+      "runtime_ms": 71.263229
+    },
+    "9": {
+      "color": 74,
+      "runtime_ms": 66.863113
+    },
+    "10": {
+      "color": 74,
+      "runtime_ms": 63.500294
+    },
+    "vertices": 2601977,
+    "edges": 62241262
+  },
+  "sx-superuser.nl.egr": {
+    "0": {
+      "color": 33,
+      "runtime_ms": 17.69165
+    },
+    "1": {
+      "color": 34,
+      "runtime_ms": 9.582592
+    },
+    "2": {
+      "color": 33,
+      "runtime_ms": 6.378497
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 4.893696
+    },
+    "4": {
+      "color": 34,
+      "runtime_ms": 4.175872
+    },
+    "5": {
+      "color": 33,
+      "runtime_ms": 3.709952
+    },
+    "6": {
+      "color": 33,
+      "runtime_ms": 3.319808
+    },
+    "7": {
+      "color": 35,
+      "runtime_ms": 3.165184
+    },
+    "8": {
+      "color": 33,
+      "runtime_ms": 2.855936
+    },
+    "9": {
+      "color": 34,
+      "runtime_ms": 2.644992
+    },
+    "10": {
+      "color": 33,
+      "runtime_ms": 2.574336
+    },
+    "vertices": 194085,
+    "edges": 1539714
+  },
+  "t60k.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 4.569088
+    },
+    "1": {
+      "color": 3,
+      "runtime_ms": 1.9712
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 0.666624
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 0.703488
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 0.73728
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 0.674816
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 0.735232
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 0.702464
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 0.709632
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 0.684
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 0.662528
+    },
+    "vertices": 60005,
+    "edges": 178880
+  },
+  "tn2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 17.131521
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.111232
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.854336
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.584128
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.050624
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.927744
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.914432
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.93184
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.084416
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.960512
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.976928
+    },
+    "vertices": 240116,
+    "edges": 1193966
+  },
+  "tx2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 61.32122
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 21.015553
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 11.168769
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 3.2256
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.828864
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.650688
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 1.670144
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 1.48992
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 1.47456
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 1.455104
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 1.444864
+    },
+    "vertices": 914231,
+    "edges": 4456272
+  },
+  "uk.egr": {
+    "0": {
+      "color": 3,
+      "runtime_ms": 2.054144
+    },
+    "1": {
+      "color": 3,
+      "runtime_ms": 1.027072
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 0.648192
+    },
+    "3": {
+      "color": 4,
+      "runtime_ms": 0.669696
+    },
+    "4": {
+      "color": 4,
+      "runtime_ms": 0.681984
+    },
+    "5": {
+      "color": 4,
+      "runtime_ms": 0.674816
+    },
+    "6": {
+      "color": 4,
+      "runtime_ms": 0.664576
+    },
+    "7": {
+      "color": 4,
+      "runtime_ms": 0.683008
+    },
+    "8": {
+      "color": 4,
+      "runtime_ms": 0.70656
+    },
+    "9": {
+      "color": 4,
+      "runtime_ms": 0.717824
+    },
+    "10": {
+      "color": 4,
+      "runtime_ms": 0.779264
+    },
+    "vertices": 4824,
+    "edges": 13674
+  },
+  "ut2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 12.609537
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 4.210688
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.122752
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.353728
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.99328
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.856064
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.850944
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.889856
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.98816
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.878592
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.868352
+    },
+    "vertices": 115406,
+    "edges": 572066
+  },
+  "va2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 19.929089
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.658048
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.699712
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.81248
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.071104
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 1.206272
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.98816
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 1.032224
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.980992
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.986112
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.96256
+    },
+    "vertices": 285762,
+    "edges": 1402128
+  },
+  "vsp_barth5_1Ksep_50in_5Kout.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 10.897408
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.971648
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 1.577984
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 1.427456
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 0.833536
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.78336
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 0.83968
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.708608
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.745472
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.719872
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.71168
+    },
+    "vertices": 32212,
+    "edges": 203610
+  },
+  "vsp_bcsstk30_500sep_10in_1Kout.egr": {
+    "0": {
+      "color": 48,
+      "runtime_ms": 51.428356
+    },
+    "1": {
+      "color": 48,
+      "runtime_ms": 32.34304
+    },
+    "2": {
+      "color": 48,
+      "runtime_ms": 23.03488
+    },
+    "3": {
+      "color": 48,
+      "runtime_ms": 18.034689
+    },
+    "4": {
+      "color": 48,
+      "runtime_ms": 14.011393
+    },
+    "5": {
+      "color": 48,
+      "runtime_ms": 11.680769
+    },
+    "6": {
+      "color": 50,
+      "runtime_ms": 10.229761
+    },
+    "7": {
+      "color": 48,
+      "runtime_ms": 8.180736
+    },
+    "8": {
+      "color": 48,
+      "runtime_ms": 7.646208
+    },
+    "9": {
+      "color": 54,
+      "runtime_ms": 6.28224
+    },
+    "10": {
+      "color": 49,
+      "runtime_ms": 5.522432
+    },
+    "vertices": 58348,
+    "edges": 4033156
+  },
+  "vsp_befref_fxm_2_4_air02.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 5.167104
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 2.530304
+    },
+    "2": {
+      "color": 11,
+      "runtime_ms": 1.518592
+    },
+    "3": {
+      "color": 11,
+      "runtime_ms": 1.452032
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 1.12128
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 1.118208
+    },
+    "6": {
+      "color": 10,
+      "runtime_ms": 1.073152
+    },
+    "7": {
+      "color": 11,
+      "runtime_ms": 0.978944
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 1.074176
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 0.857088
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 0.992256
+    },
+    "vertices": 14109,
+    "edges": 196448
+  },
+  "vsp_bump2_e18_aa01_model1_crew1.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 11.895808
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 4.781056
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 2.90816
+    },
+    "3": {
+      "color": 10,
+      "runtime_ms": 2.14016
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 1.75104
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 1.542144
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 1.312768
+    },
+    "7": {
+      "color": 9,
+      "runtime_ms": 1.176576
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 1.176576
+    },
+    "9": {
+      "color": 9,
+      "runtime_ms": 1.132544
+    },
+    "10": {
+      "color": 9,
+      "runtime_ms": 0.999424
+    },
+    "vertices": 56438,
+    "edges": 601602
+  },
+  "vsp_c-30_data_data.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 6.549504
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 2.630656
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 1.726464
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 1.278976
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 1.118208
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 1.0752
+    },
+    "6": {
+      "color": 8,
+      "runtime_ms": 1.004544
+    },
+    "7": {
+      "color": 9,
+      "runtime_ms": 0.90112
+    },
+    "8": {
+      "color": 8,
+      "runtime_ms": 0.88576
+    },
+    "9": {
+      "color": 9,
+      "runtime_ms": 0.888832
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 0.8192
+    },
+    "vertices": 11023,
+    "edges": 124368
+  },
+  "vsp_c-60_data_cti_cs4.egr": {
+    "0": {
+      "color": 8,
+      "runtime_ms": 20.513794
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 7.486465
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 4.191232
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 2.857984
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 2.11968
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 1.583104
+    },
+    "6": {
+      "color": 8,
+      "runtime_ms": 1.405952
+    },
+    "7": {
+      "color": 8,
+      "runtime_ms": 1.424384
+    },
+    "8": {
+      "color": 8,
+      "runtime_ms": 1.225728
+    },
+    "9": {
+      "color": 8,
+      "runtime_ms": 1.406976
+    },
+    "10": {
+      "color": 9,
+      "runtime_ms": 1.149952
+    },
+    "vertices": 85830,
+    "edges": 482160
+  },
+  "vsp_data_and_seymourl.egr": {
+    "0": {
+      "color": 8,
+      "runtime_ms": 9.341952
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 3.311616
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 1.907712
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 1.41824
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 1.174528
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 1.10592
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 0.994304
+    },
+    "7": {
+      "color": 9,
+      "runtime_ms": 0.85504
+    },
+    "8": {
+      "color": 9,
+      "runtime_ms": 0.91648
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 0.950272
+    },
+    "10": {
+      "color": 9,
+      "runtime_ms": 0.780288
+    },
+    "vertices": 9167,
+    "edges": 111732
+  },
+  "vsp_finan512_scagr7-2c_rlfddd.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 13.723649
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 6.071297
+    },
+    "2": {
+      "color": 7,
+      "runtime_ms": 3.141632
+    },
+    "3": {
+      "color": 7,
+      "runtime_ms": 2.53952
+    },
+    "4": {
+      "color": 7,
+      "runtime_ms": 1.574912
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 1.686528
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 1.544192
+    },
+    "7": {
+      "color": 7,
+      "runtime_ms": 1.224704
+    },
+    "8": {
+      "color": 7,
+      "runtime_ms": 1.074176
+    },
+    "9": {
+      "color": 7,
+      "runtime_ms": 1.308672
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 1.052672
+    },
+    "vertices": 139752,
+    "edges": 1104040
+  },
+  "vsp_mod2_pgp2_slptsk.egr": {
+    "0": {
+      "color": 16,
+      "runtime_ms": 14.834689
+    },
+    "1": {
+      "color": 15,
+      "runtime_ms": 6.726656
+    },
+    "2": {
+      "color": 15,
+      "runtime_ms": 4.199424
+    },
+    "3": {
+      "color": 15,
+      "runtime_ms": 3.050496
+    },
+    "4": {
+      "color": 15,
+      "runtime_ms": 2.564096
+    },
+    "5": {
+      "color": 15,
+      "runtime_ms": 2.207744
+    },
+    "6": {
+      "color": 14,
+      "runtime_ms": 1.65376
+    },
+    "7": {
+      "color": 15,
+      "runtime_ms": 1.824768
+    },
+    "8": {
+      "color": 14,
+      "runtime_ms": 1.552384
+    },
+    "9": {
+      "color": 14,
+      "runtime_ms": 1.260512
+    },
+    "10": {
+      "color": 14,
+      "runtime_ms": 1.245184
+    },
+    "vertices": 101364,
+    "edges": 778736
+  },
+  "vsp_model1_crew1_cr42_south31.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 5.634048
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 2.968576
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 2.253824
+    },
+    "3": {
+      "color": 9,
+      "runtime_ms": 1.824768
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 1.497088
+    },
+    "5": {
+      "color": 9,
+      "runtime_ms": 1.330176
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 1.342464
+    },
+    "7": {
+      "color": 9,
+      "runtime_ms": 1.19296
+    },
+    "8": {
+      "color": 9,
+      "runtime_ms": 1.180672
+    },
+    "9": {
+      "color": 9,
+      "runtime_ms": 1.045504
+    },
+    "10": {
+      "color": 9,
+      "runtime_ms": 1.033216
+    },
+    "vertices": 45101,
+    "edges": 379952
+  },
+  "vsp_msc10848_300sep_100in_1Kout.egr": {
+    "0": {
+      "color": 66,
+      "runtime_ms": 10.933249
+    },
+    "1": {
+      "color": 66,
+      "runtime_ms": 10.661889
+    },
+    "2": {
+      "color": 66,
+      "runtime_ms": 10.529792
+    },
+    "3": {
+      "color": 65,
+      "runtime_ms": 6.966272
+    },
+    "4": {
+      "color": 65,
+      "runtime_ms": 6.851584
+    },
+    "5": {
+      "color": 65,
+      "runtime_ms": 6.842368
+    },
+    "6": {
+      "color": 67,
+      "runtime_ms": 4.66944
+    },
+    "7": {
+      "color": 67,
+      "runtime_ms": 4.636672
+    },
+    "8": {
+      "color": 67,
+      "runtime_ms": 4.682752
+    },
+    "9": {
+      "color": 67,
+      "runtime_ms": 3.912704
+    },
+    "10": {
+      "color": 67,
+      "runtime_ms": 3.966976
+    },
+    "vertices": 21996,
+    "edges": 2442056
+  },
+  "vsp_p0291_seymourl_iiasa.egr": {
+    "0": {
+      "color": 8,
+      "runtime_ms": 4.6848
+    },
+    "1": {
+      "color": 8,
+      "runtime_ms": 1.961984
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 1.36192
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 1.2032
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 1.043456
+    },
+    "5": {
+      "color": 8,
+      "runtime_ms": 0.948224
+    },
+    "6": {
+      "color": 8,
+      "runtime_ms": 0.914432
+    },
+    "7": {
+      "color": 8,
+      "runtime_ms": 0.95744
+    },
+    "8": {
+      "color": 8,
+      "runtime_ms": 0.862208
+    },
+    "9": {
+      "color": 8,
+      "runtime_ms": 0.868352
+    },
+    "10": {
+      "color": 8,
+      "runtime_ms": 0.82432
+    },
+    "vertices": 10498,
+    "edges": 107736
+  },
+  "vsp_sctap1-2b_and_seymourl.egr": {
+    "0": {
+      "color": 7,
+      "runtime_ms": 6.156289
+    },
+    "1": {
+      "color": 7,
+      "runtime_ms": 2.768896
+    },
+    "2": {
+      "color": 8,
+      "runtime_ms": 1.665056
+    },
+    "3": {
+      "color": 8,
+      "runtime_ms": 1.427456
+    },
+    "4": {
+      "color": 8,
+      "runtime_ms": 1.36704
+    },
+    "5": {
+      "color": 7,
+      "runtime_ms": 1.224704
+    },
+    "6": {
+      "color": 7,
+      "runtime_ms": 1.132544
+    },
+    "7": {
+      "color": 8,
+      "runtime_ms": 0.907264
+    },
+    "8": {
+      "color": 8,
+      "runtime_ms": 0.923648
+    },
+    "9": {
+      "color": 8,
+      "runtime_ms": 0.93696
+    },
+    "10": {
+      "color": 7,
+      "runtime_ms": 0.928768
+    },
+    "vertices": 40174,
+    "edges": 281662
+  },
+  "vsp_south31_slptsk.egr": {
+    "0": {
+      "color": 16,
+      "runtime_ms": 5.968896
+    },
+    "1": {
+      "color": 15,
+      "runtime_ms": 3.228672
+    },
+    "2": {
+      "color": 15,
+      "runtime_ms": 2.279456
+    },
+    "3": {
+      "color": 15,
+      "runtime_ms": 1.77152
+    },
+    "4": {
+      "color": 15,
+      "runtime_ms": 1.75104
+    },
+    "5": {
+      "color": 15,
+      "runtime_ms": 1.481728
+    },
+    "6": {
+      "color": 14,
+      "runtime_ms": 1.338368
+    },
+    "7": {
+      "color": 14,
+      "runtime_ms": 1.248256
+    },
+    "8": {
+      "color": 15,
+      "runtime_ms": 1.186816
+    },
+    "9": {
+      "color": 14,
+      "runtime_ms": 1.1264
+    },
+    "10": {
+      "color": 14,
+      "runtime_ms": 1.143808
+    },
+    "vertices": 39668,
+    "edges": 379828
+  },
+  "vsp_vibrobox_scagr7-2c_rlfddd.egr": {
+    "0": {
+      "color": 19,
+      "runtime_ms": 18.34189
+    },
+    "1": {
+      "color": 19,
+      "runtime_ms": 7.3472
+    },
+    "2": {
+      "color": 19,
+      "runtime_ms": 3.92704
+    },
+    "3": {
+      "color": 19,
+      "runtime_ms": 3.106784
+    },
+    "4": {
+      "color": 19,
+      "runtime_ms": 2.182144
+    },
+    "5": {
+      "color": 19,
+      "runtime_ms": 1.572864
+    },
+    "6": {
+      "color": 19,
+      "runtime_ms": 1.529856
+    },
+    "7": {
+      "color": 19,
+      "runtime_ms": 1.398784
+    },
+    "8": {
+      "color": 19,
+      "runtime_ms": 1.50528
+    },
+    "9": {
+      "color": 19,
+      "runtime_ms": 1.258496
+    },
+    "10": {
+      "color": 19,
+      "runtime_ms": 1.271808
+    },
+    "vertices": 77328,
+    "edges": 871172
+  },
+  "vt2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 5.924864
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2.241536
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.487872
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.033216
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.790528
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.787456
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.751616
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.769024
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.728064
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.684032
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.671744
+    },
+    "vertices": 32580,
+    "edges": 155598
+  },
+  "wa2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 18.671618
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 5.742592
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.46112
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.46432
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.96256
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.893952
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.900096
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.939008
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.892928
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.888832
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.918528
+    },
+    "vertices": 195574,
+    "edges": 947432
+  },
+  "wi2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 16.505856
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 6.286336
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 3.533824
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.552416
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.021952
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.9472
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.9544
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 0.980992
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 0.965632
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 0.927744
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.994304
+    },
+    "vertices": 253096,
+    "edges": 1209404
+  },
+  "wiki-RfA.nl.egr": {
+    "0": {
+      "color": 33,
+      "runtime_ms": 12.749824
+    },
+    "1": {
+      "color": 33,
+      "runtime_ms": 6.536192
+    },
+    "2": {
+      "color": 34,
+      "runtime_ms": 4.313088
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 3.529728
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 2.792448
+    },
+    "5": {
+      "color": 33,
+      "runtime_ms": 2.52928
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 2.19136
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 1.983488
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 1.839104
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 1.747968
+    },
+    "10": {
+      "color": 33,
+      "runtime_ms": 1.631232
+    },
+    "vertices": 11380,
+    "edges": 363838
+  },
+  "wiki-talk-temporal.nl.egr": {
+    "0": {
+      "color": 54,
+      "runtime_ms": 65.293312
+    },
+    "1": {
+      "color": 54,
+      "runtime_ms": 35.348484
+    },
+    "2": {
+      "color": 54,
+      "runtime_ms": 26.259459
+    },
+    "3": {
+      "color": 52,
+      "runtime_ms": 20.640768
+    },
+    "4": {
+      "color": 54,
+      "runtime_ms": 17.214466
+    },
+    "5": {
+      "color": 53,
+      "runtime_ms": 15.002625
+    },
+    "6": {
+      "color": 53,
+      "runtime_ms": 13.925376
+    },
+    "7": {
+      "color": 53,
+      "runtime_ms": 13.039616
+    },
+    "8": {
+      "color": 54,
+      "runtime_ms": 12.112897
+    },
+    "9": {
+      "color": 54,
+      "runtime_ms": 11.090944
+    },
+    "10": {
+      "color": 54,
+      "runtime_ms": 10.764289
+    },
+    "vertices": 1140149,
+    "edges": 6016724
+  },
+  "wiki-topcats.nl.egr": {
+    "0": {
+      "color": 39,
+      "runtime_ms": 495.57196
+    },
+    "1": {
+      "color": 39,
+      "runtime_ms": 222.095383
+    },
+    "2": {
+      "color": 39,
+      "runtime_ms": 141.019135
+    },
+    "3": {
+      "color": 39,
+      "runtime_ms": 104.054794
+    },
+    "4": {
+      "color": 39,
+      "runtime_ms": 89.425919
+    },
+    "5": {
+      "color": 39,
+      "runtime_ms": 72.329224
+    },
+    "6": {
+      "color": 39,
+      "runtime_ms": 65.009666
+    },
+    "7": {
+      "color": 39,
+      "runtime_ms": 59.171844
+    },
+    "8": {
+      "color": 39,
+      "runtime_ms": 56.530949
+    },
+    "9": {
+      "color": 39,
+      "runtime_ms": 51.725311
+    },
+    "10": {
+      "color": 39,
+      "runtime_ms": 46.102531
+    },
+    "vertices": 1791489,
+    "edges": 50888414
+  },
+  "wing.egr": {
+    "0": {
+      "color": 4,
+      "runtime_ms": 5.015521
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 1.342464
+    },
+    "2": {
+      "color": 4,
+      "runtime_ms": 1.693696
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 0.714752
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.69632
+    },
+    "5": {
+      "color": 5,
+      "runtime_ms": 0.71168
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.72192
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.72192
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.68608
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.667648
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.674816
+    },
+    "vertices": 62032,
+    "edges": 243088
+  },
+  "wing_nodal.egr": {
+    "0": {
+      "color": 9,
+      "runtime_ms": 14.456833
+    },
+    "1": {
+      "color": 9,
+      "runtime_ms": 4.29568
+    },
+    "2": {
+      "color": 9,
+      "runtime_ms": 2.013184
+    },
+    "3": {
+      "color": 9,
+      "runtime_ms": 1.437696
+    },
+    "4": {
+      "color": 9,
+      "runtime_ms": 1.152
+    },
+    "5": {
+      "color": 9,
+      "runtime_ms": 1.00864
+    },
+    "6": {
+      "color": 9,
+      "runtime_ms": 0.975872
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 0.93184
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 0.868352
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 0.841728
+    },
+    "10": {
+      "color": 11,
+      "runtime_ms": 0.971776
+    },
+    "vertices": 10937,
+    "edges": 150976
+  },
+  "wv2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 14.507009
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 4.421632
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 1.77664
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.429504
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 0.98304
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.84992
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.883776
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.855072
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.872448
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.842752
+    },
+    "10": {
+      "color": 5,
+      "runtime_ms": 0.837632
+    },
+    "vertices": 135218,
+    "edges": 662922
+  },
+  "wy2010.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 11.472896
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 3.972096
+    },
+    "2": {
+      "color": 5,
+      "runtime_ms": 2.071552
+    },
+    "3": {
+      "color": 5,
+      "runtime_ms": 1.303552
+    },
+    "4": {
+      "color": 5,
+      "runtime_ms": 1.067008
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 0.7936
+    },
+    "6": {
+      "color": 5,
+      "runtime_ms": 0.854016
+    },
+    "7": {
+      "color": 5,
+      "runtime_ms": 0.845824
+    },
+    "8": {
+      "color": 5,
+      "runtime_ms": 0.847872
+    },
+    "9": {
+      "color": 5,
+      "runtime_ms": 0.840704
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 0.852992
+    },
+    "vertices": 86204,
+    "edges": 427586
+  }
+}
