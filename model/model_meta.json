@@ -3,46 +3,46 @@
   "best_params": {
     "max_depth": 10,
     "max_features": 1.0,
-    "min_samples_leaf": 2,
-    "n_estimators": 300
+    "min_samples_leaf": 1,
+    "n_estimators": 100
   },
   "beta": 1.0,
   "cv_folds": 5,
   "cv_results": [
     {
       "fold": 0,
-      "mae": 1.05,
-      "mean_theta": 3.575,
-      "vr": 0.275,
-      "weighted_loss": -1.3249999999999997
+      "mae": 1.3414634146341464,
+      "mean_theta": 3.658536585365854,
+      "vr": 0.2682926829268293,
+      "weighted_loss": -1.475609756097561
     },
     {
       "fold": 1,
-      "mae": 1.2,
-      "mean_theta": 3.8,
-      "vr": 0.35,
-      "weighted_loss": -0.7999999999999998
+      "mae": 0.9512195121951219,
+      "mean_theta": 4.073170731707317,
+      "vr": 0.34146341463414637,
+      "weighted_loss": -1.1585365853658534
     },
     {
       "fold": 2,
-      "mae": 1.475,
-      "mean_theta": 3.9,
-      "vr": 0.275,
-      "weighted_loss": -1.6499999999999995
+      "mae": 1.2682926829268293,
+      "mean_theta": 3.975609756097561,
+      "vr": 0.21951219512195122,
+      "weighted_loss": -2.280487804878049
     },
     {
       "fold": 3,
-      "mae": 1.3846153846153846,
-      "mean_theta": 4.076923076923077,
-      "vr": 0.3076923076923077,
-      "weighted_loss": -1.4999999999999996
+      "mae": 1.425,
+      "mean_theta": 4.075,
+      "vr": 0.25,
+      "weighted_loss": -2.075
     },
     {
       "fold": 4,
-      "mae": 1.1025641025641026,
-      "mean_theta": 3.923076923076923,
-      "vr": 0.2564102564102564,
-      "weighted_loss": -1.858974358974359
+      "mae": 1.05,
+      "mean_theta": 4.025,
+      "vr": 0.225,
+      "weighted_loss": -2.2750000000000004
     }
   ],
   "deployable": true,
@@ -56,7 +56,7 @@
     "GI",
     "H_er"
   ],
-  "generated_utc": "2026-05-10T21:47:36.220074Z",
+  "generated_utc": "2026-05-10T22:36:06.045662Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/SSMC_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_merged_clean.json",
   "model_class": "rf",
@@ -263,7 +263,12 @@
     "wing.egr",
     "wing_nodal.egr",
     "wv2010.egr",
-    "wy2010.egr"
+    "wy2010.egr",
+    "com-Orkut.egr",
+    "kron_g500-logn20.nl.egr",
+    "kron_g500-logn21.nl.egr",
+    "rgg_n_2_23_s0.egr",
+    "rgg_n_2_24_s0.egr"
   ],
   "use_scaled": false,
   "vr_cap": 0.05,

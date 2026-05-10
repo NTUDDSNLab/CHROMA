@@ -9550,5 +9550,245 @@
     },
     "vertices": 86204,
     "edges": 427586
+  },
+  "com-Orkut.egr": {
+    "0": {
+      "color": 86,
+      "runtime_ms": 7168.507812
+    },
+    "1": {
+      "color": 85,
+      "runtime_ms": 3185.976562
+    },
+    "2": {
+      "color": 87,
+      "runtime_ms": 1863.725098
+    },
+    "3": {
+      "color": 86,
+      "runtime_ms": 1261.353027
+    },
+    "4": {
+      "color": 85,
+      "runtime_ms": 947.860535
+    },
+    "5": {
+      "color": 87,
+      "runtime_ms": 752.143372
+    },
+    "6": {
+      "color": 85,
+      "runtime_ms": 617.090027
+    },
+    "7": {
+      "color": 84,
+      "runtime_ms": 533.481506
+    },
+    "8": {
+      "color": 85,
+      "runtime_ms": 463.052795
+    },
+    "9": {
+      "color": 85,
+      "runtime_ms": 402.699249
+    },
+    "10": {
+      "color": 84,
+      "runtime_ms": 372.822052
+    },
+    "vertices": 3072441,
+    "edges": 234370166
+  },
+  "kron_g500-logn20.nl.egr": {
+    "0": {
+      "color": 397,
+      "runtime_ms": 522.31781
+    },
+    "1": {
+      "color": 395,
+      "runtime_ms": 234.90152
+    },
+    "2": {
+      "color": 393,
+      "runtime_ms": 153.539581
+    },
+    "3": {
+      "color": 398,
+      "runtime_ms": 115.122185
+    },
+    "4": {
+      "color": 396,
+      "runtime_ms": 91.505707
+    },
+    "5": {
+      "color": 392,
+      "runtime_ms": 80.497665
+    },
+    "6": {
+      "color": 395,
+      "runtime_ms": 69.184509
+    },
+    "7": {
+      "color": 393,
+      "runtime_ms": 64.331787
+    },
+    "8": {
+      "color": 395,
+      "runtime_ms": 57.957378
+    },
+    "9": {
+      "color": 399,
+      "runtime_ms": 60.346367
+    },
+    "10": {
+      "color": 396,
+      "runtime_ms": 50.980869
+    },
+    "vertices": 1048576,
+    "edges": 89238804
+  },
+  "kron_g500-logn21.nl.egr": {
+    "0": {
+      "color": 483,
+      "runtime_ms": 1122.991089
+    },
+    "1": {
+      "color": 488,
+      "runtime_ms": 497.047577
+    },
+    "2": {
+      "color": 487,
+      "runtime_ms": 315.975708
+    },
+    "3": {
+      "color": 483,
+      "runtime_ms": 232.403976
+    },
+    "4": {
+      "color": 482,
+      "runtime_ms": 188.795914
+    },
+    "5": {
+      "color": 487,
+      "runtime_ms": 162.401291
+    },
+    "6": {
+      "color": 484,
+      "runtime_ms": 139.189255
+    },
+    "7": {
+      "color": 485,
+      "runtime_ms": 139.097092
+    },
+    "8": {
+      "color": 482,
+      "runtime_ms": 121.26516
+    },
+    "9": {
+      "color": 481,
+      "runtime_ms": 116.708351
+    },
+    "10": {
+      "color": 489,
+      "runtime_ms": 115.273697
+    },
+    "vertices": 2097152,
+    "edges": 182081864
+  },
+  "rgg_n_2_23_s0.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 33938.417969
+    },
+    "1": {
+      "color": 21,
+      "runtime_ms": 9794.421875
+    },
+    "2": {
+      "color": 21,
+      "runtime_ms": 3828.419922
+    },
+    "3": {
+      "color": 21,
+      "runtime_ms": 1885.769897
+    },
+    "4": {
+      "color": 21,
+      "runtime_ms": 954.303528
+    },
+    "5": {
+      "color": 21,
+      "runtime_ms": 533.306396
+    },
+    "6": {
+      "color": 21,
+      "runtime_ms": 319.801361
+    },
+    "7": {
+      "color": 21,
+      "runtime_ms": 223.977493
+    },
+    "8": {
+      "color": 21,
+      "runtime_ms": 158.997513
+    },
+    "9": {
+      "color": 21,
+      "runtime_ms": 120.610825
+    },
+    "10": {
+      "color": 21,
+      "runtime_ms": 81.926155
+    },
+    "vertices": 8388608,
+    "edges": 127002786
+  },
+  "rgg_n_2_24_s0.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 112920.664062
+    },
+    "1": {
+      "color": 21,
+      "runtime_ms": 28846.007812
+    },
+    "2": {
+      "color": 21,
+      "runtime_ms": 12372.742188
+    },
+    "3": {
+      "color": 21,
+      "runtime_ms": 5902.878418
+    },
+    "4": {
+      "color": 21,
+      "runtime_ms": 3213.669434
+    },
+    "5": {
+      "color": 21,
+      "runtime_ms": 1665.353882
+    },
+    "6": {
+      "color": 21,
+      "runtime_ms": 920.284241
+    },
+    "7": {
+      "color": 21,
+      "runtime_ms": 552.466431
+    },
+    "8": {
+      "color": 21,
+      "runtime_ms": 410.176544
+    },
+    "9": {
+      "color": 21,
+      "runtime_ms": 285.663239
+    },
+    "10": {
+      "color": 21,
+      "runtime_ms": 212.982803
+    },
+    "vertices": 16777216,
+    "edges": 265114400
   }
 }
