@@ -2,7 +2,7 @@
 //
 // USAGE:  extract <graph.egr>
 //
-// Reads the .egr, computes the 7 GraphFeatures, prints them as a
+// Reads the .egr, computes the 9 GraphFeatures, prints them as a
 // single-line JSON object on stdout. Used by the Python ↔ C++ parity
 // test (tests/test_features_cpp.py).
 #include "graph_features.h"
@@ -18,8 +18,9 @@ int main(int argc, char** argv)
     ECLgraph g = readECLgraph(argv[1]);
     GraphFeatures f = compute_graph_features(g);
     printf("{\"V\":%.17g,\"E\":%.17g,\"d\":%.17g,\"s\":%.17g,"
-           "\"R\":%.17g,\"GI\":%.17g,\"H_er\":%.17g}\n",
-           f.V, f.E, f.d, f.s, f.R, f.GI, f.H_er);
+           "\"R\":%.17g,\"GI\":%.17g,\"H_er\":%.17g,"
+           "\"kcore\":%.17g,\"assort\":%.17g}\n",
+           f.V, f.E, f.d, f.s, f.R, f.GI, f.H_er, f.kcore, f.assort);
     freeECLgraph(g);
     return 0;
 }

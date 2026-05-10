@@ -67,8 +67,8 @@ def test_prepare_train_data(canonical_egr_fixtures):
         json_path=FIXDIR / "tiny_training.json",
         graph_dir=FIXDIR,
     )
-    # 3 graphs, 7 features each
-    assert X.shape == (3, 7)
+    # 3 graphs, 9 features each (V, E, d, s, R, GI, H_er, kcore, assort — see model/features.py FEATURE_NAMES)
+    assert X.shape == (3, 9)
     assert y.shape == (3,)
     assert names == ["K_5.egr", "P_10.egr", "C_10.egr"]
 
@@ -87,6 +87,6 @@ def test_prepare_train_data_skips_missing_egr(tmp_path):
     json_path = tmp_path / "j.json"
     json_path.write_text('{"missing.egr": {"vertices": 1, "edges": 0, "0": {"color": 1, "runtime_ms": 1.0}}}')
     X, y, names = data.prepare_train_data(json_path=json_path, graph_dir=tmp_path)
-    assert X.shape == (0, 7)
+    assert X.shape == (0, 9)
     assert y.shape == (0,)
     assert names == []

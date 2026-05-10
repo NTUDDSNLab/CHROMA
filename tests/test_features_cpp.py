@@ -20,5 +20,5 @@ def test_python_cpp_parity(canonical_egr_fixtures, name):
         capture_output=True, text=True, check=True, timeout=10,
     ).stdout)
     py  = features.compute_features(features.load_ecl_graph(egr))
-    for key in ("V", "E", "d", "s", "R", "GI", "H_er"):
+    for key in ("V", "E", "d", "s", "R", "GI", "H_er", "kcore", "assort"):
         assert cpp[key] == pytest.approx(py[key], abs=1e-9, rel=1e-9), (key, cpp, py)

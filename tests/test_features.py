@@ -108,3 +108,38 @@ def test_entropy_star(canonical_egr_fixtures):
     expected = H / math.log2(10)
     f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["star_K_1_9"]))
     assert f["H_er"] == pytest.approx(expected, abs=1e-9)
+
+
+# --- v3: kcore + assortativity ---
+
+def test_kcore_canonical(canonical_egr_fixtures):
+    """K_5: complete graph → degeneracy=4 (everyone deg 4 even after peeling)
+    P_10: path → degeneracy=1 (always remove a deg-1 endpoint)
+    C_10: cycle → degeneracy=2 (regular, peel order destroys it as 2-core)
+    star K_{1,9}: 1 hub deg 9 + 9 leaves deg 1 → degeneracy=1 (peel leaves first)
+    """
+    cases = {"K_5": 4, "P_10": 1, "C_10": 2, "star_K_1_9": 1}
+    for name, expected in cases.items():
+        f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures[name]))
+        assert f["kcore"] == expected, f"{name}: got kcore={f['kcore']}, expected {expected}"
+
+
+def test_assortativity_constant_degree_zero(canonical_egr_fixtures):
+    """K_5 (all deg 4) and C_10 (all deg 2): degree variance = 0 → return 0 by convention."""
+    for name in ("K_5", "C_10"):
+        f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures[name]))
+        assert f["assort"] == pytest.approx(0.0, abs=1e-12), name
+
+
+def test_assortativity_P10(canonical_egr_fixtures):
+    """P_10: 4 directed edges incident to a deg-1 vertex (paired with deg-2),
+    14 inner directed edges (deg-2 to deg-2). E[xy]=64/18=32/9, E[x]=E[y]=17/9.
+    cov = 32/9 − 289/81 = −1/81. Var = 11/3 − 289/81 = 8/81. r = −1/8 = −0.125."""
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["P_10"]))
+    assert f["assort"] == pytest.approx(-0.125, abs=1e-9)
+
+
+def test_assortativity_star_perfectly_disassortative(canonical_egr_fixtures):
+    """K_{1,9}: every directed edge is between deg=9 hub and deg=1 leaf → r = −1."""
+    f = features.compute_features(features.load_ecl_graph(canonical_egr_fixtures["star_K_1_9"]))
+    assert f["assort"] == pytest.approx(-1.0, abs=1e-9)

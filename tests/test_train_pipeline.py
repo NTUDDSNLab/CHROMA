@@ -28,8 +28,8 @@ def test_train_v2_smoke(tmp_path):
     assert proc.returncode == 0, proc.stderr
     assert out_cpp.exists()
     assert "score" in out_cpp.read_text()
-    assert "FEATURE_COUNT = 7" in out_scaler.read_text()
+    assert "FEATURE_COUNT = 9" in out_scaler.read_text()
     meta = json.loads(out_meta.read_text())
-    assert meta["feature_count"] == 7
+    assert meta["feature_count"] == 9
     assert meta["model_class"] == "linear"
     assert "cv_results" in meta
