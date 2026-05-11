@@ -1,0 +1,648 @@
+[
+  {
+    "graph": "Email-Enron.col.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 28.0,
+      "avg_total_ms": 16.7,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 28.0,
+      "avg_total_ms": 6.843,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 7.107,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 27.0,
+      "avg_total_ms": 6.47,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 3,
+      "theta_final": 6
+    }
+  },
+  {
+    "graph": "Slashdot0811.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 32.0,
+      "avg_total_ms": 20.4,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.817,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 32.0,
+      "avg_total_ms": 8.807,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 7.88,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 3,
+      "theta_final": 6
+    }
+  },
+  {
+    "graph": "Slashdot0902.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 32.0,
+      "avg_total_ms": 21.124,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.432,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 35.0,
+      "avg_total_ms": 8.916,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 7.842,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 3,
+      "theta_final": 6
+    }
+  },
+  {
+    "graph": "Stanford.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 61.0,
+      "avg_total_ms": 139.421,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 61.0,
+      "avg_total_ms": 37.758,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 61.0,
+      "avg_total_ms": 33.548,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 61.0,
+      "avg_total_ms": 30.579,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "as-skitter.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 67.0,
+      "avg_total_ms": 579.202,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 67.0,
+      "avg_total_ms": 125.522,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 68.0,
+      "avg_total_ms": 94.109,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 68.0,
+      "avg_total_ms": 80.962,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "cit-Patents.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 13.0,
+      "avg_total_ms": 2165.672,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 13.0,
+      "avg_total_ms": 267.698,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 13.0,
+      "avg_total_ms": 173.497,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 13.0,
+      "avg_total_ms": 130.639,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "delaunay_n24.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 5.0,
+      "avg_total_ms": 4148.833,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 187.268,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 5.0,
+      "avg_total_ms": 250.176,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 4,
+      "theta_final": 4
+    },
+    "static_dyn": {
+      "theta_initial": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 127.074,
+      "n_runs": 5,
+      "theta_initial_logged": 2,
+      "n_bumps": 1,
+      "theta_final": 3
+    }
+  },
+  {
+    "graph": "europe_osm.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 4.0,
+      "avg_total_ms": 5359.952,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 2,
+      "avg_color": 4.0,
+      "avg_total_ms": 81.008,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 4.0,
+      "avg_total_ms": 221.412,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 3,
+      "theta_final": 3
+    },
+    "static_dyn": {
+      "theta_initial": 2,
+      "avg_color": 4.0,
+      "avg_total_ms": 81.005,
+      "n_runs": 5,
+      "theta_initial_logged": 2,
+      "n_bumps": 1,
+      "theta_final": 3
+    }
+  },
+  {
+    "graph": "facebook.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 72.0,
+      "avg_total_ms": 17.977,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 73.0,
+      "avg_total_ms": 8.372,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 72.0,
+      "avg_total_ms": 8.238,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 74.0,
+      "avg_total_ms": 7.274,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "le450_25d.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 30.0,
+      "avg_total_ms": 7.316,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 2,
+      "avg_color": 30.0,
+      "avg_total_ms": 5.213,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 31.0,
+      "avg_total_ms": 5.373,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 3,
+      "theta_final": 3
+    },
+    "static_dyn": {
+      "theta_initial": 2,
+      "avg_color": 30.0,
+      "avg_total_ms": 5.164,
+      "n_runs": 5,
+      "theta_initial_logged": 2,
+      "n_bumps": 2,
+      "theta_final": 4
+    }
+  },
+  {
+    "graph": "r4-2e23.sym.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 6.0,
+      "avg_total_ms": 416.545,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 246.609,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 6.0,
+      "avg_total_ms": 223.986,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 3,
+      "theta_final": 3
+    },
+    "static_dyn": {
+      "theta_initial": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 227.907,
+      "n_runs": 5,
+      "theta_initial_logged": 2,
+      "n_bumps": 1,
+      "theta_final": 3
+    }
+  },
+  {
+    "graph": "rmat22.sym.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 36.0,
+      "avg_total_ms": 706.653,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 36.0,
+      "avg_total_ms": 299.776,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 37.0,
+      "avg_total_ms": 286.851,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 36.0,
+      "avg_total_ms": 270.149,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "school1.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 14.0,
+      "avg_total_ms": 6.77,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 2,
+      "avg_color": 16.0,
+      "avg_total_ms": 4.987,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 14.0,
+      "avg_total_ms": 5.064,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 4,
+      "theta_final": 4
+    },
+    "static_dyn": {
+      "theta_initial": 2,
+      "avg_color": 15.0,
+      "avg_total_ms": 4.765,
+      "n_runs": 5,
+      "theta_initial_logged": 2,
+      "n_bumps": 2,
+      "theta_final": 4
+    }
+  },
+  {
+    "graph": "soc-Epinions1.col.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 33.0,
+      "avg_total_ms": 24.542,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 9.572,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 34.0,
+      "avg_total_ms": 9.706,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.923,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 4,
+      "theta_final": 7
+    }
+  },
+  {
+    "graph": "soc-pokec-relationships.col.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 29.0,
+      "avg_total_ms": 1012.725,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 29.0,
+      "avg_total_ms": 244.372,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 29.0,
+      "avg_total_ms": 192.606,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 29.0,
+      "avg_total_ms": 159.08,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "twitter_combined.egr",
+    "in_train_overlap": false,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 71.0,
+      "avg_total_ms": 114.322,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 72.0,
+      "avg_total_ms": 30.395,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 71.0,
+      "avg_total_ms": 23.101,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 73.0,
+      "avg_total_ms": 16.763,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 5,
+      "theta_final": 8
+    }
+  },
+  {
+    "graph": "wiki-Talk.col.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 56.0,
+      "avg_total_ms": 195.653,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 55.0,
+      "avg_total_ms": 166.902,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 55.0,
+      "avg_total_ms": 169.801,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 3,
+      "theta_final": 3
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 57.0,
+      "avg_total_ms": 162.941,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 1,
+      "theta_final": 4
+    }
+  },
+  {
+    "graph": "wiki-Vote.col.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 12.392,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 26.0,
+      "avg_total_ms": 6.143,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 26.0,
+      "avg_total_ms": 6.548,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 26.0,
+      "avg_total_ms": 5.759,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 3,
+      "theta_final": 6
+    }
+  },
+  {
+    "graph": "youtube.egr",
+    "in_train_overlap": true,
+    "baseline": {
+      "theta_initial": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 128.339,
+      "n_runs": 5
+    },
+    "static_v3": {
+      "theta_initial": 3,
+      "avg_color": 28.0,
+      "avg_total_ms": 64.436,
+      "n_runs": 5
+    },
+    "dyn_only": {
+      "theta_initial": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 79.304,
+      "n_runs": 5,
+      "theta_initial_logged": 0,
+      "n_bumps": 5,
+      "theta_final": 5
+    },
+    "static_dyn": {
+      "theta_initial": 3,
+      "avg_color": 27.0,
+      "avg_total_ms": 61.194,
+      "n_runs": 5,
+      "theta_initial_logged": 3,
+      "n_bumps": 4,
+      "theta_final": 7
+    }
+  }
+]
