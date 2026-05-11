@@ -57,9 +57,10 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
-    std::cout << "  --dynamic-theta           Enable on-device θ controller (requires DYNAMIC_THETA=1 build)\n";
-    std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 10)\n";
-    std::cout << "  --dynamic-rate <float>    Trigger threshold = fraction of V removed per iter (default 0.005)\n";
+    std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
+    std::cout << "  --no-dynamic-theta        Disable on-device θ controller (opt-out, ablation)\n";
+    std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 5)\n";
+    std::cout << "  --dynamic-rate <float>    Trigger threshold = fraction of V removed per iter (default 0.001)\n";
     std::cout << "  --dynamic-step <int>      Bump amount per trigger (default 1)\n";
     std::cout << "  --dynamic-cap <int>       Max FuzzyNumber (default θ_initial + 5)\n";
     std::cout << "  --dynamic-log <path>      Append trajectory JSON to <path> (default no log)\n";
@@ -177,9 +178,16 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    // T14: dynamic θ controller is ON by default in DYNAMIC_THETA=1 builds
+    // (decision per docs/superpowers/specs/2026-05-11-online-θ-prediction-design.md
+    //  Decision Criterion + T13 HP sweep). Use --no-dynamic-theta to disable.
+#ifdef DYNAMIC_THETA
+    bool        dynamic_theta = true;
+#else
     bool        dynamic_theta = false;
-    int         dynamic_K     = 10;
-    float       dynamic_rate  = 0.005f;
+#endif
+    int         dynamic_K     = 5;          // T13 winner: K=5
+    float       dynamic_rate  = 0.001f;     // T13 winner: rate=0.001
     int         dynamic_step  = 1;
     int         dynamic_cap   = 0;        // 0 = "θ_initial + 5" (resolved later)
     std::string dynamic_log;
@@ -226,6 +234,8 @@ int main(int argc, char* argv[])
             use_predicted_elastic = true;
         } else if (strcmp(argv[i], "--dynamic-theta") == 0) {
             dynamic_theta = true;
+        } else if (strcmp(argv[i], "--no-dynamic-theta") == 0) {
+            dynamic_theta = false;
         } else if (strcmp(argv[i], "--dynamic-K") == 0) {
             if (i + 1 >= argc) { std::cerr << "Error: --dynamic-K needs an int.\n"; return 1; }
             dynamic_K = std::stoi(argv[++i]);

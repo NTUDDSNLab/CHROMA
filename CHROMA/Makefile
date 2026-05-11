@@ -13,7 +13,8 @@
 # ---- User Configurable Parameters ----------------------------------
 ARCH      ?= sm_86
 PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
-DYNAMIC_THETA ?= 0     # 0: off (zero overhead); 1: enable on-device θ controller
+# 0: off (zero overhead); 1: enable on-device θ controller (DEFAULT post-T14)
+DYNAMIC_THETA ?= 1
 PROF      ?= 0       # 0: not use profiler, 1: use profiler
 DEBUG     ?= 0       # 0: release mode, 1: debug mode
 
