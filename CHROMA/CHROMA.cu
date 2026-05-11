@@ -56,6 +56,12 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
+    std::cout << "  --dynamic-theta           Enable on-device θ controller (requires DYNAMIC_THETA=1 build)\n";
+    std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 10)\n";
+    std::cout << "  --dynamic-rate <float>    Trigger threshold = fraction of V removed per iter (default 0.005)\n";
+    std::cout << "  --dynamic-step <int>      Bump amount per trigger (default 1)\n";
+    std::cout << "  --dynamic-cap <int>       Max FuzzyNumber (default θ_initial + 5)\n";
+    std::cout << "  --dynamic-log <path>      Append trajectory JSON to <path> (default no log)\n";
     std::cout << "  -r, --runs <int>          Repeat PA+CA N times on the same loaded\n"
                  "                            graph and print per-run timings + final\n"
                  "                            avg/min/max summary (default: 1)\n";
@@ -170,6 +176,12 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    bool        dynamic_theta = false;
+    int         dynamic_K     = 10;
+    float       dynamic_rate  = 0.005f;
+    int         dynamic_step  = 1;
+    int         dynamic_cap   = 0;        // 0 = "θ_initial + 5" (resolved later)
+    std::string dynamic_log;
     std::string dump_priority_path;
     int  num_runs = 1;
     bool enable_reduce = true;
@@ -211,6 +223,23 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "--dynamic-theta") == 0) {
+            dynamic_theta = true;
+        } else if (strcmp(argv[i], "--dynamic-K") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-K needs an int.\n"; return 1; }
+            dynamic_K = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-rate") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-rate needs a float.\n"; return 1; }
+            dynamic_rate = std::stof(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-step") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-step needs an int.\n"; return 1; }
+            dynamic_step = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-cap") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-cap needs an int.\n"; return 1; }
+            dynamic_cap = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-log") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-log needs a path.\n"; return 1; }
+            dynamic_log = argv[++i];
         } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runs") == 0) {
             if (i + 1 < argc) {
                 try {
