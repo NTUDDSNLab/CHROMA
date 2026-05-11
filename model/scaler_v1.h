@@ -11,12 +11,12 @@ static constexpr const char* MODEL_CLASS = "linear";
 
 // Feature ordering: V, E
 static const double SCALER_MEAN[FEATURE_COUNT] = {
-    1061454.3442982456,
-    10769045.649122806,
+    0.0,
+    0.0,
 };
 static const double SCALER_STD[FEATURE_COUNT] = {
-    3099478.1935036047,
-    31842790.483842406,
+    1.0,
+    1.0,
 };
 
 // Deployment-time rounding policy (set by trainer to operate at a chosen

@@ -46,7 +46,7 @@
     "V",
     "E"
   ],
-  "generated_utc": "2026-05-11T01:05:52.512868Z",
+  "generated_utc": "2026-05-11T03:07:20.073804Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/COMBINED_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/combined_clean.json",
   "model_class": "linear",
@@ -513,7 +513,7 @@
     "rgg_n_2_23_s0.egr",
     "rgg_n_2_24_s0.egr"
   ],
-  "use_scaled": true,
+  "use_scaled": false,
   "vr_cap": 0.05,
   "xgb_quantile": null
 }

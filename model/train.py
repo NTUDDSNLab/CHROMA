@@ -69,10 +69,24 @@ def run_v2(args) -> int:
     print(f"[v2] {len(names)} samples, {X.shape[1]} features ({list(feature_names_used)})")
 
     # Standardise. Tree models ignore it (scale-invariant); linear/SVR depend.
-    scaler = StandardScaler().fit(X)
-    X_scaled = scaler.transform(X)
-    use_scaled = spec.name in ("linear", "svr")
-    X_train = X_scaled if use_scaled else X
+    # `--no-scale` lets the caller force raw-feature training — needed for the
+    # v1 legacy linear pipeline because CHROMA.cu's legacy --predict path passes
+    # raw V, E to score(), so a StandardScaler-trained linear model would
+    # explode (predicting θ in millions). With --no-scale, the emitted scaler.h
+    # records mean=0 and std=1 (no-op transform) so any downstream consumer
+    # that does run the standardisation step gets back the input unchanged.
+    if args.no_scale:
+        scaler = StandardScaler()
+        scaler.mean_  = np.zeros(X.shape[1], dtype=float)
+        scaler.scale_ = np.ones (X.shape[1], dtype=float)
+        scaler.var_   = np.ones (X.shape[1], dtype=float)
+        scaler.n_features_in_ = X.shape[1]
+        use_scaled = False
+        print(f"[v2] --no-scale: training on raw features (scaler.h will be no-op identity)")
+    else:
+        scaler = StandardScaler().fit(X)
+        use_scaled = spec.name in ("linear", "svr")
+    X_train = scaler.transform(X) if use_scaled else X
 
     # K-fold CV with the chosen scorer
     scorer = weighted_vr_scorer(args.alpha, args.beta, args.vr_cap)
@@ -197,6 +211,9 @@ def _build_parser():
                         "predictions (default 0.15 → ~17-21%% VR on SSMC training set)")
     p.add_argument("--features", type=int, default=9, choices=[2, 7, 9],
                    help="number of features to use (2=v1 legacy V/E, 7=v2, 9=v3)")
+    p.add_argument("--no-scale", action="store_true",
+                   help="skip StandardScaler (raw features); required for v1 "
+                        "since legacy CHROMA --predict path passes raw V, E to score()")
     p.add_argument("--feature-cache", default=None,
                    help="path to JSON feature cache; speeds up repeated training runs "
                         "on the same dataset by persisting computed graph features")
