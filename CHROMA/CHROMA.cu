@@ -671,7 +671,25 @@ int main(int argc, char* argv[])
         printf("colors used : %s\n", stats_i(colors_arr).c_str());
         printf("iter count  : %s\n", stats_i(iter_count_arr).c_str());
     }
-    
+
+#ifdef DYNAMIC_THETA
+    if (dynamic_theta) {
+        int        bump_n = 0;
+        int        bumps_iter [BUMP_LOG_MAX]  = {0};
+        int        bumps_theta[BUMP_LOG_MAX]  = {0};
+        cudaMemcpyFromSymbol(&bump_n,      bump_count, sizeof(int));
+        cudaMemcpyFromSymbol(bumps_iter,   bump_iter,  sizeof(bumps_iter));
+        cudaMemcpyFromSymbol(bumps_theta,  bump_theta, sizeof(bumps_theta));
+
+        printf("θ trajectory: start=%d  bumps=[", fuzzy_number);
+        for (int b = 0; b < bump_n; ++b) {
+            if (b > 0) printf(", ");
+            printf("(iter=%d, θ=%d)", bumps_iter[b], bumps_theta[b]);
+        }
+        printf("]  total=%d\n", bump_n);
+    }
+#endif
+
     cudaFree(d.wl_d);  cudaFree(d.color_d);  cudaFree(d.posscol2_d);  cudaFree(d.posscol_d);  cudaFree(d.nlist2_d);  cudaFree(d.nlist_d);  cudaFree(d.nidx_d);
     delete [] color;
     freeECLgraph(g);
