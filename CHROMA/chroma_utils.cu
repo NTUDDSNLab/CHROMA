@@ -336,6 +336,31 @@ void bb_setup_sorted_S(const ECLgraph& g, DevPtr& d)
     cudaMemcpyToSymbol(bb_S_ptr, &zero, sizeof(int));
 }
 
+/* --------------- setDynamicParameters ----------- */
+#ifdef DYNAMIC_THETA
+__global__ void setDynamicParameters_kernel(
+    int   nodes_in,
+    int   K,
+    float rate,
+    int   step,
+    int   cap)
+{
+    g_nodes              = nodes_in;
+    CTRL_K               = K;
+    CTRL_RATE_THRESHOLD  = rate;
+    CTRL_STEP            = step;
+    CTRL_CAP             = cap;
+    last_remove_size     = 0;
+    bump_count           = 0;
+}
+
+void setDynamicParameters(int nodes, int K, float rate, int step, int cap)
+{
+    setDynamicParameters_kernel<<<1, 1>>>(nodes, K, rate, step, cap);
+    cudaDeviceSynchronize();
+}
+#endif
+
 /* --------------- verify & stats ----------------- */
 void verifyAndPrintStats(const ECLgraph& g,
                          const int* color,
