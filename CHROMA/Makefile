@@ -1,10 +1,13 @@
 # ================== Usage ==================
 # $ make                   Generate executable CHROMA
-# $ make PRE_MODEL=1       Enable predict model
-# $ make PRE_MODEL=1 V2_MODEL=1   Enable v2 predict model (requires model_v2.cpp + scaler.h, see T17)
-# $ make DEBUG=1         Enable debug mode (-lineinfo -O0)
+# $ make PRE_MODEL=1       Enable predict model (v3: 9 features + RF + floor + shift -0.5)
+# $ make DEBUG=1           Enable debug mode (-lineinfo -O0)
 # $ make clean             Remove *.o and CHROMA
 # =================================================
+#
+# The deployed predictor (v3) is in model/model.cpp + model/scaler.h.
+# Reference v1/v2 artefacts live in model/model_v{1,2}.cpp + scaler_v{1,2}.h
+# but require a separate build to use (see T22 commit history).
 
 # ---- User Configurable Parameters ----------------------------------
 ARCH      ?= sm_86
@@ -30,18 +33,10 @@ TARGET    := CHROMA
 SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu BB.cu BB_split.cu CHROMA.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp ../lib/io/graph_features.cpp
 
-V2_MODEL ?= 0
-
 ifeq ($(PRE_MODEL), 1)
-	ifeq ($(V2_MODEL), 1)
-		CPP_SRCS += ../model/model_v2.cpp
-		DC_FLAGS += -DPRED_MODEL -DHAVE_V2_MODEL -I../model
-		CXXFLAGS += -DPRED_MODEL -DHAVE_V2_MODEL -I../model
-	else
-		CPP_SRCS += ../model/model.cpp
-		DC_FLAGS += -DPRED_MODEL
-		CXXFLAGS += -DPRED_MODEL
-	endif
+	CPP_SRCS += ../model/model.cpp
+	DC_FLAGS += -DPRED_MODEL -I../model
+	CXXFLAGS += -DPRED_MODEL -I../model
 endif
 
 ifeq ($(PROF), 1)

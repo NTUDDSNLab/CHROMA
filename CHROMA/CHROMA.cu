@@ -14,7 +14,7 @@
 #include <cstring>
 #include "graph.h"
 #include "graph_features.h"
-#if defined(PRED_MODEL) && defined(HAVE_V2_MODEL)
+#ifdef PRED_MODEL
 #include "scaler.h"
 #endif
 
@@ -56,7 +56,6 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
-    std::cout << "      --v2-model            Use 7-feature v2 predictor (requires PRE_MODEL=1 V2_MODEL=1 build)\n";
     std::cout << "  -r, --runs <int>          Repeat PA+CA N times on the same loaded\n"
                  "                            graph and print per-run timings + final\n"
                  "                            avg/min/max summary (default: 1)\n";
@@ -171,7 +170,6 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
-    bool use_v2_model = false;
     std::string dump_priority_path;
     int  num_runs = 1;
     bool enable_reduce = true;
@@ -213,8 +211,6 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
-        } else if (strcmp(argv[i], "--v2-model") == 0) {
-            use_v2_model = true;
         } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runs") == 0) {
             if (i + 1 < argc) {
                 try {
@@ -326,39 +322,27 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // If prediction model is enabled, use score function to predict elastic parameter
+    // If prediction model is enabled, compute graph features and call score().
+    // Deployed model is v3: 9 features (V, E, d, s, R, GI, H_er, kcore, assort)
+    // with floor + score-shift policy embedded in scaler.h.
     #ifdef PRED_MODEL
     if (use_predicted_elastic) {
-        double score_result;
-    #ifdef HAVE_V2_MODEL
-        if (use_v2_model) {
-            GraphFeatures f = compute_graph_features(g);
-            double input[chroma_predictor::FEATURE_COUNT];
-            for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
-                input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
-                         /  chroma_predictor::SCALER_STD[i];
-            }
-            score_result = score(input) + chroma_predictor::SCORE_SHIFT;
-            fuzzy_number = chroma_predictor::USE_FLOOR
-                           ? (int)floor(score_result)
-                           : (int)round(score_result);
-        } else
-    #endif
-        {
-            // Legacy 2-feature predictor: V, E only
-            double input[2] = {(double)g.nodes, (double)g.edges};
-            score_result = score(input);
-            fuzzy_number = (int)round(score_result);
+        GraphFeatures f = compute_graph_features(g);
+        double input[chroma_predictor::FEATURE_COUNT];
+        for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
+            input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
+                     /  chroma_predictor::SCALER_STD[i];
         }
+        double score_result = score(input) + chroma_predictor::SCORE_SHIFT;
+        fuzzy_number = chroma_predictor::USE_FLOOR
+                       ? (int)floor(score_result)
+                       : (int)round(score_result);
         if (fuzzy_number < 0) fuzzy_number = 0;
     }
     #else
     if (use_predicted_elastic) {
         std::cerr << "Error: Prediction model is not compiled. Please compile with PRED_MODEL flag.\n";
         return 1;
-    }
-    if (use_v2_model) {
-        std::cerr << "Warning: --v2-model has no effect without --predict.\n";
     }
     #endif
 

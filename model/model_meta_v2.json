@@ -1,9 +1,9 @@
 {
   "alpha": 10.0,
   "best_params": {
-    "max_depth": null,
-    "max_features": "sqrt",
-    "min_samples_leaf": 1,
+    "max_depth": 10,
+    "max_features": 1.0,
+    "min_samples_leaf": 3,
     "n_estimators": 100
   },
   "beta": 1.0,
@@ -11,42 +11,42 @@
   "cv_results": [
     {
       "fold": 0,
-      "mae": 1.141304347826087,
-      "mean_theta": 3.5652173913043477,
+      "mae": 1.2282608695652173,
+      "mean_theta": 3.5869565217391304,
       "vr": 0.3695652173913043,
-      "weighted_loss": -0.3695652173913042
+      "weighted_loss": -0.3913043478260869
     },
     {
       "fold": 1,
       "mae": 1.2637362637362637,
-      "mean_theta": 3.2637362637362637,
-      "vr": 0.3956043956043956,
-      "weighted_loss": 0.1923076923076925
+      "mean_theta": 3.241758241758242,
+      "vr": 0.42857142857142855,
+      "weighted_loss": 0.5439560439560438
     },
     {
       "fold": 2,
-      "mae": 1.4285714285714286,
-      "mean_theta": 3.1868131868131866,
-      "vr": 0.4065934065934066,
-      "weighted_loss": 0.37912087912087955
+      "mae": 1.5384615384615385,
+      "mean_theta": 3.142857142857143,
+      "vr": 0.4175824175824176,
+      "weighted_loss": 0.5329670329670333
     },
     {
       "fold": 3,
-      "mae": 1.1868131868131868,
-      "mean_theta": 2.956043956043956,
-      "vr": 0.43956043956043955,
-      "weighted_loss": 0.9395604395604393
+      "mae": 1.2637362637362637,
+      "mean_theta": 2.923076923076923,
+      "vr": 0.45054945054945056,
+      "weighted_loss": 1.0824175824175826
     },
     {
       "fold": 4,
-      "mae": 1.2967032967032968,
-      "mean_theta": 3.7362637362637363,
-      "vr": 0.37362637362637363,
-      "weighted_loss": -0.5
+      "mae": 1.3846153846153846,
+      "mean_theta": 3.758241758241758,
+      "vr": 0.38461538461538464,
+      "weighted_loss": -0.4120879120879115
     }
   ],
   "deployable": true,
-  "feature_count": 9,
+  "feature_count": 7,
   "feature_names": [
     "V",
     "E",
@@ -54,11 +54,9 @@
     "s",
     "R",
     "GI",
-    "H_er",
-    "kcore",
-    "assort"
+    "H_er"
   ],
-  "generated_utc": "2026-05-11T01:10:23.519555Z",
+  "generated_utc": "2026-05-11T01:08:13.619023Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/COMBINED_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/combined_clean.json",
   "model_class": "rf",
