@@ -701,6 +701,29 @@ __global__ void P_SL_ELS_SDC_CTA_S(
       iteration     = iteration + 1 + FuzzyNumber;
       cursor_remove = 0;
       iter_count++;
+
+#ifdef DYNAMIC_THETA
+      // ─── Online θ controller ─────────────────────────────────────
+      // Every CTRL_K iterations, check removal rate. If we removed at least
+      // CTRL_RATE_THRESHOLD·V vertices since the last checkpoint, bump
+      // FuzzyNumber by CTRL_STEP (capped at CTRL_CAP). Monotone non-decreasing.
+      if (CTRL_K > 0 && (iter_count % CTRL_K) == 0 && iter_count >= CTRL_K) {
+          int delta = worker - last_remove_size;
+          last_remove_size = worker;
+          if (delta >= (int)(CTRL_RATE_THRESHOLD * (float)g_nodes)) {
+              int new_fz = FuzzyNumber + CTRL_STEP;
+              if (CTRL_CAP > 0 && new_fz > CTRL_CAP) new_fz = CTRL_CAP;
+              if (new_fz > FuzzyNumber) {
+                  FuzzyNumber = new_fz;
+                  if (bump_count < BUMP_LOG_MAX) {
+                      bump_iter [bump_count] = iter_count;
+                      bump_theta[bump_count] = new_fz;
+                      bump_count = bump_count + 1;
+                  }
+              }
+          }
+      }
+#endif
     }
     grid.sync();
   } while (worker != nodes);

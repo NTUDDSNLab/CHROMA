@@ -1,6 +1,7 @@
 # ================== Usage ==================
 # $ make                   Generate executable CHROMA
 # $ make PRE_MODEL=1       Enable predict model (v3: 9 features + RF + floor + shift -0.5)
+# $ make PRE_MODEL=1 DYNAMIC_THETA=1   Enable predict model + on-device θ controller
 # $ make DEBUG=1           Enable debug mode (-lineinfo -O0)
 # $ make clean             Remove *.o and CHROMA
 # =================================================
@@ -12,6 +13,8 @@
 # ---- User Configurable Parameters ----------------------------------
 ARCH      ?= sm_86
 PRE_MODEL ?= 0 		# 0: not use predict model, 1: use predict model
+# 0: off (zero overhead); 1: enable on-device θ controller (DEFAULT post-T14)
+DYNAMIC_THETA ?= 1
 PROF      ?= 0       # 0: not use profiler, 1: use profiler
 DEBUG     ?= 0       # 0: release mode, 1: debug mode
 
@@ -37,6 +40,10 @@ ifeq ($(PRE_MODEL), 1)
 	CPP_SRCS += ../model/model.cpp
 	DC_FLAGS += -DPRED_MODEL -I../model
 	CXXFLAGS += -DPRED_MODEL -I../model
+	ifeq ($(DYNAMIC_THETA), 1)
+		DC_FLAGS += -DDYNAMIC_THETA
+		CXXFLAGS += -DDYNAMIC_THETA
+	endif
 endif
 
 ifeq ($(PROF), 1)

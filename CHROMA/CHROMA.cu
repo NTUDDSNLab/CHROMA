@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 // #include <cooperative_groups.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <algorithm>
 #include "chroma_utils.cuh"
@@ -56,6 +57,13 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
+    std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
+    std::cout << "  --no-dynamic-theta        Disable on-device θ controller (opt-out, ablation)\n";
+    std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 5)\n";
+    std::cout << "  --dynamic-rate <float>    Trigger threshold = fraction of V removed per iter (default 0.001)\n";
+    std::cout << "  --dynamic-step <int>      Bump amount per trigger (default 1)\n";
+    std::cout << "  --dynamic-cap <int>       Max FuzzyNumber (default θ_initial + 5)\n";
+    std::cout << "  --dynamic-log <path>      Append trajectory JSON to <path> (default no log)\n";
     std::cout << "  -r, --runs <int>          Repeat PA+CA N times on the same loaded\n"
                  "                            graph and print per-run timings + final\n"
                  "                            avg/min/max summary (default: 1)\n";
@@ -170,6 +178,19 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    // T14: dynamic θ controller is ON by default in DYNAMIC_THETA=1 builds
+    // (decision per docs/superpowers/specs/2026-05-11-online-θ-prediction-design.md
+    //  Decision Criterion + T13 HP sweep). Use --no-dynamic-theta to disable.
+#ifdef DYNAMIC_THETA
+    bool        dynamic_theta = true;
+#else
+    bool        dynamic_theta = false;
+#endif
+    int         dynamic_K     = 5;          // T13 winner: K=5
+    float       dynamic_rate  = 0.001f;     // T13 winner: rate=0.001
+    int         dynamic_step  = 1;
+    int         dynamic_cap   = 0;        // 0 = "θ_initial + 5" (resolved later)
+    std::string dynamic_log;
     std::string dump_priority_path;
     int  num_runs = 1;
     bool enable_reduce = true;
@@ -211,6 +232,25 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "--dynamic-theta") == 0) {
+            dynamic_theta = true;
+        } else if (strcmp(argv[i], "--no-dynamic-theta") == 0) {
+            dynamic_theta = false;
+        } else if (strcmp(argv[i], "--dynamic-K") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-K needs an int.\n"; return 1; }
+            dynamic_K = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-rate") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-rate needs a float.\n"; return 1; }
+            dynamic_rate = std::stof(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-step") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-step needs an int.\n"; return 1; }
+            dynamic_step = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-cap") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-cap needs an int.\n"; return 1; }
+            dynamic_cap = std::stoi(argv[++i]);
+        } else if (strcmp(argv[i], "--dynamic-log") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --dynamic-log needs a path.\n"; return 1; }
+            dynamic_log = argv[++i];
         } else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runs") == 0) {
             if (i + 1 < argc) {
                 try {
@@ -364,7 +404,20 @@ int main(int argc, char* argv[])
     
     setParameters<<<1, 1>>>(fuzzy_number);
 
-    
+    // Dynamic θ controller setup (no-op when --dynamic-theta isn't set).
+    if (dynamic_theta) {
+#ifdef DYNAMIC_THETA
+        int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+        setDynamicParameters(g.nodes, dynamic_K, dynamic_rate, dynamic_step, cap);
+        printf("Dynamic θ: K=%d  rate=%.4f  step=%d  cap=%d  initial=%d\n",
+               dynamic_K, dynamic_rate, dynamic_step, cap, fuzzy_number);
+#else
+        std::cerr << "Warning: --dynamic-theta has no effect — rebuild with "
+                     "`make ... DYNAMIC_THETA=1`. Falling back to static θ.\n";
+#endif
+    }
+
+
     // GPU INFO
     cudaSetDevice(Device);
     cudaDeviceProp deviceProp;
@@ -455,6 +508,17 @@ int main(int argc, char* argv[])
             // run 0). degree_list is re-filled by the init_degree<<<>>> launch
             // a few lines below.
             resetForRun(g, d);
+            // Re-upload FuzzyNumber so each run starts from the same θ_initial
+            // (controller may have ramped it during the previous run).
+            setParameters<<<1, 1>>>(fuzzy_number);
+#ifdef DYNAMIC_THETA
+            // Re-upload dynamic-θ tunables AND clear last_remove_size +
+            // bump_count so the controller starts fresh each run.
+            if (dynamic_theta) {
+                int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+                setDynamicParameters(g.nodes, dynamic_K, dynamic_rate, dynamic_step, cap);
+            }
+#endif
         }
 
         GPUTimer timer_PA;
@@ -629,7 +693,52 @@ int main(int argc, char* argv[])
         printf("colors used : %s\n", stats_i(colors_arr).c_str());
         printf("iter count  : %s\n", stats_i(iter_count_arr).c_str());
     }
-    
+
+#ifdef DYNAMIC_THETA
+    if (dynamic_theta) {
+        int        bump_n = 0;
+        int        bumps_iter [BUMP_LOG_MAX]  = {0};
+        int        bumps_theta[BUMP_LOG_MAX]  = {0};
+        cudaMemcpyFromSymbol(&bump_n,      bump_count, sizeof(int));
+        cudaMemcpyFromSymbol(bumps_iter,   bump_iter,  sizeof(bumps_iter));
+        cudaMemcpyFromSymbol(bumps_theta,  bump_theta, sizeof(bumps_theta));
+
+        printf("θ trajectory: start=%d  bumps=[", fuzzy_number);
+        for (int b = 0; b < bump_n; ++b) {
+            if (b > 0) printf(", ");
+            printf("(iter=%d, θ=%d)", bumps_iter[b], bumps_theta[b]);
+        }
+        printf("]  total=%d\n", bump_n);
+
+        if (!dynamic_log.empty()) {
+            std::ofstream f(dynamic_log, std::ios::app);
+            if (f.is_open()) {
+                int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+                int theta_final = (bump_n > 0) ? bumps_theta[bump_n - 1] : fuzzy_number;
+                f << "{\n";
+                f << "  \"graph\": \"" << filename << "\",\n";
+                f << "  \"theta_initial\": " << fuzzy_number << ",\n";
+                f << "  \"theta_final\":   " << theta_final << ",\n";
+                f << "  \"ctrl_K\": "    << dynamic_K    << ", "
+                  << "\"ctrl_rate\": " << dynamic_rate << ", "
+                  << "\"ctrl_step\": " << dynamic_step << ", "
+                  << "\"ctrl_cap\": "  << cap          << ",\n";
+                f << "  \"bumps\": [";
+                for (int b = 0; b < bump_n; ++b) {
+                    if (b > 0) f << ", ";
+                    f << "{\"iter\":" << bumps_iter[b] << ",\"theta\":" << bumps_theta[b] << "}";
+                }
+                f << "]\n}\n";
+                f.close();
+                printf("θ trajectory JSON appended to %s\n", dynamic_log.c_str());
+            } else {
+                std::cerr << "Warning: could not open --dynamic-log path '"
+                          << dynamic_log << "' for append.\n";
+            }
+        }
+    }
+#endif
+
     cudaFree(d.wl_d);  cudaFree(d.color_d);  cudaFree(d.posscol2_d);  cudaFree(d.posscol_d);  cudaFree(d.nlist2_d);  cudaFree(d.nlist_d);  cudaFree(d.nidx_d);
     delete [] color;
     freeECLgraph(g);

@@ -212,3 +212,17 @@ static __device__ __forceinline__ unsigned int hash(unsigned int val)
     val = ((val >> 16) ^ val) * 0x45d9f3b;
     return (val >> 16) ^ val;
 }
+
+#ifdef DYNAMIC_THETA
+extern __device__ int   g_nodes;
+extern __device__ int   last_remove_size;
+extern __device__ int   CTRL_K;
+extern __device__ float CTRL_RATE_THRESHOLD;
+extern __device__ int   CTRL_STEP;
+extern __device__ int   CTRL_CAP;
+
+#define BUMP_LOG_MAX 32
+extern __device__ int   bump_count;
+extern __device__ int   bump_iter [BUMP_LOG_MAX];
+extern __device__ int   bump_theta[BUMP_LOG_MAX];
+#endif
