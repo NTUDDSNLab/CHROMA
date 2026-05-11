@@ -37,3 +37,25 @@ __device__ int*  bb_sorted_S       = nullptr;
 __device__ int*  bb_sorted_degree  = nullptr;
 __device__ int*  bb_initial_degree = nullptr;
 __device__ int   bb_S_ptr          = 0;
+
+#ifdef DYNAMIC_THETA
+// ─── Online θ controller state (compile-gated) ─────────────────────
+// Number of vertices in graph (set once before kernel by setDynamicParameters)
+__device__ int g_nodes = 0;
+
+// Number of vertices already removed at the last controller checkpoint.
+// Initialised to 0; updated every CTRL_K iterations.
+__device__ int last_remove_size = 0;
+
+// Tunables (set by setDynamicParameters before each kernel launch).
+__device__ int   CTRL_K               = 0;       // 0 disables controller at runtime
+__device__ float CTRL_RATE_THRESHOLD  = 0.0f;    // bump trigger (fraction of V removed per iter)
+__device__ int   CTRL_STEP            = 1;       // amount to bump FuzzyNumber
+__device__ int   CTRL_CAP             = 0;       // upper bound on FuzzyNumber (0 = no cap)
+
+// Trajectory log (single-writer: block 0 thread 0, race-free).
+#define BUMP_LOG_MAX 32
+__device__ int bump_count = 0;
+__device__ int bump_iter [BUMP_LOG_MAX] = {0};
+__device__ int bump_theta[BUMP_LOG_MAX] = {0};
+#endif
