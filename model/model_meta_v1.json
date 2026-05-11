@@ -1,70 +1,58 @@
 {
   "alpha": 10.0,
-  "best_params": {
-    "max_depth": null,
-    "max_features": "sqrt",
-    "min_samples_leaf": 1,
-    "n_estimators": 100
-  },
+  "best_params": {},
   "beta": 1.0,
   "cv_folds": 5,
   "cv_results": [
     {
       "fold": 0,
-      "mae": 1.141304347826087,
-      "mean_theta": 3.5652173913043477,
-      "vr": 0.3695652173913043,
-      "weighted_loss": -0.3695652173913042
+      "mae": 1.9673913043478262,
+      "mean_theta": 3.0652173913043477,
+      "vr": 0.391304347826087,
+      "weighted_loss": 0.3478260869565224
     },
     {
       "fold": 1,
-      "mae": 1.2637362637362637,
-      "mean_theta": 3.2637362637362637,
-      "vr": 0.3956043956043956,
-      "weighted_loss": 0.1923076923076925
+      "mae": 2.010989010989011,
+      "mean_theta": 3.197802197802198,
+      "vr": 0.4945054945054945,
+      "weighted_loss": 1.2472527472527473
     },
     {
       "fold": 2,
-      "mae": 1.4285714285714286,
-      "mean_theta": 3.1868131868131866,
-      "vr": 0.4065934065934066,
-      "weighted_loss": 0.37912087912087955
+      "mae": 2.087912087912088,
+      "mean_theta": 3.1648351648351647,
+      "vr": 0.4945054945054945,
+      "weighted_loss": 1.2802197802197806
     },
     {
       "fold": 3,
-      "mae": 1.1868131868131868,
-      "mean_theta": 2.956043956043956,
-      "vr": 0.43956043956043955,
-      "weighted_loss": 0.9395604395604393
+      "mae": 1.989010989010989,
+      "mean_theta": 3.032967032967033,
+      "vr": 0.4945054945054945,
+      "weighted_loss": 1.4120879120879124
     },
     {
       "fold": 4,
-      "mae": 1.2967032967032968,
-      "mean_theta": 3.7362637362637363,
-      "vr": 0.37362637362637363,
-      "weighted_loss": -0.5
+      "mae": 2.010989010989011,
+      "mean_theta": 3.2637362637362637,
+      "vr": 0.38461538461538464,
+      "weighted_loss": 0.08241758241758301
     }
   ],
   "deployable": true,
-  "feature_count": 9,
+  "feature_count": 2,
   "feature_names": [
     "V",
-    "E",
-    "d",
-    "s",
-    "R",
-    "GI",
-    "H_er",
-    "kcore",
-    "assort"
+    "E"
   ],
-  "generated_utc": "2026-05-11T01:10:23.519555Z",
+  "generated_utc": "2026-05-11T01:05:52.512868Z",
   "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/COMBINED_unified",
   "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/combined_clean.json",
-  "model_class": "rf",
+  "model_class": "linear",
   "rounding_policy": {
-    "score_shift": -0.5,
-    "use_floor": true
+    "score_shift": 0.0,
+    "use_floor": false
   },
   "sklearn_version": "1.7.2",
   "training_samples": [
@@ -525,7 +513,7 @@
     "rgg_n_2_23_s0.egr",
     "rgg_n_2_24_s0.egr"
   ],
-  "use_scaled": false,
+  "use_scaled": true,
   "vr_cap": 0.05,
   "xgb_quantile": null
 }

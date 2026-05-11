@@ -52,11 +52,21 @@ def run_v2(args) -> int:
         print(f"[v2] model={spec.name}  deployable={spec.deployable}")
 
     X, y, names = prepare_train_data(args.input, args.graph_dir,
-                                      speedup_decay=args.speedup_decay)
-    print(f"[v2] {len(names)} samples, {X.shape[1]} features ({list(FEATURE_NAMES)})")
+                                      speedup_decay=args.speedup_decay,
+                                      feature_cache=args.feature_cache)
     if len(names) == 0:
         print("[v2] ERROR: no samples — check --input and --graph-dir", flush=True)
         return 2
+
+    # Slice features based on --features
+    n_feat = args.features
+    if n_feat < X.shape[1]:
+        X = X[:, :n_feat]
+        feature_names_used = FEATURE_NAMES[:n_feat]
+    else:
+        feature_names_used = FEATURE_NAMES
+    print(f"[v2] using {n_feat} features: {list(feature_names_used)}")
+    print(f"[v2] {len(names)} samples, {X.shape[1]} features ({list(feature_names_used)})")
 
     # Standardise. Tree models ignore it (scale-invariant); linear/SVR depend.
     scaler = StandardScaler().fit(X)
@@ -106,7 +116,7 @@ def run_v2(args) -> int:
         print(f"[v2] wrote {args.out_cpp}  ({len(cpp)} bytes)")
 
     write_scaler_header(scaler, model_class=spec.name,
-                         feature_names=FEATURE_NAMES, path=args.out_scaler,
+                         feature_names=feature_names_used, path=args.out_scaler,
                          use_floor=args.use_floor,
                          score_shift=args.score_shift)
     print(f"[v2] wrote {args.out_scaler}  "
@@ -114,8 +124,8 @@ def run_v2(args) -> int:
 
     meta = {
         "generated_utc":   datetime.datetime.utcnow().isoformat() + "Z",
-        "feature_count":   len(FEATURE_NAMES),
-        "feature_names":   list(FEATURE_NAMES),
+        "feature_count":   len(feature_names_used),
+        "feature_names":   list(feature_names_used),
         "model_class":     spec.name,
         "deployable":      spec.deployable,
         "use_scaled":      use_scaled,
@@ -185,6 +195,11 @@ def _build_parser():
     p.add_argument("--xgb-quantile", type=float, default=0.15,
                    help="q for xgb_pinball custom objective; q<0.5 → conservative "
                         "predictions (default 0.15 → ~17-21%% VR on SSMC training set)")
+    p.add_argument("--features", type=int, default=9, choices=[2, 7, 9],
+                   help="number of features to use (2=v1 legacy V/E, 7=v2, 9=v3)")
+    p.add_argument("--feature-cache", default=None,
+                   help="path to JSON feature cache; speeds up repeated training runs "
+                        "on the same dataset by persisting computed graph features")
     return p
 
 
