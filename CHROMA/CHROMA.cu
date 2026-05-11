@@ -393,7 +393,20 @@ int main(int argc, char* argv[])
     
     setParameters<<<1, 1>>>(fuzzy_number);
 
-    
+    // Dynamic θ controller setup (no-op when --dynamic-theta isn't set).
+    if (dynamic_theta) {
+#ifdef DYNAMIC_THETA
+        int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+        setDynamicParameters(g.nodes, dynamic_K, dynamic_rate, dynamic_step, cap);
+        printf("Dynamic θ: K=%d  rate=%.4f  step=%d  cap=%d  initial=%d\n",
+               dynamic_K, dynamic_rate, dynamic_step, cap, fuzzy_number);
+#else
+        std::cerr << "Warning: --dynamic-theta has no effect — rebuild with "
+                     "`make ... DYNAMIC_THETA=1`. Falling back to static θ.\n";
+#endif
+    }
+
+
     // GPU INFO
     cudaSetDevice(Device);
     cudaDeviceProp deviceProp;
