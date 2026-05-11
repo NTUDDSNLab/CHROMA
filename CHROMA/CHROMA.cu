@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 // #include <cooperative_groups.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <algorithm>
 #include "chroma_utils.cuh"
@@ -687,6 +688,33 @@ int main(int argc, char* argv[])
             printf("(iter=%d, θ=%d)", bumps_iter[b], bumps_theta[b]);
         }
         printf("]  total=%d\n", bump_n);
+
+        if (!dynamic_log.empty()) {
+            std::ofstream f(dynamic_log, std::ios::app);
+            if (f.is_open()) {
+                int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+                int theta_final = (bump_n > 0) ? bumps_theta[bump_n - 1] : fuzzy_number;
+                f << "{\n";
+                f << "  \"graph\": \"" << filename << "\",\n";
+                f << "  \"theta_initial\": " << fuzzy_number << ",\n";
+                f << "  \"theta_final\":   " << theta_final << ",\n";
+                f << "  \"ctrl_K\": "    << dynamic_K    << ", "
+                  << "\"ctrl_rate\": " << dynamic_rate << ", "
+                  << "\"ctrl_step\": " << dynamic_step << ", "
+                  << "\"ctrl_cap\": "  << cap          << ",\n";
+                f << "  \"bumps\": [";
+                for (int b = 0; b < bump_n; ++b) {
+                    if (b > 0) f << ", ";
+                    f << "{\"iter\":" << bumps_iter[b] << ",\"theta\":" << bumps_theta[b] << "}";
+                }
+                f << "]\n}\n";
+                f.close();
+                printf("θ trajectory JSON appended to %s\n", dynamic_log.c_str());
+            } else {
+                std::cerr << "Warning: could not open --dynamic-log path '"
+                          << dynamic_log << "' for append.\n";
+            }
+        }
     }
 #endif
 
