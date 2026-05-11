@@ -498,6 +498,17 @@ int main(int argc, char* argv[])
             // run 0). degree_list is re-filled by the init_degree<<<>>> launch
             // a few lines below.
             resetForRun(g, d);
+            // Re-upload FuzzyNumber so each run starts from the same θ_initial
+            // (controller may have ramped it during the previous run).
+            setParameters<<<1, 1>>>(fuzzy_number);
+#ifdef DYNAMIC_THETA
+            // Re-upload dynamic-θ tunables AND clear last_remove_size +
+            // bump_count so the controller starts fresh each run.
+            if (dynamic_theta) {
+                int cap = (dynamic_cap > 0) ? dynamic_cap : (fuzzy_number + 5);
+                setDynamicParameters(g.nodes, dynamic_K, dynamic_rate, dynamic_step, cap);
+            }
+#endif
         }
 
         GPUTimer timer_PA;
