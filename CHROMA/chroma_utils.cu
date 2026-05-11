@@ -54,6 +54,13 @@ void resetForRun(const ECLgraph& g, DevPtr& d)
             cudaMemset(bb_count_ptr, 0, (size_t)bw * sizeof(int));
         }
     }
+
+#ifdef DYNAMIC_THETA
+    // Reset dynamic-θ controller state for the new run.
+    int   zero_int = 0;
+    cudaMemcpyToSymbol(last_remove_size, &zero_int,  sizeof(int));
+    cudaMemcpyToSymbol(bump_count,       &zero_int,  sizeof(int));
+#endif
 }
 
 /* ----------------- allocAndInit ----------------- */
