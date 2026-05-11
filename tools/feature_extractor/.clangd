@@ -1,0 +1,5 @@
+# Tells clangd where graph_features.h lives, since extract.cpp is built
+# via this directory's Makefile with -I../../lib/io but the LSP doesn't
+# read the Makefile.
+CompileFlags:
+  Add: [-I../../lib/io, -std=c++17]

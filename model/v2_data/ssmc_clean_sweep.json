@@ -1,0 +1,674 @@
+{
+  "as-735.nl.egr": {
+    "0": {
+      "color": 10,
+      "runtime_ms": 1.705984
+    },
+    "1": {
+      "color": 10,
+      "runtime_ms": 2.18416
+    },
+    "2": {
+      "color": 10,
+      "runtime_ms": 2.635776
+    },
+    "3": {
+      "color": 10,
+      "runtime_ms": 0.95232
+    },
+    "4": {
+      "color": 10,
+      "runtime_ms": 4.10624
+    },
+    "5": {
+      "color": 10,
+      "runtime_ms": 0.818176
+    },
+    "6": {
+      "color": 10,
+      "runtime_ms": 0.84992
+    },
+    "7": {
+      "color": 10,
+      "runtime_ms": 2.087936
+    },
+    "8": {
+      "color": 10,
+      "runtime_ms": 0.785408
+    },
+    "9": {
+      "color": 10,
+      "runtime_ms": 1.92
+    },
+    "10": {
+      "color": 10,
+      "runtime_ms": 0.897024
+    },
+    "vertices": 7716,
+    "edges": 25144
+  },
+  "ca-AstroPh.nl.egr": {
+    "0": {
+      "color": 57,
+      "runtime_ms": 29.846529
+    },
+    "1": {
+      "color": 57,
+      "runtime_ms": 17.509377
+    },
+    "2": {
+      "color": 57,
+      "runtime_ms": 11.264
+    },
+    "3": {
+      "color": 57,
+      "runtime_ms": 8.364032
+    },
+    "4": {
+      "color": 57,
+      "runtime_ms": 6.610944
+    },
+    "5": {
+      "color": 57,
+      "runtime_ms": 5.488608
+    },
+    "6": {
+      "color": 57,
+      "runtime_ms": 2.881536
+    },
+    "7": {
+      "color": 57,
+      "runtime_ms": 3.963904
+    },
+    "8": {
+      "color": 57,
+      "runtime_ms": 2.584576
+    },
+    "9": {
+      "color": 57,
+      "runtime_ms": 2.077696
+    },
+    "10": {
+      "color": 57,
+      "runtime_ms": 2.254848
+    },
+    "vertices": 18772,
+    "edges": 396100
+  },
+  "ca-CondMat.nl.egr": {
+    "0": {
+      "color": 26,
+      "runtime_ms": 11.94496
+    },
+    "1": {
+      "color": 26,
+      "runtime_ms": 11.891712
+    },
+    "2": {
+      "color": 26,
+      "runtime_ms": 10.11712
+    },
+    "3": {
+      "color": 26,
+      "runtime_ms": 6.525952
+    },
+    "4": {
+      "color": 26,
+      "runtime_ms": 2.213888
+    },
+    "5": {
+      "color": 26,
+      "runtime_ms": 3.155968
+    },
+    "6": {
+      "color": 26,
+      "runtime_ms": 5.718017
+    },
+    "7": {
+      "color": 26,
+      "runtime_ms": 2.609152
+    },
+    "8": {
+      "color": 26,
+      "runtime_ms": 2.899968
+    },
+    "9": {
+      "color": 26,
+      "runtime_ms": 17.510401
+    },
+    "10": {
+      "color": 26,
+      "runtime_ms": 1.140736
+    },
+    "vertices": 23133,
+    "edges": 186878
+  },
+  "ca-GrQc.nl.egr": {
+    "0": {
+      "color": 44,
+      "runtime_ms": 4.806656
+    },
+    "1": {
+      "color": 44,
+      "runtime_ms": 18.000896
+    },
+    "2": {
+      "color": 44,
+      "runtime_ms": 1.488896
+    },
+    "3": {
+      "color": 44,
+      "runtime_ms": 3.21536
+    },
+    "4": {
+      "color": 44,
+      "runtime_ms": 4.164608
+    },
+    "5": {
+      "color": 44,
+      "runtime_ms": 2.436096
+    },
+    "6": {
+      "color": 44,
+      "runtime_ms": 3.448832
+    },
+    "7": {
+      "color": 44,
+      "runtime_ms": 17.165312
+    },
+    "8": {
+      "color": 44,
+      "runtime_ms": 2.33984
+    },
+    "9": {
+      "color": 44,
+      "runtime_ms": 2.768896
+    },
+    "10": {
+      "color": 44,
+      "runtime_ms": 3.134464
+    },
+    "vertices": 5242,
+    "edges": 28968
+  },
+  "ca-HepPh.nl.egr": {
+    "0": {
+      "color": 239,
+      "runtime_ms": 27.514881
+    },
+    "1": {
+      "color": 239,
+      "runtime_ms": 7.878656
+    },
+    "2": {
+      "color": 239,
+      "runtime_ms": 6.028288
+    },
+    "3": {
+      "color": 239,
+      "runtime_ms": 5.38624
+    },
+    "4": {
+      "color": 239,
+      "runtime_ms": 2.904064
+    },
+    "5": {
+      "color": 239,
+      "runtime_ms": 2.48832
+    },
+    "6": {
+      "color": 239,
+      "runtime_ms": 2.281472
+    },
+    "7": {
+      "color": 239,
+      "runtime_ms": 4.762624
+    },
+    "8": {
+      "color": 239,
+      "runtime_ms": 2.57024
+    },
+    "9": {
+      "color": 239,
+      "runtime_ms": 3.636224
+    },
+    "10": {
+      "color": 239,
+      "runtime_ms": 3.637248
+    },
+    "vertices": 12008,
+    "edges": 236978
+  },
+  "ca-HepTh.nl.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 6.664192
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 2.131968
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 1.47456
+    },
+    "3": {
+      "color": 32,
+      "runtime_ms": 2.674688
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 3.245056
+    },
+    "5": {
+      "color": 32,
+      "runtime_ms": 2.402304
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 2.377728
+    },
+    "7": {
+      "color": 32,
+      "runtime_ms": 2.378752
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 2.316288
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 2.286592
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 2.42176
+    },
+    "vertices": 9877,
+    "edges": 51946
+  },
+  "cit-HepPh.nl.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 54.296577
+    },
+    "1": {
+      "color": 20,
+      "runtime_ms": 21.477377
+    },
+    "2": {
+      "color": 21,
+      "runtime_ms": 9.286657
+    },
+    "3": {
+      "color": 21,
+      "runtime_ms": 6.417408
+    },
+    "4": {
+      "color": 21,
+      "runtime_ms": 7.153664
+    },
+    "5": {
+      "color": 20,
+      "runtime_ms": 5.905408
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 4.600832
+    },
+    "7": {
+      "color": 21,
+      "runtime_ms": 4.0192
+    },
+    "8": {
+      "color": 21,
+      "runtime_ms": 5.199872
+    },
+    "9": {
+      "color": 22,
+      "runtime_ms": 3.534848
+    },
+    "10": {
+      "color": 20,
+      "runtime_ms": 4.071424
+    },
+    "vertices": 34546,
+    "edges": 841754
+  },
+  "cit-HepTh.nl.egr": {
+    "0": {
+      "color": 26,
+      "runtime_ms": 48.572418
+    },
+    "1": {
+      "color": 26,
+      "runtime_ms": 18.828287
+    },
+    "2": {
+      "color": 26,
+      "runtime_ms": 12.848128
+    },
+    "3": {
+      "color": 25,
+      "runtime_ms": 6.843392
+    },
+    "4": {
+      "color": 25,
+      "runtime_ms": 4.432896
+    },
+    "5": {
+      "color": 26,
+      "runtime_ms": 5.966848
+    },
+    "6": {
+      "color": 25,
+      "runtime_ms": 5.284864
+    },
+    "7": {
+      "color": 25,
+      "runtime_ms": 3.011584
+    },
+    "8": {
+      "color": 26,
+      "runtime_ms": 4.72064
+    },
+    "9": {
+      "color": 26,
+      "runtime_ms": 4.645888
+    },
+    "10": {
+      "color": 25,
+      "runtime_ms": 3.198976
+    },
+    "vertices": 27770,
+    "edges": 704570
+  },
+  "cit-Patents.nl.egr": {
+    "0": {
+      "color": 13,
+      "runtime_ms": 2267.038818
+    },
+    "1": {
+      "color": 13,
+      "runtime_ms": 817.019958
+    },
+    "2": {
+      "color": 12,
+      "runtime_ms": 368.864258
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 198.193146
+    },
+    "4": {
+      "color": 13,
+      "runtime_ms": 303.213562
+    },
+    "5": {
+      "color": 12,
+      "runtime_ms": 84.882439
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 67.363876
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 69.963776
+    },
+    "8": {
+      "color": 13,
+      "runtime_ms": 113.241089
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 89.431038
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 83.079178
+    },
+    "vertices": 3774768,
+    "edges": 33037894
+  },
+  "email-EuAll.nl.egr": {
+    "0": {
+      "color": 21,
+      "runtime_ms": 12.419073
+    },
+    "1": {
+      "color": 21,
+      "runtime_ms": 7.048193
+    },
+    "2": {
+      "color": 22,
+      "runtime_ms": 3.892224
+    },
+    "3": {
+      "color": 22,
+      "runtime_ms": 6.675456
+    },
+    "4": {
+      "color": 23,
+      "runtime_ms": 5.045248
+    },
+    "5": {
+      "color": 22,
+      "runtime_ms": 4.016129
+    },
+    "6": {
+      "color": 22,
+      "runtime_ms": 1.995776
+    },
+    "7": {
+      "color": 22,
+      "runtime_ms": 4.867072
+    },
+    "8": {
+      "color": 23,
+      "runtime_ms": 3.485696
+    },
+    "9": {
+      "color": 21,
+      "runtime_ms": 3.0208
+    },
+    "10": {
+      "color": 21,
+      "runtime_ms": 8.505344
+    },
+    "vertices": 265214,
+    "edges": 728962
+  },
+  "soc-Slashdot0811.nl.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 25.601027
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 10.356736
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 4.877313
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 4.878336
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 12.014593
+    },
+    "5": {
+      "color": 31,
+      "runtime_ms": 4.584448
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 4.386816
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 8.204288
+    },
+    "8": {
+      "color": 31,
+      "runtime_ms": 5.771265
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 1.922048
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 2.020352
+    },
+    "vertices": 77360,
+    "edges": 938360
+  },
+  "soc-Slashdot0902.nl.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 15.779873
+    },
+    "1": {
+      "color": 33,
+      "runtime_ms": 7.734272
+    },
+    "2": {
+      "color": 34,
+      "runtime_ms": 10.35776
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 7.714817
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 5.610496
+    },
+    "5": {
+      "color": 35,
+      "runtime_ms": 6.32832
+    },
+    "6": {
+      "color": 33,
+      "runtime_ms": 3.00032
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 5.060608
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 3.92704
+    },
+    "9": {
+      "color": 33,
+      "runtime_ms": 4.555776
+    },
+    "10": {
+      "color": 33,
+      "runtime_ms": 2.142208
+    },
+    "vertices": 82168,
+    "edges": 1008460
+  },
+  "soc-sign-epinions.nl.egr": {
+    "0": {
+      "color": 94,
+      "runtime_ms": 26.523647
+    },
+    "1": {
+      "color": 94,
+      "runtime_ms": 19.223555
+    },
+    "2": {
+      "color": 94,
+      "runtime_ms": 8.387585
+    },
+    "3": {
+      "color": 95,
+      "runtime_ms": 6.18496
+    },
+    "4": {
+      "color": 94,
+      "runtime_ms": 5.204992
+    },
+    "5": {
+      "color": 94,
+      "runtime_ms": 7.539712
+    },
+    "6": {
+      "color": 95,
+      "runtime_ms": 6.395905
+    },
+    "7": {
+      "color": 94,
+      "runtime_ms": 5.095425
+    },
+    "8": {
+      "color": 94,
+      "runtime_ms": 4.639744
+    },
+    "9": {
+      "color": 94,
+      "runtime_ms": 6.938624
+    },
+    "10": {
+      "color": 94,
+      "runtime_ms": 4.037632
+    },
+    "vertices": 131828,
+    "edges": 1427826
+  },
+  "web-NotreDame.nl.egr": {
+    "0": {
+      "color": 155,
+      "runtime_ms": 46.228485
+    },
+    "1": {
+      "color": 155,
+      "runtime_ms": 14.158849
+    },
+    "2": {
+      "color": 155,
+      "runtime_ms": 8.35584
+    },
+    "3": {
+      "color": 155,
+      "runtime_ms": 9.615361
+    },
+    "4": {
+      "color": 155,
+      "runtime_ms": 9.487361
+    },
+    "5": {
+      "color": 155,
+      "runtime_ms": 4.151296
+    },
+    "6": {
+      "color": 155,
+      "runtime_ms": 4.867072
+    },
+    "7": {
+      "color": 155,
+      "runtime_ms": 11.736064
+    },
+    "8": {
+      "color": 155,
+      "runtime_ms": 3.90144
+    },
+    "9": {
+      "color": 155,
+      "runtime_ms": 12.299265
+    },
+    "10": {
+      "color": 155,
+      "runtime_ms": 9.695232
+    },
+    "vertices": 325729,
+    "edges": 2180216
+  }
+}

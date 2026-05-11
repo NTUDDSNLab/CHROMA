@@ -1,0 +1,866 @@
+{
+  "Email-Enron.col.egr": {
+    "0": {
+      "color": 28,
+      "runtime_ms": 30.644224
+    },
+    "1": {
+      "color": 27,
+      "runtime_ms": 15.682561
+    },
+    "2": {
+      "color": 27,
+      "runtime_ms": 10.948608
+    },
+    "3": {
+      "color": 28,
+      "runtime_ms": 7.072769
+    },
+    "4": {
+      "color": 27,
+      "runtime_ms": 6.710272
+    },
+    "5": {
+      "color": 27,
+      "runtime_ms": 6.332417
+    },
+    "6": {
+      "color": 26,
+      "runtime_ms": 6.100993
+    },
+    "7": {
+      "color": 27,
+      "runtime_ms": 5.978113
+    },
+    "8": {
+      "color": 28,
+      "runtime_ms": 5.901312
+    },
+    "9": {
+      "color": 27,
+      "runtime_ms": 5.803009
+    },
+    "10": {
+      "color": 27,
+      "runtime_ms": 5.746688
+    },
+    "vertices": 36692,
+    "edges": 367662
+  },
+  "Slashdot0811.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 39.149567
+    },
+    "1": {
+      "color": 32,
+      "runtime_ms": 20.278273
+    },
+    "2": {
+      "color": 32,
+      "runtime_ms": 14.811137
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 10.817537
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 10.274817
+    },
+    "5": {
+      "color": 31,
+      "runtime_ms": 7.016448
+    },
+    "6": {
+      "color": 32,
+      "runtime_ms": 6.786048
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 6.631424
+    },
+    "8": {
+      "color": 31,
+      "runtime_ms": 6.493184
+    },
+    "9": {
+      "color": 32,
+      "runtime_ms": 6.372353
+    },
+    "10": {
+      "color": 32,
+      "runtime_ms": 6.290432
+    },
+    "vertices": 77360,
+    "edges": 938360
+  },
+  "Slashdot0902.egr": {
+    "0": {
+      "color": 32,
+      "runtime_ms": 39.82336
+    },
+    "1": {
+      "color": 33,
+      "runtime_ms": 20.545536
+    },
+    "2": {
+      "color": 34,
+      "runtime_ms": 14.927873
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 10.988544
+    },
+    "4": {
+      "color": 32,
+      "runtime_ms": 10.44992
+    },
+    "5": {
+      "color": 35,
+      "runtime_ms": 7.139328
+    },
+    "6": {
+      "color": 33,
+      "runtime_ms": 6.903809
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 6.747137
+    },
+    "8": {
+      "color": 32,
+      "runtime_ms": 6.461441
+    },
+    "9": {
+      "color": 33,
+      "runtime_ms": 6.467585
+    },
+    "10": {
+      "color": 33,
+      "runtime_ms": 6.351872
+    },
+    "vertices": 82168,
+    "edges": 1008460
+  },
+  "Stanford.egr": {
+    "0": {
+      "color": 61,
+      "runtime_ms": 282.800171
+    },
+    "1": {
+      "color": 61,
+      "runtime_ms": 96.141319
+    },
+    "2": {
+      "color": 61,
+      "runtime_ms": 58.412033
+    },
+    "3": {
+      "color": 61,
+      "runtime_ms": 40.307716
+    },
+    "4": {
+      "color": 61,
+      "runtime_ms": 34.4105
+    },
+    "5": {
+      "color": 61,
+      "runtime_ms": 26.022913
+    },
+    "6": {
+      "color": 61,
+      "runtime_ms": 25.072639
+    },
+    "7": {
+      "color": 61,
+      "runtime_ms": 21.203968
+    },
+    "8": {
+      "color": 61,
+      "runtime_ms": 20.245506
+    },
+    "9": {
+      "color": 61,
+      "runtime_ms": 19.663872
+    },
+    "10": {
+      "color": 61,
+      "runtime_ms": 16.37888
+    },
+    "vertices": 281903,
+    "edges": 3985272
+  },
+  "as-skitter.egr": {
+    "0": {
+      "color": 67,
+      "runtime_ms": 1317.271729
+    },
+    "1": {
+      "color": 67,
+      "runtime_ms": 562.194458
+    },
+    "2": {
+      "color": 67,
+      "runtime_ms": 328.818695
+    },
+    "3": {
+      "color": 67,
+      "runtime_ms": 220.890121
+    },
+    "4": {
+      "color": 68,
+      "runtime_ms": 162.358276
+    },
+    "5": {
+      "color": 68,
+      "runtime_ms": 130.479111
+    },
+    "6": {
+      "color": 68,
+      "runtime_ms": 106.972168
+    },
+    "7": {
+      "color": 68,
+      "runtime_ms": 96.172043
+    },
+    "8": {
+      "color": 68,
+      "runtime_ms": 83.232765
+    },
+    "9": {
+      "color": 69,
+      "runtime_ms": 77.526016
+    },
+    "10": {
+      "color": 70,
+      "runtime_ms": 68.832253
+    },
+    "vertices": 1696415,
+    "edges": 22190596
+  },
+  "cit-Patents.egr": {
+    "0": {
+      "color": 13,
+      "runtime_ms": 5091.237305
+    },
+    "1": {
+      "color": 13,
+      "runtime_ms": 1806.306396
+    },
+    "2": {
+      "color": 12,
+      "runtime_ms": 860.127258
+    },
+    "3": {
+      "color": 13,
+      "runtime_ms": 480.326691
+    },
+    "4": {
+      "color": 13,
+      "runtime_ms": 299.820068
+    },
+    "5": {
+      "color": 12,
+      "runtime_ms": 208.461838
+    },
+    "6": {
+      "color": 13,
+      "runtime_ms": 165.976059
+    },
+    "7": {
+      "color": 13,
+      "runtime_ms": 141.682693
+    },
+    "8": {
+      "color": 13,
+      "runtime_ms": 118.876167
+    },
+    "9": {
+      "color": 13,
+      "runtime_ms": 94.682121
+    },
+    "10": {
+      "color": 13,
+      "runtime_ms": 89.921539
+    },
+    "vertices": 3774768,
+    "edges": 33037894
+  },
+  "delaunay_n24.egr": {
+    "0": {
+      "color": 5,
+      "runtime_ms": 9229.202148
+    },
+    "1": {
+      "color": 5,
+      "runtime_ms": 2462.903564
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 231.796738
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 85.607422
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 70.235138
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 51.731461
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 47.352837
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 42.057732
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 37.184513
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 33.403908
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 33.299458
+    },
+    "vertices": 16777216,
+    "edges": 100663202
+  },
+  "facebook.egr": {
+    "0": {
+      "color": 72,
+      "runtime_ms": 34.395138
+    },
+    "1": {
+      "color": 72,
+      "runtime_ms": 16.688129
+    },
+    "2": {
+      "color": 73,
+      "runtime_ms": 11.814913
+    },
+    "3": {
+      "color": 73,
+      "runtime_ms": 10.802176
+    },
+    "4": {
+      "color": 73,
+      "runtime_ms": 10.123265
+    },
+    "5": {
+      "color": 72,
+      "runtime_ms": 6.89152
+    },
+    "6": {
+      "color": 72,
+      "runtime_ms": 6.586368
+    },
+    "7": {
+      "color": 74,
+      "runtime_ms": 6.387712
+    },
+    "8": {
+      "color": 74,
+      "runtime_ms": 6.278144
+    },
+    "9": {
+      "color": 75,
+      "runtime_ms": 6.115328
+    },
+    "10": {
+      "color": 73,
+      "runtime_ms": 6.05184
+    },
+    "vertices": 4039,
+    "edges": 176468
+  },
+  "le450_25d.egr": {
+    "0": {
+      "color": 30,
+      "runtime_ms": 10.82368
+    },
+    "1": {
+      "color": 30,
+      "runtime_ms": 6.43072
+    },
+    "2": {
+      "color": 30,
+      "runtime_ms": 5.929984
+    },
+    "3": {
+      "color": 30,
+      "runtime_ms": 5.755905
+    },
+    "4": {
+      "color": 31,
+      "runtime_ms": 5.669888
+    },
+    "5": {
+      "color": 30,
+      "runtime_ms": 5.528576
+    },
+    "6": {
+      "color": 30,
+      "runtime_ms": 5.493761
+    },
+    "7": {
+      "color": 30,
+      "runtime_ms": 5.428225
+    },
+    "8": {
+      "color": 30,
+      "runtime_ms": 5.399552
+    },
+    "9": {
+      "color": 30,
+      "runtime_ms": 5.382144
+    },
+    "10": {
+      "color": 30,
+      "runtime_ms": 5.337089
+    },
+    "vertices": 450,
+    "edges": 34850
+  },
+  "r4-2e23.sym.egr": {
+    "0": {
+      "color": 6,
+      "runtime_ms": 450.761749
+    },
+    "1": {
+      "color": 6,
+      "runtime_ms": 236.451843
+    },
+    "2": {
+      "color": 6,
+      "runtime_ms": 162.201614
+    },
+    "3": {
+      "color": 6,
+      "runtime_ms": 136.481812
+    },
+    "4": {
+      "color": 6,
+      "runtime_ms": 132.576279
+    },
+    "5": {
+      "color": 6,
+      "runtime_ms": 109.806595
+    },
+    "6": {
+      "color": 6,
+      "runtime_ms": 99.112968
+    },
+    "7": {
+      "color": 6,
+      "runtime_ms": 89.505791
+    },
+    "8": {
+      "color": 6,
+      "runtime_ms": 78.394379
+    },
+    "9": {
+      "color": 6,
+      "runtime_ms": 75.723785
+    },
+    "10": {
+      "color": 6,
+      "runtime_ms": 70.077438
+    },
+    "vertices": 8388608,
+    "edges": 67108846
+  },
+  "rmat22.sym.egr": {
+    "0": {
+      "color": 36,
+      "runtime_ms": 1182.887085
+    },
+    "1": {
+      "color": 37,
+      "runtime_ms": 485.247986
+    },
+    "2": {
+      "color": 37,
+      "runtime_ms": 303.507446
+    },
+    "3": {
+      "color": 36,
+      "runtime_ms": 232.325134
+    },
+    "4": {
+      "color": 36,
+      "runtime_ms": 193.993729
+    },
+    "5": {
+      "color": 37,
+      "runtime_ms": 171.364349
+    },
+    "6": {
+      "color": 37,
+      "runtime_ms": 155.649017
+    },
+    "7": {
+      "color": 36,
+      "runtime_ms": 147.527679
+    },
+    "8": {
+      "color": 36,
+      "runtime_ms": 146.336761
+    },
+    "9": {
+      "color": 37,
+      "runtime_ms": 141.588501
+    },
+    "10": {
+      "color": 37,
+      "runtime_ms": 136.797195
+    },
+    "vertices": 4194304,
+    "edges": 65660814
+  },
+  "school1.egr": {
+    "0": {
+      "color": 14,
+      "runtime_ms": 10.959873
+    },
+    "1": {
+      "color": 14,
+      "runtime_ms": 6.915072
+    },
+    "2": {
+      "color": 16,
+      "runtime_ms": 6.319105
+    },
+    "3": {
+      "color": 16,
+      "runtime_ms": 6.073345
+    },
+    "4": {
+      "color": 15,
+      "runtime_ms": 5.946368
+    },
+    "5": {
+      "color": 14,
+      "runtime_ms": 5.811201
+    },
+    "6": {
+      "color": 16,
+      "runtime_ms": 5.713921
+    },
+    "7": {
+      "color": 14,
+      "runtime_ms": 5.664769
+    },
+    "8": {
+      "color": 15,
+      "runtime_ms": 5.602304
+    },
+    "9": {
+      "color": 14,
+      "runtime_ms": 5.549057
+    },
+    "10": {
+      "color": 15,
+      "runtime_ms": 5.511168
+    },
+    "vertices": 385,
+    "edges": 38190
+  },
+  "soc-Epinions1.col.egr": {
+    "0": {
+      "color": 33,
+      "runtime_ms": 44.923904
+    },
+    "1": {
+      "color": 34,
+      "runtime_ms": 21.346304
+    },
+    "2": {
+      "color": 34,
+      "runtime_ms": 15.590401
+    },
+    "3": {
+      "color": 33,
+      "runtime_ms": 11.225088
+    },
+    "4": {
+      "color": 33,
+      "runtime_ms": 10.656769
+    },
+    "5": {
+      "color": 34,
+      "runtime_ms": 10.139648
+    },
+    "6": {
+      "color": 33,
+      "runtime_ms": 6.964224
+    },
+    "7": {
+      "color": 33,
+      "runtime_ms": 6.782977
+    },
+    "8": {
+      "color": 33,
+      "runtime_ms": 6.595584
+    },
+    "9": {
+      "color": 33,
+      "runtime_ms": 6.360064
+    },
+    "10": {
+      "color": 34,
+      "runtime_ms": 6.291457
+    },
+    "vertices": 75879,
+    "edges": 811480
+  },
+  "soc-pokec-relationships.col.egr": {
+    "0": {
+      "color": 29,
+      "runtime_ms": 2069.181396
+    },
+    "1": {
+      "color": 29,
+      "runtime_ms": 785.38446
+    },
+    "2": {
+      "color": 29,
+      "runtime_ms": 429.642792
+    },
+    "3": {
+      "color": 29,
+      "runtime_ms": 290.836517
+    },
+    "4": {
+      "color": 29,
+      "runtime_ms": 225.06189
+    },
+    "5": {
+      "color": 29,
+      "runtime_ms": 173.467667
+    },
+    "6": {
+      "color": 29,
+      "runtime_ms": 148.924423
+    },
+    "7": {
+      "color": 29,
+      "runtime_ms": 129.626129
+    },
+    "8": {
+      "color": 29,
+      "runtime_ms": 111.368202
+    },
+    "9": {
+      "color": 29,
+      "runtime_ms": 105.311234
+    },
+    "10": {
+      "color": 29,
+      "runtime_ms": 92.716042
+    },
+    "vertices": 1632803,
+    "edges": 44603928
+  },
+  "twitter_combined.egr": {
+    "0": {
+      "color": 71,
+      "runtime_ms": 257.210388
+    },
+    "1": {
+      "color": 72,
+      "runtime_ms": 124.317696
+    },
+    "2": {
+      "color": 72,
+      "runtime_ms": 77.474815
+    },
+    "3": {
+      "color": 72,
+      "runtime_ms": 57.729023
+    },
+    "4": {
+      "color": 73,
+      "runtime_ms": 43.564037
+    },
+    "5": {
+      "color": 71,
+      "runtime_ms": 34.327557
+    },
+    "6": {
+      "color": 73,
+      "runtime_ms": 29.767681
+    },
+    "7": {
+      "color": 72,
+      "runtime_ms": 25.238529
+    },
+    "8": {
+      "color": 73,
+      "runtime_ms": 20.963327
+    },
+    "9": {
+      "color": 72,
+      "runtime_ms": 19.989506
+    },
+    "10": {
+      "color": 72,
+      "runtime_ms": 16.515072
+    },
+    "vertices": 81306,
+    "edges": 2684592
+  },
+  "wiki-Talk.col.egr": {
+    "0": {
+      "color": 56,
+      "runtime_ms": 215.47316
+    },
+    "1": {
+      "color": 56,
+      "runtime_ms": 110.19265
+    },
+    "2": {
+      "color": 54,
+      "runtime_ms": 76.618752
+    },
+    "3": {
+      "color": 55,
+      "runtime_ms": 58.936325
+    },
+    "4": {
+      "color": 57,
+      "runtime_ms": 49.882114
+    },
+    "5": {
+      "color": 55,
+      "runtime_ms": 44.149765
+    },
+    "6": {
+      "color": 56,
+      "runtime_ms": 39.989246
+    },
+    "7": {
+      "color": 56,
+      "runtime_ms": 35.635204
+    },
+    "8": {
+      "color": 55,
+      "runtime_ms": 35.020802
+    },
+    "9": {
+      "color": 56,
+      "runtime_ms": 30.995459
+    },
+    "10": {
+      "color": 56,
+      "runtime_ms": 30.472195
+    },
+    "vertices": 2394385,
+    "edges": 9319130
+  },
+  "wiki-Vote.col.egr": {
+    "0": {
+      "color": 27,
+      "runtime_ms": 21.152769
+    },
+    "1": {
+      "color": 27,
+      "runtime_ms": 11.268096
+    },
+    "2": {
+      "color": 26,
+      "runtime_ms": 10.184705
+    },
+    "3": {
+      "color": 26,
+      "runtime_ms": 6.63552
+    },
+    "4": {
+      "color": 26,
+      "runtime_ms": 6.406144
+    },
+    "5": {
+      "color": 26,
+      "runtime_ms": 6.121472
+    },
+    "6": {
+      "color": 25,
+      "runtime_ms": 6.011904
+    },
+    "7": {
+      "color": 26,
+      "runtime_ms": 5.868544
+    },
+    "8": {
+      "color": 26,
+      "runtime_ms": 5.758976
+    },
+    "9": {
+      "color": 26,
+      "runtime_ms": 5.710848
+    },
+    "10": {
+      "color": 26,
+      "runtime_ms": 5.681152
+    },
+    "vertices": 7115,
+    "edges": 201524
+  },
+  "youtube.egr": {
+    "0": {
+      "color": 27,
+      "runtime_ms": 196.052994
+    },
+    "1": {
+      "color": 27,
+      "runtime_ms": 91.210762
+    },
+    "2": {
+      "color": 28,
+      "runtime_ms": 57.693188
+    },
+    "3": {
+      "color": 28,
+      "runtime_ms": 40.485893
+    },
+    "4": {
+      "color": 27,
+      "runtime_ms": 34.440193
+    },
+    "5": {
+      "color": 27,
+      "runtime_ms": 29.464579
+    },
+    "6": {
+      "color": 27,
+      "runtime_ms": 25.113602
+    },
+    "7": {
+      "color": 27,
+      "runtime_ms": 24.48077
+    },
+    "8": {
+      "color": 27,
+      "runtime_ms": 21.130239
+    },
+    "9": {
+      "color": 27,
+      "runtime_ms": 20.436993
+    },
+    "10": {
+      "color": 28,
+      "runtime_ms": 20.147202
+    },
+    "vertices": 1157827,
+    "edges": 5975248
+  }
+}

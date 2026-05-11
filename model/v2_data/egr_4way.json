@@ -1,0 +1,439 @@
+[
+  {
+    "graph": "Email-Enron.col.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 28.0,
+      "avg_total_ms": 16.147
+    },
+    "v1": {
+      "theta": 1,
+      "avg_color": 27.0,
+      "avg_total_ms": 9.879
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 28.0,
+      "avg_total_ms": 6.759
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 27.0,
+      "avg_total_ms": 7.807
+    }
+  },
+  {
+    "graph": "Slashdot0811.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 32.0,
+      "avg_total_ms": 20.164
+    },
+    "v1": {
+      "theta": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.663
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.645
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 32.0,
+      "avg_total_ms": 9.836
+    }
+  },
+  {
+    "graph": "Slashdot0902.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 32.0,
+      "avg_total_ms": 20.779
+    },
+    "v1": {
+      "theta": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.43
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 8.355
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 34.0,
+      "avg_total_ms": 9.951
+    }
+  },
+  {
+    "graph": "Stanford.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 61.0,
+      "avg_total_ms": 137.242
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 61.0,
+      "avg_total_ms": 44.197
+    },
+    "v2_raw": {
+      "theta": 5,
+      "avg_color": 61.0,
+      "avg_total_ms": 31.379
+    },
+    "v2_deployed": {
+      "theta": 4,
+      "avg_color": 61.0,
+      "avg_total_ms": 34.059
+    }
+  },
+  {
+    "graph": "as-skitter.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 67.0,
+      "avg_total_ms": 573.473
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 67.0,
+      "avg_total_ms": 168.208
+    },
+    "v2_raw": {
+      "theta": 4,
+      "avg_color": 68.0,
+      "avg_total_ms": 99.161
+    },
+    "v2_deployed": {
+      "theta": 3,
+      "avg_color": 67.0,
+      "avg_total_ms": 124.741
+    }
+  },
+  {
+    "graph": "cit-Patents.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 13.0,
+      "avg_total_ms": 2152.705
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 12.0,
+      "avg_total_ms": 421.632
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 13.0,
+      "avg_total_ms": 266.693
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 12.0,
+      "avg_total_ms": 421.727
+    }
+  },
+  {
+    "graph": "delaunay_n24.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 5.0,
+      "avg_total_ms": 4158.549
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 187.041
+    },
+    "v2_raw": {
+      "theta": 1,
+      "avg_color": 5.0,
+      "avg_total_ms": 1348.071
+    },
+    "v2_deployed": {
+      "theta": 0,
+      "avg_color": 5.0,
+      "avg_total_ms": 4168.042
+    }
+  },
+  {
+    "graph": "europe_osm.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 4.0,
+      "avg_total_ms": 5358.34
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 4.0,
+      "avg_total_ms": 81.153
+    },
+    "v2_raw": {
+      "theta": 1,
+      "avg_color": 4.0,
+      "avg_total_ms": 158.93
+    },
+    "v2_deployed": {
+      "theta": 0,
+      "avg_color": 4.0,
+      "avg_total_ms": 5359.802
+    }
+  },
+  {
+    "graph": "facebook.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 72.0,
+      "avg_total_ms": 17.729
+    },
+    "v1": {
+      "theta": 1,
+      "avg_color": 72.0,
+      "avg_total_ms": 11.432
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 73.0,
+      "avg_total_ms": 8.234
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 73.0,
+      "avg_total_ms": 9.269
+    }
+  },
+  {
+    "graph": "le450_25d.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 30.0,
+      "avg_total_ms": 7.262
+    },
+    "v1": {
+      "theta": 1,
+      "avg_color": 30.0,
+      "avg_total_ms": 5.667
+    },
+    "v2_raw": {
+      "theta": 1,
+      "avg_color": 30.0,
+      "avg_total_ms": 5.689
+    },
+    "v2_deployed": {
+      "theta": 0,
+      "avg_color": 30.0,
+      "avg_total_ms": 7.189
+    }
+  },
+  {
+    "graph": "r4-2e23.sym.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 6.0,
+      "avg_total_ms": 416.719
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 6.0,
+      "avg_total_ms": 246.874
+    },
+    "v2_raw": {
+      "theta": 1,
+      "avg_color": 6.0,
+      "avg_total_ms": 299.141
+    },
+    "v2_deployed": {
+      "theta": 0,
+      "avg_color": 6.0,
+      "avg_total_ms": 416.571
+    }
+  },
+  {
+    "graph": "rmat22.sym.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 36.0,
+      "avg_total_ms": 707.176
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 37.0,
+      "avg_total_ms": 338.001
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 36.0,
+      "avg_total_ms": 299.274
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 37.0,
+      "avg_total_ms": 336.209
+    }
+  },
+  {
+    "graph": "school1.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 14.0,
+      "avg_total_ms": 6.753
+    },
+    "v1": {
+      "theta": 1,
+      "avg_color": 14.0,
+      "avg_total_ms": 5.551
+    },
+    "v2_raw": {
+      "theta": 1,
+      "avg_color": 14.0,
+      "avg_total_ms": 5.507
+    },
+    "v2_deployed": {
+      "theta": 0,
+      "avg_color": 14.0,
+      "avg_total_ms": 6.686
+    }
+  },
+  {
+    "graph": "soc-Epinions1.col.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 33.0,
+      "avg_total_ms": 24.155
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 34.0,
+      "avg_total_ms": 11.65
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 33.0,
+      "avg_total_ms": 9.445
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 34.0,
+      "avg_total_ms": 11.643
+    }
+  },
+  {
+    "graph": "soc-pokec-relationships.col.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 29.0,
+      "avg_total_ms": 1006.534
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 29.0,
+      "avg_total_ms": 317.958
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 29.0,
+      "avg_total_ms": 242.786
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 29.0,
+      "avg_total_ms": 317.927
+    }
+  },
+  {
+    "graph": "twitter_combined.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 71.0,
+      "avg_total_ms": 112.388
+    },
+    "v1": {
+      "theta": 3,
+      "avg_color": 72.0,
+      "avg_total_ms": 29.957
+    },
+    "v2_raw": {
+      "theta": 4,
+      "avg_color": 73.0,
+      "avg_total_ms": 24.264
+    },
+    "v2_deployed": {
+      "theta": 3,
+      "avg_color": 72.0,
+      "avg_total_ms": 29.915
+    }
+  },
+  {
+    "graph": "wiki-Talk.col.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 56.0,
+      "avg_total_ms": 194.964
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 54.0,
+      "avg_total_ms": 298.709
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 55.0,
+      "avg_total_ms": 166.887
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 54.0,
+      "avg_total_ms": 298.687
+    }
+  },
+  {
+    "graph": "wiki-Vote.col.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 12.277
+    },
+    "v1": {
+      "theta": 1,
+      "avg_color": 27.0,
+      "avg_total_ms": 8.065
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 26.0,
+      "avg_total_ms": 6.168
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 26.0,
+      "avg_total_ms": 7.037
+    }
+  },
+  {
+    "graph": "youtube.egr",
+    "baseline": {
+      "theta": 0,
+      "avg_color": 27.0,
+      "avg_total_ms": 126.978
+    },
+    "v1": {
+      "theta": 2,
+      "avg_color": 28.0,
+      "avg_total_ms": 81.041
+    },
+    "v2_raw": {
+      "theta": 3,
+      "avg_color": 28.0,
+      "avg_total_ms": 64.271
+    },
+    "v2_deployed": {
+      "theta": 2,
+      "avg_color": 28.0,
+      "avg_total_ms": 81.072
+    }
+  }
+]

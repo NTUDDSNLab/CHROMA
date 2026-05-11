@@ -13,6 +13,10 @@
 #include "chroma_utils.cuh"
 #include <cstring>
 #include "graph.h"
+#include "graph_features.h"
+#ifdef PRED_MODEL
+#include "scaler.h"
+#endif
 
 // namespace cg = cooperative_groups;
 
@@ -318,13 +322,22 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    // If prediction model is enabled, use score function to predict elastic parameter
+    // If prediction model is enabled, compute graph features and call score().
+    // Deployed model is v3: 9 features (V, E, d, s, R, GI, H_er, kcore, assort)
+    // with floor + score-shift policy embedded in scaler.h.
     #ifdef PRED_MODEL
     if (use_predicted_elastic) {
-        // Use graph nodes and edges as input for prediction model
-        double input[2] = {(double)g.nodes, (double)g.edges};
-        double score_result = score(input);
-        fuzzy_number = (int)round(score_result);
+        GraphFeatures f = compute_graph_features(g);
+        double input[chroma_predictor::FEATURE_COUNT];
+        for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
+            input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
+                     /  chroma_predictor::SCALER_STD[i];
+        }
+        double score_result = score(input) + chroma_predictor::SCORE_SHIFT;
+        fuzzy_number = chroma_predictor::USE_FLOOR
+                       ? (int)floor(score_result)
+                       : (int)round(score_result);
+        if (fuzzy_number < 0) fuzzy_number = 0;
     }
     #else
     if (use_predicted_elastic) {

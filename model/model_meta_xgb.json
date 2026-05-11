@@ -1,0 +1,86 @@
+{
+  "alpha": 10.0,
+  "best_params": {
+    "learning_rate": 0.1,
+    "max_depth": 6,
+    "n_estimators": 300
+  },
+  "beta": 1.0,
+  "cv_folds": 5,
+  "cv_results": [
+    {
+      "fold": 0,
+      "mae": 1.75,
+      "mean_theta": 2.75,
+      "vr": 0.75,
+      "weighted_loss": 4.25
+    },
+    {
+      "fold": 1,
+      "mae": 2.75,
+      "mean_theta": 1.5,
+      "vr": 0.25,
+      "weighted_loss": 0.5
+    },
+    {
+      "fold": 2,
+      "mae": 1.5,
+      "mean_theta": 2.5,
+      "vr": 0.5,
+      "weighted_loss": 2.0
+    },
+    {
+      "fold": 3,
+      "mae": 1.0,
+      "mean_theta": 0.75,
+      "vr": 0.0,
+      "weighted_loss": -0.75
+    },
+    {
+      "fold": 4,
+      "mae": 2.0,
+      "mean_theta": 2.6666666666666665,
+      "vr": 0.3333333333333333,
+      "weighted_loss": 0.16666666666666652
+    }
+  ],
+  "deployable": true,
+  "feature_count": 7,
+  "feature_names": [
+    "V",
+    "E",
+    "d",
+    "s",
+    "R",
+    "GI",
+    "H_er"
+  ],
+  "generated_utc": "2026-05-09T01:51:45.785395Z",
+  "graph_dir": "/home/chsieh45/PunchShadow/CHROMA/Datasets/EGR",
+  "input": "/home/chsieh45/PunchShadow/CHROMA/.claude/worktrees/theta-predictor-v2/model/v2_data/ssmc_train.json",
+  "model_class": "xgb",
+  "sklearn_version": "1.7.2",
+  "training_samples": [
+    "Email-Enron.col.egr",
+    "Stanford.egr",
+    "as-skitter.egr",
+    "cit-Patents.egr",
+    "delaunay_n24.egr",
+    "europe_osm.egr",
+    "facebook.egr",
+    "le450_25d.egr",
+    "r4-2e23.sym.egr",
+    "school1.egr",
+    "soc-Epinions1.col.egr",
+    "wiki-Vote.col.egr",
+    "youtube.egr",
+    "Slashdot0811.egr",
+    "Slashdot0902.egr",
+    "rmat22.sym.egr",
+    "soc-pokec-relationships.col.egr",
+    "twitter_combined.egr",
+    "wiki-Talk.col.egr"
+  ],
+  "use_scaled": false,
+  "vr_cap": 0.05
+}
