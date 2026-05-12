@@ -508,6 +508,10 @@ int main(int argc, char* argv[])
 
     // Per-run stats (size = num_runs)
     std::vector<float> pa_ms_arr, ca_ms_arr, reduce_ms_arr, total_ms_arr;
+    std::vector<float> pa_scan_ms_arr, pa_decrement_ms_arr;
+    const bool is_split = (algo_name == "cuSL_ELS_SDC_SPLIT"     ||
+                           algo_name == "cuSL_ELS_SDC_CTA_SPLIT" ||
+                           algo_name == "cuSL_ELS_SDC_CTA_S_SPLIT");
     std::vector<int>   colors_arr, iter_count_arr;
 
     for (int run_idx = 0; run_idx < num_runs; ++run_idx) {
@@ -549,12 +553,23 @@ int main(int argc, char* argv[])
                 bb_split_phase1_peel, ThreadsPerBlock, 0);
             int gridDim_split = blkPerSM_split * SMs;
             run_bb_split(gridDim_split, g, d);
-        } else if (algo_name == "cuSL_ELS_SDC_SPLIT") {
+        } else if (is_split) {
             int blkPerSM_sdc_split;
             cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_sdc_split,
                 P_SL_ELS_SDC_split_scan, ThreadsPerBlock, 0);
             int gridDim_sdc_split = blkPerSM_sdc_split * SMs;
-            run_sdc_split(gridDim_sdc_split, g, d);
+            PaSplitStats sp{};
+            if (algo_name == "cuSL_ELS_SDC_SPLIT") {
+                sp = run_sdc_split(gridDim_sdc_split, g, d);
+            } else if (algo_name == "cuSL_ELS_SDC_CTA_SPLIT") {
+                sp = run_sdc_cta_split(gridDim_sdc_split, g, d);
+            } else /* cuSL_ELS_SDC_CTA_S_SPLIT */ {
+                sp = run_sdc_cta_s_split(gridDim_sdc_split, g, d);
+            }
+            // Stash per-phase ms in run-local variables; they'll be
+            // recorded into the arrays after timer_PA stops.
+            pa_scan_ms_arr.push_back(sp.scan_ms);
+            pa_decrement_ms_arr.push_back(sp.decrement_ms);
         } else {
             int blkPerSM;
             cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM,
@@ -642,18 +657,35 @@ int main(int argc, char* argv[])
 
         // Per-run line.
         if (num_runs > 1) {
-            printf("[Run %d/%d] PA: %8.3f ms  CA: %7.3f ms  Reduce: %6.3f ms  "
-                   "Total: %8.3f ms  colors: %d  iters: %d\n",
-                   run_idx + 1, num_runs,
-                   runtime_PA * 1000, runtime_CA * 1000,
-                   reduction_stats.runtime_sec * 1000, total_runtime * 1000,
-                   colors_after, host_iter_count);
+            if (is_split) {
+                printf("[Run %d/%d] PA: %8.3f ms (scan: %7.3f dec: %7.3f)  "
+                       "CA: %7.3f ms  Reduce: %6.3f ms  Total: %8.3f ms  "
+                       "colors: %d  iters: %d\n",
+                       run_idx + 1, num_runs,
+                       runtime_PA * 1000,
+                       pa_scan_ms_arr.back(),
+                       pa_decrement_ms_arr.back(),
+                       runtime_CA * 1000,
+                       reduction_stats.runtime_sec * 1000, total_runtime * 1000,
+                       colors_after, host_iter_count);
+            } else {
+                printf("[Run %d/%d] PA: %8.3f ms  CA: %7.3f ms  Reduce: %6.3f ms  "
+                       "Total: %8.3f ms  colors: %d  iters: %d\n",
+                       run_idx + 1, num_runs,
+                       runtime_PA * 1000, runtime_CA * 1000,
+                       reduction_stats.runtime_sec * 1000, total_runtime * 1000,
+                       colors_after, host_iter_count);
+            }
         } else {
             // Backward-compatible single-run output (verbose).
             std::cout << "Finish PA" << (is_fused ? "+Init" : "") << std::endl;
             std::cout << "Finish CA" << (is_fused ? " (coloring only)" : "")
                       << std::endl;
             printf("PA runtime: %.6f ms\n", runtime_PA * 1000);
+            if (is_split) {
+                printf("PA scan runtime: %.6f ms\n",      pa_scan_ms_arr.back());
+                printf("PA decrement runtime: %.6f ms\n", pa_decrement_ms_arr.back());
+            }
             printf("CA runtime: %.6f ms\n", runtime_CA * 1000);
             printf("Post reduction runtime: %.6f ms\n",
                    reduction_stats.runtime_sec * 1000);
@@ -673,6 +705,12 @@ int main(int argc, char* argv[])
         total_ms_arr.push_back(total_runtime * 1000);
         colors_arr.push_back(colors_after);
         iter_count_arr.push_back(host_iter_count);
+        if (!is_split) {
+            // Keep arrays in lockstep so the multi-run summary doesn't need
+            // separate length tracking. Non-SPLIT runs report 0/0.
+            pa_scan_ms_arr.push_back(0.0f);
+            pa_decrement_ms_arr.push_back(0.0f);
+        }
     }
 
     // Final summary across runs (only when num_runs > 1).
@@ -695,6 +733,10 @@ int main(int argc, char* argv[])
         };
         printf("\n=== Statistics over %d runs (ms) ===\n", num_runs);
         printf("PA time     : %s\n", stats_f(pa_ms_arr).c_str());
+        if (is_split) {
+            printf("PA scan     : %s\n", stats_f(pa_scan_ms_arr).c_str());
+            printf("PA decrement: %s\n", stats_f(pa_decrement_ms_arr).c_str());
+        }
         printf("CA time     : %s\n", stats_f(ca_ms_arr).c_str());
         printf("Reduce time : %s\n", stats_f(reduce_ms_arr).c_str());
         printf("Total time  : %s\n", stats_f(total_ms_arr).c_str());
