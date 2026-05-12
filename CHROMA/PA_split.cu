@@ -5,6 +5,17 @@
 #include "globals.cuh"
 #include <cuda.h>
 #include <cstdio>
+#include <cub/cub.cuh>
+
+// CTA block size (mirrors PA.cu — must match ThreadsPerBlock so cub::BlockScan
+// is templated on the same compile-time constant as the launch configuration).
+#define BLOCK_SIZE ThreadsPerBlock
+
+struct node_buf_t {
+    int node_id;
+    int degree;
+    int prefix_sum;
+};
 
 __global__ void P_SL_ELS_SDC_split_scan(
     const int N,
@@ -85,5 +96,95 @@ __global__ void P_SL_ELS_SDC_split_advance()
         iteration      = iteration + 1 + FuzzyNumber;
         cursor_remove  = 0;
         iter_count++;
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// P_SL_ELS_SDC_CTA_split_decrement — Phase 2 of P_SL_ELS_SDC_CTA, isolated
+// for per-phase profiling. Block-scan + CTA-balanced work distribution +
+// atomicSub on neighbour degrees.
+// ──────────────────────────────────────────────────────────────────────────
+__global__ void P_SL_ELS_SDC_CTA_split_decrement(
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list)
+{
+    const int lane = threadIdx.x & 31;
+
+    __shared__ node_buf_t node_buf[BLOCK_SIZE];
+    __shared__ int buf_size;
+    __shared__ int start_idx;
+    __shared__ int task_size;
+    __shared__ int total_degree;
+
+    using BlockScan = cub::BlockScan<int, BLOCK_SIZE>;
+    __shared__ typename BlockScan::TempStorage temp_storage;
+
+    while (true) {
+        unsigned int warpMin = 0x7FFFFFFF;
+
+        if (threadIdx.x == 0) {
+            start_idx = atomicAdd(&cursor_remove, BLOCK_SIZE);
+            if (start_idx >= remove_size) {
+                task_size = 0;
+            } else {
+                int remaining = remove_size - start_idx;
+                task_size = (remaining < BLOCK_SIZE) ? remaining : BLOCK_SIZE;
+            }
+        }
+        __syncthreads();
+        if (task_size <= 0) break;
+
+        node_buf_t val;
+        {
+            int idx = start_idx + threadIdx.x;
+            val.node_id    = (idx < remove_size && idx >= start_idx)
+                           ? remove_list[idx] : -1;
+            val.degree     = (val.node_id == -1) ? 0
+                           : nidx[val.node_id + 1] - nidx[val.node_id];
+            val.prefix_sum = 0;
+        }
+        __syncthreads();
+
+        int deg[1]  = { val.degree };
+        int pref[1] = { 0 };
+        BlockScan(temp_storage).ExclusiveSum(deg, pref);
+        __syncthreads();
+
+        val.prefix_sum = pref[0];
+        node_buf[threadIdx.x] = val;
+        __syncthreads();
+
+        if (threadIdx.x == 0) {
+            buf_size     = task_size;
+            total_degree = node_buf[task_size - 1].prefix_sum
+                         + node_buf[task_size - 1].degree;
+        }
+        __syncthreads();
+
+        for (int i = threadIdx.x; i < total_degree; i += BLOCK_SIZE) {
+            int low = 0, high = buf_size - 1;
+            while (low <= high) {
+                int mid   = (low + high) >> 1;
+                int start = node_buf[mid].prefix_sum;
+                int end   = start + node_buf[mid].degree;
+                if      (i >= end)   low  = mid + 1;
+                else if (i <  start) high = mid - 1;
+                else {
+                    int source   = node_buf[mid].node_id;
+                    int neighbor = __ldg(nlist + nidx[source] + (i - start));
+                    unsigned int it = __ldg(iteration_list + neighbor);
+                    if (!(it & 0x40000000u)) {
+                        warpMin = min(warpMin,
+                                      (unsigned int)(atomicSub(&degree_list[neighbor], 1) - 1));
+                    }
+                    break;
+                }
+            }
+        }
+        warpMin = warpReduceMin(warpMin);
+        if (lane == 0 && warpMin < 0x7FFFFFFF) atomicMin(&g_minDegree, (int)warpMin);
+        __syncthreads();
     }
 }

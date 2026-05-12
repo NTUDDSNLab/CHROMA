@@ -205,6 +205,12 @@ __global__ void P_SL_ELS_SDC_split_decrement(
 
 __global__ void P_SL_ELS_SDC_split_advance();
 
+__global__ void P_SL_ELS_SDC_CTA_split_decrement(
+    const int* __restrict__ nidx,
+    const int* __restrict__ nlist,
+    unsigned int* __restrict__ degree_list,
+    const unsigned int* __restrict__ iteration_list);
+
 // ── hash function (shared by PA fused + ECLGC init) ──────
 static __device__ __forceinline__ unsigned int hash(unsigned int val)
 {
