@@ -70,6 +70,10 @@ struct PaSplitStats {
 /* SDC-cuSL split-phase host driver (diagnostic; use for NCU per-phase profiling) */
 PaSplitStats run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d);
 
+/* CTA-balanced SDC split-phase host driver. Same shape as run_sdc_split
+ * but uses P_SL_ELS_SDC_CTA_split_decrement for Phase 2. */
+PaSplitStats run_sdc_cta_split(int blocks, const ECLgraph& g, DevPtr& d);
+
 /* Set dynamic control parameters (DYNAMIC_THETA) */
 #ifdef DYNAMIC_THETA
 void setDynamicParameters(int nodes, int K, float rate, int step, int cap);
