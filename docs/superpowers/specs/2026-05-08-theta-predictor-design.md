@@ -544,6 +544,68 @@ Beyond `--help` and the plan's Task 18, there is no standalone
 "how to train" markdown — the trainer's docstring + CLI argparse
 serve that role.
 
+### Training set size (clarifies §R2)
+
+The original "Risks + open questions" §R2 worried about
+overfitting with "~17 training graphs". That figure was the
+17-graph paper-era set; it does not reflect the v3 training
+corpus. The deployed v3 model is trained on **456 graphs**
+(`model_meta.json::training_samples`) — a mix of bio-, ca-,
+soc-, web-, road-, delaunay-, hugetric-, and SuiteSparse
+collections. With 9 features and 456 samples the
+overfitting risk for tree models is much lower than the
+original spec assumed; the K=5 CV folds in
+`model_meta.json::cv_results` are the live signal.
+
+### Experimental results (EGR sweep, 19 graphs)
+
+Held-out + trained-overlap evaluation using
+`scripts/sweep_v123_combined.py` (v1/v2/v3_raw) merged with
+`scripts/sweep_dynamic_theta.py` `static_dyn` arm (v3_bump). 5
+runs per (graph, mode); reported numbers are arithmetic means
+over runs, then aggregated as geomean / mean across the 19 EGR
+graphs (11 in the training set, 8 strict holdout).
+
+* **base**     — `--elastic 0`, no predictor, no dynamic-θ.
+* **v1**       — paper-era 2-feature linear regression on `(V, V/E)`,
+                 unbounded `θ̂` (often emits 10⁵–10⁷; CHROMA
+                 silently caps internally).
+* **v2**       — 7-feature Random Forest (V, E, d, s, R, GI, H_er).
+* **v3_raw**   — 9-feature RF (adds kcore + assort), no dynamic-θ.
+* **v3_bump**  — v3_raw + on-device bump-mode controller
+                 (deployed default in `DYNAMIC_THETA=1` build).
+
+| Subset | mode | geomean speedup | mean Δcolors | color regressions | color improvements |
+|---|---|---:|---:|---:|---:|
+| **TRAINED 11** | v1       | 5.84× | **+4.55** | 9/11 | 0/11 |
+|                | v2       | 2.31× |  +0.00 | 3/11 | 4/11 |
+|                | v3_raw   | 3.29× |  +0.18 | 4/11 | 2/11 |
+|                | v3_bump  | **4.25×** | **−0.09** | **3/11** | **4/11** |
+| **HOLDOUT 8**  | v1       | 6.26× | **+3.50** | 6/8  | 0/8  |
+|                | v2       | 2.68× |  +0.38 | 3/8  | 0/8  |
+|                | v3_raw   | 3.36× |  +0.50 | 3/8  | 0/8  |
+|                | v3_bump  | **4.22×** |  +0.75 | 3/8  | 0/8  |
+| **ALL 19**     | v1       | 6.01× | **+4.11** | 15/19 | 0/19 |
+|                | v2       | 2.46× |  +0.16 |  6/19 | 4/19 |
+|                | v3_raw   | 3.32× |  +0.32 |  7/19 | 2/19 |
+|                | v3_bump  | **4.24×** |  +0.26 |  6/19 | 4/19 |
+
+Headline reading:
+* v1 is fastest by speedup but pays **+4 colors** on average —
+  the loss function rewards speedup with no colour cap.
+* v2 holds colour quality but recovers <half of v1's speedup.
+* v3_raw: kcore + assort recover ~30 % of the gap to v1
+  (3.32× vs 2.46×) while keeping Δcolors near zero.
+* v3_bump: on-device bumping adds another ~28 % geomean
+  speedup over v3_raw on TRAINED 11 (4.25× vs 3.29×) and
+  actually *improves* colour count by 0.09 on the trained
+  set (the bump scope is bounded by `CTRL_CAP`, so it never
+  blows past v2's safe envelope).
+
+Per-graph data: `model/v2_data/egr_dyntheta_default.json`
+(v3_raw + v3_bump) and `model/v2_data/egr_v123_fixed.json` /
+`scripts/sweep_v123_combined.log` (v1 + v2 + base).
+
 ## References
 
 1. Boldi, P. & Vigna, S. *Fairness on the Web: Alternatives to the
