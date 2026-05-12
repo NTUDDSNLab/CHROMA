@@ -57,8 +57,18 @@ void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d);
 /* Path A: build sorted-by-initial-degree permutation for BB global-min hint */
 void bb_setup_sorted_S(const ECLgraph& g, DevPtr& d);
 
+/* Per-phase timing returned by SDC split-mode launchers (milliseconds,
+ * summed across all outer iterations).  scan_ms covers every
+ * P_SL_ELS_SDC_split_scan kernel launch; decrement_ms covers every
+ * Phase-2 split-decrement kernel launch.  Excludes the advance kernel
+ * and the cudaMemcpyFromSymbol(worker) round-trip. */
+struct PaSplitStats {
+    float scan_ms{};
+    float decrement_ms{};
+};
+
 /* SDC-cuSL split-phase host driver (diagnostic; use for NCU per-phase profiling) */
-void run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d);
+PaSplitStats run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d);
 
 /* Set dynamic control parameters (DYNAMIC_THETA) */
 #ifdef DYNAMIC_THETA

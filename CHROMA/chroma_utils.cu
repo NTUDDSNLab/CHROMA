@@ -281,28 +281,46 @@ void run_bb_split(int blocks, const ECLgraph& g, DevPtr& d)
 }
 
 /* --------------- run_sdc_split ------------------- */
-void run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d)
+PaSplitStats run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d)
 {
     int N = g.nodes;
     int worker_h = 0;
+    PaSplitStats stats{};
+
+    cudaEvent_t beg, end;
+    cudaEventCreate(&beg);
+    cudaEventCreate(&end);
+    auto record = [&](float& acc) {
+        cudaEventRecord(end, 0);
+        cudaEventSynchronize(end);
+        float ms = 0.0f;
+        cudaEventElapsedTime(&ms, beg, end);
+        acc += ms;
+    };
 
     while (worker_h != N) {
         // Phase 1: scan all N vertices, peel those with degree <= theta+FuzzyNumber
+        cudaEventRecord(beg, 0);
         P_SL_ELS_SDC_split_scan<<<blocks, ThreadsPerBlock>>>(
             N, d.nidx_d, d.degree_list, d.iteration_list_d);
-        cudaDeviceSynchronize();
+        record(stats.scan_ms);
 
         // Phase 2: decrement neighbours of peeled vertices, track new min degree
+        cudaEventRecord(beg, 0);
         P_SL_ELS_SDC_split_decrement<<<blocks, ThreadsPerBlock>>>(
             d.nidx_d, d.nlist_d, d.degree_list, d.iteration_list_d);
-        cudaDeviceSynchronize();
+        record(stats.decrement_ms);
 
-        // Phase 3: advance worker, reset remove_size, update theta
+        // Phase 3: advance worker, reset remove_size, update theta, reset cursor_remove
         P_SL_ELS_SDC_split_advance<<<1, 32>>>();
         cudaDeviceSynchronize();
 
         cudaMemcpyFromSymbol(&worker_h, worker, sizeof(int));
     }
+
+    cudaEventDestroy(beg);
+    cudaEventDestroy(end);
+    return stats;
 }
 
 /* --------------- bb_setup_sorted_S -------------- */
