@@ -54,6 +54,8 @@ void print_help(const char* program_name) {
     std::cout << "                            8 or cuSL_ELS_SDC_CTA   : SDC with CTA-balanced removal (cub::BlockScan + binary search)\n";
     std::cout << "                            9 or cuSL_ELS_SDC_CTA_W : SDC + dynamic dispatch (warp-balanced for small remove_size, CTA otherwise)\n";
     std::cout << "                           10 or cuSL_ELS_SDC_CTA_S : SDC + dynamic dispatch (SDC warp-per-vertex for small remove_size, CTA otherwise) [recommended]\n";
+    std::cout << "                           11 or cuSL_ELS_SDC_CTA_SPLIT   : CTA-balanced SDC, per-phase split-kernel diagnostic variant\n";
+    std::cout << "                           12 or cuSL_ELS_SDC_CTA_S_SPLIT : Dispatched CTA_S SDC, per-phase split-kernel diagnostic variant\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
@@ -119,6 +121,12 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
     } else if (algo_str == "10" || algo_str == "cuSL_ELS_SDC_CTA_S") {
         algo_name = "cuSL_ELS_SDC_CTA_S";
         return (void*)P_SL_ELS_SDC_CTA_S;
+    } else if (algo_str == "11" || algo_str == "cuSL_ELS_SDC_CTA_SPLIT") {
+        algo_name = "cuSL_ELS_SDC_CTA_SPLIT";
+        return (void*)P_SL_ELS_SDC_CTA;   // placeholder; main flow detects by name
+    } else if (algo_str == "12" || algo_str == "cuSL_ELS_SDC_CTA_S_SPLIT") {
+        algo_name = "cuSL_ELS_SDC_CTA_S_SPLIT";
+        return (void*)P_SL_ELS_SDC_CTA_S; // placeholder; main flow detects by name
     } else {
         std::cerr << "Error: Invalid algorithm '" << algo_str << "'. Using default cuSL_ELS.\n";
         algo_name = "cuSL_ELS";
