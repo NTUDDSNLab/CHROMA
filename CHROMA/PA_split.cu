@@ -78,11 +78,12 @@ __global__ void P_SL_ELS_SDC_split_decrement(
 __global__ void P_SL_ELS_SDC_split_advance()
 {
     if (blockIdx.x == 0 && threadIdx.x == 0) {
-        worker      += remove_size;
-        remove_size  = 0;
-        theta        = g_minDegree;
+        worker        += remove_size;
+        remove_size    = 0;
+        theta          = g_minDegree;
         atomicExch(&g_minDegree, 0x7FFFFFFF);
-        iteration    = iteration + 1 + FuzzyNumber;
+        iteration      = iteration + 1 + FuzzyNumber;
+        cursor_remove  = 0;
         iter_count++;
     }
 }
