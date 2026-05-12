@@ -363,6 +363,46 @@ PaSplitStats run_sdc_cta_split(int blocks, const ECLgraph& g, DevPtr& d)
     return stats;
 }
 
+/* --------------- run_sdc_cta_s_split ------------------- */
+PaSplitStats run_sdc_cta_s_split(int blocks, const ECLgraph& g, DevPtr& d)
+{
+    int N = g.nodes;
+    int worker_h = 0;
+    PaSplitStats stats{};
+
+    cudaEvent_t beg, end;
+    cudaEventCreate(&beg);
+    cudaEventCreate(&end);
+    auto record = [&](float& acc) {
+        cudaEventRecord(end, 0);
+        cudaEventSynchronize(end);
+        float ms = 0.0f;
+        cudaEventElapsedTime(&ms, beg, end);
+        acc += ms;
+    };
+
+    while (worker_h != N) {
+        cudaEventRecord(beg, 0);
+        P_SL_ELS_SDC_split_scan<<<blocks, ThreadsPerBlock>>>(
+            N, d.nidx_d, d.degree_list, d.iteration_list_d);
+        record(stats.scan_ms);
+
+        cudaEventRecord(beg, 0);
+        P_SL_ELS_SDC_CTA_S_split_decrement<<<blocks, ThreadsPerBlock>>>(
+            d.nidx_d, d.nlist_d, d.degree_list, d.iteration_list_d);
+        record(stats.decrement_ms);
+
+        P_SL_ELS_SDC_split_advance<<<1, 32>>>();
+        cudaDeviceSynchronize();
+
+        cudaMemcpyFromSymbol(&worker_h, worker, sizeof(int));
+    }
+
+    cudaEventDestroy(beg);
+    cudaEventDestroy(end);
+    return stats;
+}
+
 /* --------------- bb_setup_sorted_S -------------- */
 void bb_setup_sorted_S(const ECLgraph& g, DevPtr& d)
 {

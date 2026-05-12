@@ -74,6 +74,11 @@ PaSplitStats run_sdc_split(int blocks, const ECLgraph& g, DevPtr& d);
  * but uses P_SL_ELS_SDC_CTA_split_decrement for Phase 2. */
 PaSplitStats run_sdc_cta_split(int blocks, const ECLgraph& g, DevPtr& d);
 
+/* CTA_S (dispatched warp/CTA) SDC split-phase host driver. Phase 2 uses
+ * P_SL_ELS_SDC_CTA_S_split_decrement which itself dispatches per-block
+ * between SDC-warp and CTA-balanced based on remove_size. */
+PaSplitStats run_sdc_cta_s_split(int blocks, const ECLgraph& g, DevPtr& d);
+
 /* Set dynamic control parameters (DYNAMIC_THETA) */
 #ifdef DYNAMIC_THETA
 void setDynamicParameters(int nodes, int K, float rate, int step, int cap);
