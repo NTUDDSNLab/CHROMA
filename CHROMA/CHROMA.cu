@@ -72,7 +72,7 @@ void print_help(const char* program_name) {
                  "                            graph and print per-run timings + final\n"
                  "                            avg/min/max summary (default: 1)\n";
     std::cout << "  --reduce / --no-reduce    Run / skip post-CA color reduction\n"
-                 "                            (default: --reduce). When enabled,\n"
+                 "                            (default: --no-reduce). When enabled,\n"
                  "                            dispatches heuristic 1 if avg_deg > 10\n"
                  "                            else heuristic 2 (matches ECL-GC).\n";
     std::cout << "  --dump-priority <path>    Dump PA priority list (uint32 per vertex) to FILE\n";
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     std::string dynamic_log;
     std::string dump_priority_path;
     int  num_runs = 1;
-    bool enable_reduce = true;
+    bool enable_reduce = false;
 
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
