@@ -44,11 +44,35 @@ import time
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_FRAMEWORKS = [
-    "cuSL_ELS_SDC",
-    "cuSL_ELS_SDC_CTA",
-    "cuSL_ELS_SDC_CTA_S",
-]
+#
+# Logical framework name → (CHROMA -a value, extra CLI flags). The first
+# three entries match the three SDC variants with the on-device θ
+# controller turned OFF for a fair static-theta comparison; the fourth
+# (..._D) reruns the dispatched CTA_S kernel with dynamic-θ ON (CHROMA's
+# default in DYNAMIC_THETA=1 builds) so the figure can isolate the
+# effect of dynamic bumping vs. the predictor's initial θ alone.
+#
+# Logical framework names not in this dict fall through with no extras —
+# this is what the SPLIT-mode diagnostic algos use.
+#
+FRAMEWORK_SPECS = {
+    "cuSL_ELS_SDC":         ("cuSL_ELS_SDC",        ["--no-dynamic-theta"]),
+    "cuSL_ELS_SDC_CTA":     ("cuSL_ELS_SDC_CTA",    ["--no-dynamic-theta"]),
+    "cuSL_ELS_SDC_CTA_S":   ("cuSL_ELS_SDC_CTA_S",  ["--no-dynamic-theta"]),
+    "cuSL_ELS_SDC_CTA_S_D": ("cuSL_ELS_SDC_CTA_S",  []),  # dynamic-θ default ON
+}
+
+DEFAULT_FRAMEWORKS = list(FRAMEWORK_SPECS.keys())
+
+
+def resolve_framework(framework: str) -> tuple[str, list]:
+    """Return the (CHROMA -a value, extra CLI flag list) for a logical
+    framework name. Names not in FRAMEWORK_SPECS pass through unchanged
+    with no extras (the SPLIT-mode diagnostic algos use this path)."""
+    spec = FRAMEWORK_SPECS.get(framework)
+    if spec is None:
+        return (framework, [])
+    return spec
 
 # stats_f produces  "avg=%9.3f  min=%9.3f  max=%9.3f" — \s* covers padding.
 # Required rows are emitted by every algo; the optional pair is only
@@ -97,8 +121,10 @@ def build_cmd(binary: Path, egr: Path, framework: str, runs: int,
     # --no-reduce: the figure measures pure CA + PA scan + PA decrement.
     # Color reduction is a separate post-CA phase and is not part of the
     # breakdown; disabling it also keeps CHROMA's runtime cleaner.
-    cmd = [str(binary), "-f", str(egr), "-a", framework, "--no-reduce",
+    algo, framework_extras = resolve_framework(framework)
+    cmd = [str(binary), "-f", str(egr), "-a", algo, "--no-reduce",
            "--runs", str(runs)]
+    cmd.extend(framework_extras)
     if predict:
         cmd.extend(["--predict", "--predict-model", predict_model])
     else:

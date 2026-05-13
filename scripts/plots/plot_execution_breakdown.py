@@ -34,15 +34,15 @@ import numpy as np
 
 
 SEGMENTS_BREAKDOWN = [
-    ("ca_ms",            "CA",           "#4C72B0"),  # blue
-    ("pa_scan_ms",       "PA scan",      "#DD8452"),  # orange
-    ("pa_decrement_ms",  "PA decrement", "#55A467"),  # green
+    ("ca_ms",            "CA time",           "#4C72B0"),  # blue
+    ("pa_scan_ms",       "PA scan time",      "#DD8452"),  # orange
+    ("pa_decrement_ms",  "PA decrement time", "#55A467"),  # green
 ]
 SEGMENTS_UNIFIED = [
-    ("ca_ms",  "CA", "#4C72B0"),  # blue
-    ("pa_ms",  "PA", "#DD8452"),  # orange
+    ("ca_ms",  "CA time", "#4C72B0"),  # blue
+    ("pa_ms",  "PA time", "#DD8452"),  # orange
 ]
-HATCHES = ["",  "//", "xx"]  # one per framework, in input order
+HATCHES = ["",  "//", "xx", ".."]  # one per framework, in input order
 
 # Font sizes (pt). Tuned for a paper-figure-sized PDF.
 TICK_FS   = 12
@@ -50,9 +50,22 @@ LABEL_FS  = 13
 LEGEND_FS = 13
 
 FRAMEWORK_LABELS = {
-    "cuSL_ELS_SDC_SPLIT":        "cuSL_ELS_SDC",
-    "cuSL_ELS_SDC_CTA_SPLIT":    "cuSL_ELS_SDC_CTA",
-    "cuSL_ELS_SDC_CTA_S_SPLIT":  "cuSL_ELS_SDC_CTA_S",
+    # Unified cooperative kernels. CHROMA^* (superscript asterisk via
+    # mathtext) marks the SDC family in paper figures; the suffix encodes
+    # the workload-balancing strategy:
+    #   * (no suffix) baseline warp-per-vertex SDC
+    #   -cta         CTA-balanced decrement (BlockScan)
+    #   -adw         adaptive dispatched warp/CTA (a.k.a. CTA_S)
+    #   -adw-d       same as -adw, with the on-device dynamic-θ
+    #                 bumping controller enabled
+    "cuSL_ELS_SDC":          r"CHROMA$^{*}$",
+    "cuSL_ELS_SDC_CTA":      r"CHROMA$^{*}$-cta",
+    "cuSL_ELS_SDC_CTA_S":    r"CHROMA$^{*}$-adw",
+    "cuSL_ELS_SDC_CTA_S_D":  r"CHROMA$^{*}$-adw-d",
+    # Diagnostic SPLIT-mode variants reuse the same paper labels.
+    "cuSL_ELS_SDC_SPLIT":        r"CHROMA$^{*}$",
+    "cuSL_ELS_SDC_CTA_SPLIT":    r"CHROMA$^{*}$-cta",
+    "cuSL_ELS_SDC_CTA_S_SPLIT":  r"CHROMA$^{*}$-adw",
 }
 
 # X-axis display names. The .egr basenames carry historical suffixes
@@ -216,7 +229,10 @@ def main():
     )
     axes = axes[0]
 
-    bar_w = 0.27
+    # bar_w scales so the bars in a group span ~85% of the unit slot,
+    # leaving ~15% white space between adjacent dataset groups regardless
+    # of framework count (3 fw → ~0.28, 4 fw → ~0.21).
+    bar_w = 0.85 / max(1, len(frameworks))
     for ax, (_label, ds_list) in zip(axes, panels):
         draw_panel(ax, ds_list, frameworks, by_key, segments, bar_w)
         ax.set_ylabel("Time (ms)", fontsize=LABEL_FS)
@@ -236,15 +252,15 @@ def main():
     combined_handles = seg_handles + fw_handles
 
     fig.legend(handles=combined_handles, loc="upper center",
-               bbox_to_anchor=(0.5, 1.00),
+               bbox_to_anchor=(0.5, 1.02),
                ncol=len(combined_handles),
                frameon=False, handlelength=2.0, columnspacing=2.5,
                fontsize=LEGEND_FS)
 
-    # Tight margins: single legend row needs only ~10% at the top;
-    # rotated dataset labels need ~25% at the bottom; side gutters
-    # as small as practical.
-    fig.subplots_adjust(top=0.90, bottom=0.27, left=0.035, right=0.997,
+    # Margins: drop the axes top to 0.84 so the legend sits well above
+    # the bars with clear whitespace; rotated dataset labels need ~25%
+    # at the bottom; side gutters as small as practical.
+    fig.subplots_adjust(top=0.84, bottom=0.27, left=0.035, right=0.997,
                         wspace=0.16)
 
     pdf_path = Path(args.out_prefix + ".pdf")
