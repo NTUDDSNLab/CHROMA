@@ -606,6 +606,69 @@ Per-graph data: `model/v2_data/egr_dyntheta_default.json`
 (v3_raw + v3_bump) and `model/v2_data/egr_v123_fixed.json` /
 `scripts/sweep_v123_combined.log` (v1 + v2 + base).
 
+### Caveat on v1 in the table above
+
+The v1 column in the sweep log was measured against the **broken-emit
+v1** produced by T21 (commit 8929998): a StandardScaler-trained
+linear model was deployed against CHROMA's legacy `--predict` path
+which passes raw V/E to `score()`, so predictions blew up to 10⁵–10⁷.
+T22 (commit 5b95e33) fixed this with `--no-scale`. The v1 numbers in
+this table therefore reflect "linear regression with broken
+normalisation", not a fair paper-era baseline.
+
+For a fair paper-era comparison, see the **v0_paper** entry below.
+
+### Paper-era reference predictor (v0_paper, 2026-05-12)
+
+The model.cpp that shipped before the T21 retrain (commit 55b19d2,
+identical to the model state at commit 0531657) is preserved as
+`model/model_v0_paper.cpp` with its `score()` function renamed to
+`score_v0_paper()`. Both predictors are linked when `PRE_MODEL=1`
+and the runtime CLI selects between them:
+
+```bash
+CHROMA --predict                            # v3 (default)
+CHROMA --predict --predict-model v0_paper   # paper-era 200-tree RF on raw V/E
+```
+
+The v0_paper path bypasses scaler / score-shift / floor (those are
+v3 deployment policy) and rounds the raw RF output. Despite the
+spec originally describing the paper-era predictor as "Linear
+Regression on `[V, E]`", the actual on-disk artifact is a 200-tree
+random forest (m2cgen sums 200 leaves and divides by 200) on
+`(input[0]=V, input[1]=E)` — 32k lines of nested if-else.
+
+Same 19-graph EGR sweep (5 runs each, dynamic-θ disabled for v0_paper
+so the model comparison is apples-to-apples; v3_bump retains its
+deployed default — 9-feature RF + on-device bumping):
+
+| Subset | mode | geomean spd | mean Δcolors | regr | impr |
+|---|---|---:|---:|---:|---:|
+| **TRAINED 11** | v0_paper | 2.60× | **+0.09** | 5/11 | 3/11 |
+|                | v3_bump  | **4.42×** | +0.09 | 3/11 | 2/11 |
+| **HOLDOUT 8**  | v0_paper | 3.01× | **+0.25** | 2/8 | 0/8 |
+|                | v3_bump  | **4.35×** | +0.50 | 2/8 | 0/8 |
+| **ALL 19**     | v0_paper | 2.76× | **+0.16** | 7/19 | 3/19 |
+|                | v3_bump  | **4.39×** | +0.26 | 5/19 | 2/19 |
+
+Reading:
+* The paper-era predictor is **not** the disaster the broken-v1
+  numbers suggested — colour quality is actually slightly better
+  than v3_bump on holdout (Δcolors +0.25 vs +0.50) and tied on the
+  trained set (+0.09 each).
+* v3_bump's edge is **speed**: ~60 % faster geomean across all
+  subsets, by predicting more aggressive θ (typically 3 vs
+  v0_paper's 1–3) and then bumping further with the dynamic
+  controller.
+* v0_paper finds non-trivial colour improvements on three trained
+  graphs that v3_bump does not match: Email-Enron −1, cit-Patents
+  −1, wiki-Talk **−2**. This says the 200-tree RF on V/E memorises
+  certain training-graph signatures in a way the 9-feature RF does
+  not — a useful diagnostic when v3 makes a surprising choice.
+
+Per-graph data: `model/v2_data/egr_v0_paper.json`. Sweep:
+`scripts/sweep_v0_paper.py` (3-way: baseline / v0_paper / v3_bump).
+
 ## References
 
 1. Boldi, P. & Vigna, S. *Fairness on the Web: Alternatives to the
