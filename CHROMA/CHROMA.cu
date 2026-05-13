@@ -23,6 +23,7 @@
 
 #ifdef PRED_MODEL
 extern double score(double *input);
+extern double score_v0_paper(double *input);   // paper-era 200-tree RF on raw V/E
 #endif
 
 
@@ -59,6 +60,7 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
+    std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF) or v0_paper (paper-era RF on V/E only)\n";
     std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
     std::cout << "  --no-dynamic-theta        Disable on-device θ controller (opt-out, ablation)\n";
     std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 5)\n";
@@ -186,6 +188,7 @@ int main(int argc, char* argv[])
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
     bool use_predicted_elastic = false;  // Mark whether to use predicted elastic value
+    std::string predict_model = "v3";    // --predict-model: "v3" (default) | "v0_paper"
     // T14: dynamic θ controller is ON by default in DYNAMIC_THETA=1 builds
     // (decision per docs/superpowers/specs/2026-05-11-online-θ-prediction-design.md
     //  Decision Criterion + T13 HP sweep). Use --no-dynamic-theta to disable.
@@ -240,6 +243,14 @@ int main(int argc, char* argv[])
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
             use_predicted_elastic = true;
+        } else if (strcmp(argv[i], "--predict-model") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --predict-model needs a name (v3|v0_paper).\n"; return 1; }
+            predict_model = argv[++i];
+            if (predict_model != "v3" && predict_model != "v0_paper") {
+                std::cerr << "Error: --predict-model must be 'v3' or 'v0_paper' (got '"
+                          << predict_model << "').\n";
+                return 1;
+            }
         } else if (strcmp(argv[i], "--dynamic-theta") == 0) {
             dynamic_theta = true;
         } else if (strcmp(argv[i], "--no-dynamic-theta") == 0) {
@@ -376,15 +387,22 @@ int main(int argc, char* argv[])
     #ifdef PRED_MODEL
     if (use_predicted_elastic) {
         GraphFeatures f = compute_graph_features(g);
-        double input[chroma_predictor::FEATURE_COUNT];
-        for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
-            input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
-                     /  chroma_predictor::SCALER_STD[i];
+        if (predict_model == "v0_paper") {
+            // Paper-era 200-tree RF on raw V/E only (pre-T21 reference baseline).
+            // No scaler, no score-shift, no floor — round() to match original deployment.
+            double v0_input[2] = { (double)g.nodes, (double)g.edges };
+            fuzzy_number = (int)round(score_v0_paper(v0_input));
+        } else {
+            double input[chroma_predictor::FEATURE_COUNT];
+            for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
+                input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
+                         /  chroma_predictor::SCALER_STD[i];
+            }
+            double score_result = score(input) + chroma_predictor::SCORE_SHIFT;
+            fuzzy_number = chroma_predictor::USE_FLOOR
+                           ? (int)floor(score_result)
+                           : (int)round(score_result);
         }
-        double score_result = score(input) + chroma_predictor::SCORE_SHIFT;
-        fuzzy_number = chroma_predictor::USE_FLOOR
-                       ? (int)floor(score_result)
-                       : (int)round(score_result);
         if (fuzzy_number < 0) fuzzy_number = 0;
     }
     #else

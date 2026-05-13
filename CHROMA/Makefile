@@ -1,6 +1,8 @@
 # ================== Usage ==================
 # $ make                   Generate executable CHROMA
 # $ make PRE_MODEL=1       Enable predict model (v3: 9 features + RF + floor + shift -0.5)
+#                          Also links paper-era reference model (v0_paper); selectable
+#                          at runtime via --predict-model {v3|v0_paper} (default v3).
 # $ make PRE_MODEL=1 DYNAMIC_THETA=1   Enable predict model + on-device θ controller
 # $ make DEBUG=1           Enable debug mode (-lineinfo -O0)
 # $ make clean             Remove *.o and CHROMA
@@ -37,7 +39,7 @@ SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp ../lib/io/graph_features.cpp
 
 ifeq ($(PRE_MODEL), 1)
-	CPP_SRCS += ../model/model.cpp
+	CPP_SRCS += ../model/model.cpp ../model/model_v0_paper.cpp
 	DC_FLAGS += -DPRED_MODEL -I../model
 	CXXFLAGS += -DPRED_MODEL -I../model
 	ifeq ($(DYNAMIC_THETA), 1)
