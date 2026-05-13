@@ -235,9 +235,13 @@ def main():
     bar_w = 0.85 / max(1, len(frameworks))
     for ax, (_label, ds_list) in zip(axes, panels):
         draw_panel(ax, ds_list, frameworks, by_key, segments, bar_w)
-        ax.set_ylabel("Time (ms)", fontsize=LABEL_FS)
         if args.log:
             ax.set_yscale("symlog", linthresh=0.1)
+
+    # Only the leftmost panel carries the y-axis title; other panels
+    # keep their own tick numbers (independent scale) but drop the
+    # repeated "Time (ms)" label.
+    axes[0].set_ylabel("Time (ms)", fontsize=LABEL_FS)
 
     # Single combined horizontal legend above the axes: segment colours
     # first, then framework hatches. Single row keeps the top strip thin
