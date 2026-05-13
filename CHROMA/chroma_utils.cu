@@ -120,17 +120,23 @@ void allocAndInit(const ECLgraph& g, DevPtr& d, int fuzzy_number)
 /* ----------------- ECL_GC_run ------------------- */
 void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d)
 {
-    cudaFuncSetCacheConfig(init, cudaFuncCachePreferL1);
-    cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
-    cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
-    
-    cudaSetDevice(Device);
-    cudaDeviceProp deviceProp;
-    cudaGetDeviceProperties(&deviceProp, Device);
-    const int SMs = deviceProp.multiProcessorCount;
-    int blkPerSM_GC;
-    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
-    int gridDim_GC = blkPerSM_GC * SMs;
+    // Cache the GC grid-dim across calls. cudaGetDeviceProperties is slow
+    // (~1-4 ms on some drivers) and was previously leaking into timer_CA
+    // because the host stalled between cudaEventRecord(beg) and the first
+    // kernel launch, with the GPU sitting idle on stream 0 in the meantime.
+    static int gridDim_GC = 0;
+    if (gridDim_GC == 0) {
+        cudaFuncSetCacheConfig(init, cudaFuncCachePreferL1);
+        cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
+        cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
+        cudaSetDevice(Device);
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, Device);
+        const int SMs = deviceProp.multiProcessorCount;
+        int blkPerSM_GC;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+        gridDim_GC = blkPerSM_GC * SMs;
+    }
 
     init<<<blocks, ThreadsPerBlock>>>(g.nodes, g.edges,
               d.nidx_d, d.nlist_d, d.nlist2_d,
@@ -174,16 +180,19 @@ void ECL_GC_run(int blocks, const ECLgraph& g, DevPtr& d)
 /* ----------- ECL_GC_coloring_only --------------- */
 void ECL_GC_coloring_only(int blocks, const ECLgraph& g, DevPtr& d)
 {
-    cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
-    cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
-
-    cudaSetDevice(Device);
-    cudaDeviceProp deviceProp;
-    cudaGetDeviceProperties(&deviceProp, Device);
-    const int SMs = deviceProp.multiProcessorCount;
-    int blkPerSM_GC;
-    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
-    int gridDim_GC = blkPerSM_GC * SMs;
+    // See ECL_GC_run for the rationale on caching gridDim_GC.
+    static int gridDim_GC = 0;
+    if (gridDim_GC == 0) {
+        cudaFuncSetCacheConfig(runLarge, cudaFuncCachePreferL1);
+        cudaFuncSetCacheConfig(runSmall, cudaFuncCachePreferL1);
+        cudaSetDevice(Device);
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, Device);
+        const int SMs = deviceProp.multiProcessorCount;
+        int blkPerSM_GC;
+        cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blkPerSM_GC, runLarge, ThreadsPerBlock, 0);
+        gridDim_GC = blkPerSM_GC * SMs;
+    }
 
     // NOTE: use too many blocks may cause OCCUPANCY DEADLOCK in runLarge
     runLarge<<<gridDim_GC, ThreadsPerBlock>>>(g.nodes,

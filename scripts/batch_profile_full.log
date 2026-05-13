@@ -1,0 +1,59 @@
+# 19 datasets x 3 frameworks x 5 runs
+# Email-Enron.col                  cuSL_ELS_SDC_SPLIT             ca=   2.63ms scan=  12.32ms dec=   7.94ms colors= 28.0 wall=   0.5s
+# Email-Enron.col                  cuSL_ELS_SDC_CTA_SPLIT         ca=   2.64ms scan=  12.30ms dec=  10.68ms colors= 28.0 wall=   0.5s
+# Email-Enron.col                  cuSL_ELS_SDC_CTA_S_SPLIT       ca=   2.65ms scan=  12.21ms dec=   8.42ms colors= 28.0 wall=   0.5s
+# Slashdot0811                     cuSL_ELS_SDC_SPLIT             ca=   2.99ms scan=  13.76ms dec=  10.29ms colors= 33.0 wall=   0.6s
+# Slashdot0811                     cuSL_ELS_SDC_CTA_SPLIT         ca=   3.01ms scan=  13.80ms dec=  14.36ms colors= 33.0 wall=   0.6s
+# Slashdot0811                     cuSL_ELS_SDC_CTA_S_SPLIT       ca=   3.02ms scan=  13.83ms dec=  10.88ms colors= 33.0 wall=   0.6s
+# Slashdot0902                     cuSL_ELS_SDC_SPLIT             ca=   2.98ms scan=  14.30ms dec=  10.85ms colors= 32.0 wall=   0.6s
+# Slashdot0902                     cuSL_ELS_SDC_CTA_SPLIT         ca=   3.16ms scan=  14.27ms dec=  15.07ms colors= 32.0 wall=   0.6s
+# Slashdot0902                     cuSL_ELS_SDC_CTA_S_SPLIT       ca=   3.02ms scan=  14.24ms dec=  11.37ms colors= 32.0 wall=   0.6s
+# Stanford                         cuSL_ELS_SDC_SPLIT             ca=  12.35ms scan= 126.70ms dec=  64.41ms colors= 61.0 wall=   2.1s
+# Stanford                         cuSL_ELS_SDC_CTA_SPLIT         ca=  12.36ms scan= 126.00ms dec=  95.38ms colors= 61.0 wall=   2.3s
+# Stanford                         cuSL_ELS_SDC_CTA_S_SPLIT       ca=  12.46ms scan= 125.78ms dec=  68.31ms colors= 61.0 wall=   2.2s
+# as-skitter                       cuSL_ELS_SDC_SPLIT             ca=  28.70ms scan= 502.37ms dec= 173.50ms colors= 67.0 wall=   5.5s
+# as-skitter                       cuSL_ELS_SDC_CTA_SPLIT         ca=  28.10ms scan= 502.20ms dec= 208.47ms colors= 67.0 wall=   5.7s
+# as-skitter                       cuSL_ELS_SDC_CTA_S_SPLIT       ca=  28.19ms scan= 500.45ms dec= 181.39ms colors= 67.0 wall=   5.5s
+# cit-Patents                      cuSL_ELS_SDC_SPLIT             ca=  47.46ms scan=2091.13ms dec= 279.91ms colors= 13.0 wall=  15.9s
+# cit-Patents                      cuSL_ELS_SDC_CTA_SPLIT         ca=  48.49ms scan=2124.83ms dec= 399.57ms colors= 13.0 wall=  16.7s
+# cit-Patents                      cuSL_ELS_SDC_CTA_S_SPLIT       ca=  48.52ms scan=2127.48ms dec= 294.28ms colors= 13.0 wall=  16.2s
+# delaunay_n24                     cuSL_ELS_SDC_SPLIT             ca= 256.46ms scan=3724.09ms dec= 180.29ms colors=  5.0 wall=  23.5s
+# delaunay_n24                     cuSL_ELS_SDC_CTA_SPLIT         ca= 259.70ms scan=3778.77ms dec= 263.41ms colors=  5.0 wall=  24.2s
+# delaunay_n24                     cuSL_ELS_SDC_CTA_S_SPLIT       ca= 259.98ms scan=3792.45ms dec= 166.64ms colors=  5.0 wall=  23.8s
+# europe_osm                       cuSL_ELS_SDC_SPLIT             ca=1264.53ms scan=4004.58ms dec= 128.88ms colors=  4.0 wall=  29.9s
+# europe_osm                       cuSL_ELS_SDC_CTA_SPLIT         ca=1264.25ms scan=4005.47ms dec= 101.31ms colors=  4.0 wall=  29.7s
+# europe_osm                       cuSL_ELS_SDC_CTA_S_SPLIT       ca=1264.27ms scan=4005.62ms dec=  75.53ms colors=  4.0 wall=  29.6s
+# facebook                         cuSL_ELS_SDC_SPLIT             ca=   3.50ms scan=  13.82ms dec=   8.88ms colors= 72.0 wall=   0.6s
+# facebook                         cuSL_ELS_SDC_CTA_SPLIT         ca=   3.52ms scan=  13.87ms dec=  10.77ms colors= 72.0 wall=   0.6s
+# facebook                         cuSL_ELS_SDC_CTA_S_SPLIT       ca=   3.57ms scan=  13.83ms dec=   9.29ms colors= 72.0 wall=   0.6s
+# le450_25d                        cuSL_ELS_SDC_SPLIT             ca=   2.46ms scan=   2.95ms dec=   2.00ms colors= 30.0 wall=   0.4s
+# le450_25d                        cuSL_ELS_SDC_CTA_SPLIT         ca=   2.48ms scan=   2.92ms dec=   2.22ms colors= 30.0 wall=   0.4s
+# le450_25d                        cuSL_ELS_SDC_CTA_S_SPLIT       ca=   2.46ms scan=   2.93ms dec=   2.14ms colors= 30.0 wall=   0.4s
+# r4-2e23.sym                      cuSL_ELS_SDC_SPLIT             ca= 177.12ms scan= 133.89ms dec=  71.89ms colors=  6.0 wall=   3.8s
+# r4-2e23.sym                      cuSL_ELS_SDC_CTA_SPLIT         ca= 176.94ms scan= 133.85ms dec=  65.19ms colors=  6.0 wall=   3.8s
+# r4-2e23.sym                      cuSL_ELS_SDC_CTA_S_SPLIT       ca= 176.91ms scan= 133.91ms dec=  57.11ms colors=  6.0 wall=   3.8s
+# rmat22.sym                       cuSL_ELS_SDC_SPLIT             ca= 193.91ms scan= 407.87ms dec= 132.60ms colors= 37.0 wall=   5.6s
+# rmat22.sym                       cuSL_ELS_SDC_CTA_SPLIT         ca= 192.48ms scan= 406.88ms dec= 250.82ms colors= 37.0 wall=   6.2s
+# rmat22.sym                       cuSL_ELS_SDC_CTA_S_SPLIT       ca= 195.18ms scan= 407.78ms dec= 139.19ms colors= 37.0 wall=   5.7s
+# school1                          cuSL_ELS_SDC_SPLIT             ca=   1.78ms scan=   2.93ms dec=   2.08ms colors= 14.0 wall=   0.4s
+# school1                          cuSL_ELS_SDC_CTA_SPLIT         ca=   1.80ms scan=   2.90ms dec=   2.23ms colors= 14.0 wall=   0.4s
+# school1                          cuSL_ELS_SDC_CTA_S_SPLIT       ca=   1.77ms scan=   2.93ms dec=   2.23ms colors= 14.0 wall=   0.4s
+# soc-Epinions1.col                cuSL_ELS_SDC_SPLIT             ca=   3.80ms scan=  17.16ms dec=  12.65ms colors= 33.0 wall=   0.6s
+# soc-Epinions1.col                cuSL_ELS_SDC_CTA_SPLIT         ca=   3.84ms scan=  17.13ms dec=  15.89ms colors= 33.0 wall=   0.6s
+# soc-Epinions1.col                cuSL_ELS_SDC_CTA_S_SPLIT       ca=   3.83ms scan=  17.12ms dec=  13.27ms colors= 33.0 wall=   0.6s
+# soc-pokec-relationships.col      cuSL_ELS_SDC_SPLIT             ca= 139.72ms scan= 780.22ms dec= 281.58ms colors= 29.0 wall=   8.9s
+# soc-pokec-relationships.col      cuSL_ELS_SDC_CTA_SPLIT         ca= 142.72ms scan= 780.77ms dec= 383.92ms colors= 29.0 wall=   9.4s
+# soc-pokec-relationships.col      cuSL_ELS_SDC_CTA_S_SPLIT       ca= 141.32ms scan= 779.04ms dec= 299.46ms colors= 29.0 wall=   9.0s
+# twitter_combined                 cuSL_ELS_SDC_SPLIT             ca=   5.98ms scan= 108.24ms dec=  70.07ms colors= 71.0 wall=   2.0s
+# twitter_combined                 cuSL_ELS_SDC_CTA_SPLIT         ca=   5.92ms scan= 108.37ms dec=  84.10ms colors= 71.0 wall=   2.1s
+# twitter_combined                 cuSL_ELS_SDC_CTA_S_SPLIT       ca=   5.99ms scan= 108.89ms dec=  73.48ms colors= 71.0 wall=   2.0s
+# wiki-Talk.col                    cuSL_ELS_SDC_SPLIT             ca=  13.43ms scan=  60.00ms dec=  45.85ms colors= 56.0 wall=   1.2s
+# wiki-Talk.col                    cuSL_ELS_SDC_CTA_SPLIT         ca=  13.33ms scan=  60.06ms dec=  44.10ms colors= 56.0 wall=   1.2s
+# wiki-Talk.col                    cuSL_ELS_SDC_CTA_S_SPLIT       ca=  13.46ms scan=  60.01ms dec=  44.59ms colors= 56.0 wall=   1.2s
+# wiki-Vote.col                    cuSL_ELS_SDC_SPLIT             ca=   2.64ms scan=   7.57ms dec=   5.50ms colors= 27.0 wall=   0.5s
+# wiki-Vote.col                    cuSL_ELS_SDC_CTA_SPLIT         ca=   2.56ms scan=   7.57ms dec=   6.29ms colors= 27.0 wall=   0.5s
+# wiki-Vote.col                    cuSL_ELS_SDC_CTA_S_SPLIT       ca=   2.58ms scan=   7.58ms dec=   5.74ms colors= 27.0 wall=   0.5s
+# youtube                          cuSL_ELS_SDC_SPLIT             ca=   6.70ms scan=  70.19ms dec=  37.33ms colors= 28.0 wall=   1.3s
+# youtube                          cuSL_ELS_SDC_CTA_SPLIT         ca=   6.65ms scan=  70.27ms dec=  47.38ms colors= 28.0 wall=   1.3s
+# youtube                          cuSL_ELS_SDC_CTA_S_SPLIT       ca=   6.68ms scan=  70.22ms dec=  37.53ms colors= 28.0 wall=   1.3s
+# wrote /home/chsieh45/PunchShadow/CHROMA/scripts/batch_profile_results.json
