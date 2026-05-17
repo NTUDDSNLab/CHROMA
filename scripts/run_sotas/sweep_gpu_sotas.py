@@ -534,7 +534,79 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 
 def run_sweep(args: argparse.Namespace) -> int:
-    raise NotImplementedError  # filled in Task 8
+    if not args.dataset_dir:
+        sys.stderr.write("error: --dataset-dir is required\n")
+        return 2
+    if not os.path.isdir(args.dataset_dir):
+        sys.stderr.write(
+            f"error: --dataset-dir not a directory: {args.dataset_dir}\n")
+        return 2
+    datasets = discover_datasets(args.dataset_dir, args.pattern,
+                                 args.recursive)
+    if not datasets:
+        sys.stderr.write(
+            f"error: no files matching {args.pattern!r} in "
+            f"{args.dataset_dir}\n")
+        return 2
+
+    nn, arch_source = resolve_arch(args.arch)
+    tools = select_tools(args.only, args.exclude)
+    units = needed_units(tools)
+
+    builds: dict = {}
+    if not args.skip_build:
+        builds = run_build_phase(units, nn)
+
+    availability = compute_availability(tools, builds, args.skip_build)
+
+    rows: list[dict] = []
+    for t in tools:
+        binary_abs = os.path.join(REPO_ROOT, t["binrel"])
+        avail, reason = availability[t["name"]]
+        for ds in datasets:
+            name = os.path.basename(ds)
+            if not avail:
+                rows.append({
+                    "tool": t["name"], "dataset": name,
+                    "dataset_path": ds, "ok": False,
+                    "best_total_exec_ms": None, "best_colors": None,
+                    "runs": [], "error": reason})
+                continue
+            print(f"[run] {t['name']} :: {name}", flush=True)
+            cell = run_cell(t, binary_abs, ds, args.runs, args.timeout)
+            best = pick_best(cell)
+            rows.append({
+                "tool": t["name"], "dataset": name,
+                "dataset_path": ds,
+                "ok": best is not None,
+                "best_total_exec_ms":
+                    best["total_exec_ms"] if best else None,
+                "best_colors": best["colors"] if best else None,
+                "runs": cell,
+                "error": None if best else
+                         (cell[-1]["error"] if cell else "no runs"),
+            })
+
+    config = {
+        "timestamp": datetime.now(timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"),
+        "repo_root": REPO_ROOT,
+        "dataset_dir": os.path.abspath(args.dataset_dir),
+        "pattern": args.pattern,
+        "recursive": args.recursive,
+        "runs_per_cell": args.runs,
+        "timeout_sec": args.timeout,
+        "arch": int(nn) if nn.isdigit() else nn,
+        "arch_source": arch_source,
+        "skip_build": args.skip_build,
+        "tools": [t["name"] for t in tools],
+    }
+    doc = build_json_doc(config, builds, tools, availability,
+                         [os.path.basename(d) for d in datasets], rows)
+    write_json_atomic(args.out, doc)
+    print_summary(doc)
+    print(f"\nwrote {args.out}")
+    return 0
 
 
 def _check(results: list, name: str, got, expected) -> None:
