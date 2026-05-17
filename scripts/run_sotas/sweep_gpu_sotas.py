@@ -66,12 +66,82 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return p
 
 
+def normalize_arch(value: str) -> str:
+    """'89' / 'sm_89' / '8.9' -> '89'. Raises ValueError if not numeric."""
+    s = value.strip().lower()
+    if s.startswith("sm_"):
+        s = s[3:]
+    s = s.replace(".", "")
+    if not s or not s.isdigit():
+        raise ValueError(f"invalid arch: {value!r}")
+    return s
+
+
+def detect_arch() -> Optional[str]:
+    """First GPU compute capability via nvidia-smi, e.g. '8.9' -> '89'."""
+    try:
+        proc = subprocess.run(
+            ["nvidia-smi", "--query-gpu=compute_cap",
+             "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=15, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    for line in proc.stdout.splitlines():
+        line = line.strip()
+        if line:
+            try:
+                return normalize_arch(line)
+            except ValueError:
+                return None
+    return None
+
+
+def resolve_arch(cli_arch: Optional[str]) -> tuple[str, str]:
+    """Return (NN, source) where source in {--arch, nvidia-smi, fallback}."""
+    if cli_arch:
+        return normalize_arch(cli_arch), "--arch"
+    detected = detect_arch()
+    if detected:
+        return detected, "nvidia-smi"
+    return "89", "fallback"
+
+
 def run_sweep(args: argparse.Namespace) -> int:
     raise NotImplementedError  # filled in Task 8
 
 
+def _check(results: list, name: str, got, expected) -> None:
+    ok = got == expected
+    results.append((ok, name, got, expected))
+
+
 def run_selftest() -> int:
-    raise NotImplementedError  # filled in Task 2+
+    results: list = []
+    selftest_arch(results)
+    failed = [r for r in results if not r[0]]
+    for ok, name, got, expected in results:
+        if not ok:
+            print(f"FAIL {name}: got={got!r} expected={expected!r}")
+    print(f"SELFTEST: {'PASS' if not failed else 'FAIL'} "
+          f"({len(results) - len(failed)}/{len(results)} checks)")
+    return 0 if not failed else 1
+
+
+def selftest_arch(results: list) -> None:
+    _check(results, "normalize 89", normalize_arch("89"), "89")
+    _check(results, "normalize sm_86", normalize_arch("sm_86"), "86")
+    _check(results, "normalize 8.9", normalize_arch("8.9"), "89")
+    _check(results, "normalize SM_90 spaced",
+           normalize_arch("  SM_90 "), "90")
+    raised = False
+    try:
+        normalize_arch("abc")
+    except ValueError:
+        raised = True
+    _check(results, "normalize invalid raises", raised, True)
 
 
 if __name__ == "__main__":
