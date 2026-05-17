@@ -226,6 +226,12 @@ def discover_datasets(dataset_dir: str, pattern: str,
 
 
 def pick_best(runs: list[dict]) -> Optional[dict]:
+    """Best run by (colors ASC, total_exec_ms ASC), or None if no ok run.
+
+    Contract: every dict with ok=True MUST have numeric "colors" and
+    "total_exec_ms" (guaranteed by assemble_run, which only sets ok=True
+    when both parsed non-None).
+    """
     valid = [r for r in runs if r.get("ok")]
     if not valid:
         return None
@@ -361,8 +367,6 @@ def selftest_parsers(results: list) -> None:
 
 
 def selftest_engine(results: list) -> None:
-    all_names = [t["name"] for t in REGISTRY]
-
     sel = select_tools(only="cuSL,ECL-GC", exclude=None)
     _check(results, "only filter", [t["name"] for t in sel],
            ["ECL-GC", "cuSL"])  # registry order preserved
