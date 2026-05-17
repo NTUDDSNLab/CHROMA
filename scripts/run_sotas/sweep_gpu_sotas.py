@@ -470,8 +470,10 @@ def write_json_atomic(path: str, doc: dict) -> None:
             json.dump(doc, f, indent=2)
         os.replace(tmp, path)
     finally:
-        if os.path.exists(tmp):
+        try:
             os.remove(tmp)
+        except FileNotFoundError:
+            pass
 
 
 def print_summary(doc: dict) -> None:
