@@ -509,7 +509,7 @@ REGISTRY: list[dict] = [
 - [ ] **Step 4: Run selftest to verify parser cases pass**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (24/24 checks)` (5 arch + 19 parser/registry).
+Expected: `SELFTEST: PASS (21/21 checks)` (5 arch + 16 parser/registry).
 
 - [ ] **Step 5: Commit**
 
@@ -636,7 +636,7 @@ def pick_best(runs: list[dict]) -> Optional[dict]:
 - [ ] **Step 4: Run selftest to verify pass**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (33/33 checks)`.
+Expected: `SELFTEST: PASS (31/31 checks)`.
 
 - [ ] **Step 5: Commit**
 
@@ -807,7 +807,7 @@ def build_unit_steps(unit: str, nn: str) -> list[dict]:
 - [ ] **Step 4: Run selftest to verify pass**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (47/47 checks)`.
+Expected: `SELFTEST: PASS (44/44 checks)`.
 
 - [ ] **Step 5: Commit**
 
@@ -960,7 +960,7 @@ def run_cell(tool: dict, binary_abs: str, graph_abs: str, runs: int,
 - [ ] **Step 4: Run selftest to verify pass**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (54/54 checks)`.
+Expected: `SELFTEST: PASS (52/52 checks)`.
 
 - [ ] **Step 5: Commit**
 
@@ -1098,7 +1098,7 @@ def print_summary(doc: dict) -> None:
 - [ ] **Step 4: Run selftest to verify pass**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (60/60 checks)`.
+Expected: `SELFTEST: PASS (58/58 checks)`.
 
 - [ ] **Step 5: Commit**
 
@@ -1200,7 +1200,7 @@ def run_sweep(args: argparse.Namespace) -> int:
 - [ ] **Step 2: Verify selftest still passes (no regressions)**
 
 Run: `python3 scripts/run_sotas/sweep_gpu_sotas.py --selftest`
-Expected: `SELFTEST: PASS (60/60 checks)`.
+Expected: `SELFTEST: PASS (58/58 checks)`.
 
 - [ ] **Step 3: Verify argument validation works without a GPU**
 
@@ -1352,6 +1352,6 @@ every command has an expected result. ✔
 (`cmd/cwd/ignore_fail/retry`) consistent across `build_unit_steps`/
 `build_one_unit`; tool dict keys (`name/kind/unit/binrel/argv/colors/time/
 algo/usrc`) consistent across `REGISTRY`/parsers/`build_argv`/
-`build_json_doc`. Selftest counts are cumulative (5→24→33→47→54→60) and
+`build_json_doc`. Selftest counts are cumulative (5→21→31→44→52→58) and
 match each task's expected line. ✔
 ```
