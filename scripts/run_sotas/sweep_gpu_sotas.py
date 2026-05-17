@@ -185,6 +185,54 @@ REGISTRY: list[dict] = [
 ]
 
 
+def select_tools(only: Optional[str],
+                  exclude: Optional[str]) -> list[dict]:
+    """Subset REGISTRY (order preserved). Errors on unknown names."""
+    known = {t["name"] for t in REGISTRY}
+
+    def parse_csv(v: Optional[str]) -> list[str]:
+        return [x.strip() for x in v.split(",") if x.strip()] if v else []
+
+    only_l = parse_csv(only)
+    excl_l = parse_csv(exclude)
+    for n in only_l + excl_l:
+        if n not in known:
+            sys.stderr.write(
+                f"error: unknown tool name {n!r}; valid: "
+                f"{', '.join(t['name'] for t in REGISTRY)}\n")
+            raise SystemExit(2)
+    out = []
+    for t in REGISTRY:
+        if only_l and t["name"] not in only_l:
+            continue
+        if t["name"] in excl_l:
+            continue
+        out.append(t)
+    return out
+
+
+def needed_units(tools: list[dict]) -> set[str]:
+    return {t["unit"] for t in tools}
+
+
+def discover_datasets(dataset_dir: str, pattern: str,
+                      recursive: bool) -> list[str]:
+    base = os.path.abspath(dataset_dir)
+    if recursive:
+        hits = glob.glob(os.path.join(base, "**", pattern), recursive=True)
+    else:
+        hits = glob.glob(os.path.join(base, pattern))
+    return sorted(p for p in hits if os.path.isfile(p))
+
+
+def pick_best(runs: list[dict]) -> Optional[dict]:
+    valid = [r for r in runs if r.get("ok")]
+    if not valid:
+        return None
+    return sorted(valid,
+                  key=lambda r: (r["colors"], r["total_exec_ms"]))[0]
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
@@ -238,6 +286,7 @@ def run_selftest() -> int:
     results: list = []
     selftest_arch(results)
     selftest_parsers(results)
+    selftest_engine(results)
     failed = [r for r in results if not r[0]]
     for ok, name, got, expected in results:
         if not ok:
@@ -309,6 +358,48 @@ def selftest_parsers(results: list) -> None:
     _check(results, "registry size", len(REGISTRY), 12)
     _check(results, "registry names unique",
            len({t["name"] for t in REGISTRY}), 12)
+
+
+def selftest_engine(results: list) -> None:
+    all_names = [t["name"] for t in REGISTRY]
+
+    sel = select_tools(only="cuSL,ECL-GC", exclude=None)
+    _check(results, "only filter", [t["name"] for t in sel],
+           ["ECL-GC", "cuSL"])  # registry order preserved
+
+    sel2 = select_tools(only=None, exclude="data_wlc,data_pq")
+    _check(results, "exclude filter count", len(sel2), 10)
+    _check(results, "exclude removed", "data_wlc" in
+           [t["name"] for t in sel2], False)
+
+    sel3 = select_tools(only=None, exclude=None)
+    _check(results, "no filter = all", len(sel3), 12)
+
+    raised = False
+    try:
+        select_tools(only="NoSuchTool", exclude=None)
+    except SystemExit:
+        raised = True
+    _check(results, "unknown --only errors", raised, True)
+
+    _check(results, "needed units (cuSL only)",
+           sorted(needed_units(select_tools("cuSL", None))),
+           ["jp-series"])
+    _check(results, "needed units (kokkos_VB,data_pq)",
+           sorted(needed_units(select_tools("kokkos_VB,data_pq", None))),
+           ["csrcolor_data", "kokkos"])
+
+    runs = [
+        {"ok": True, "colors": 30, "total_exec_ms": 9.0},
+        {"ok": True, "colors": 28, "total_exec_ms": 12.0},
+        {"ok": True, "colors": 28, "total_exec_ms": 11.0},
+        {"ok": False, "colors": None, "total_exec_ms": None},
+    ]
+    best = pick_best(runs)
+    _check(results, "pick_best colors", best["colors"], 28)
+    _check(results, "pick_best tie->faster", best["total_exec_ms"], 11.0)
+    _check(results, "pick_best none", pick_best(
+        [{"ok": False, "colors": None, "total_exec_ms": None}]), None)
 
 
 def selftest_arch(results: list) -> None:
