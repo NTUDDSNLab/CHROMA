@@ -380,6 +380,9 @@ def assemble_run(tool: dict, returncode: Optional[int], stdout: str,
     if timeout_err is not None:
         return {"ok": False, "total_exec_ms": None, "colors": None,
                 "returncode": returncode, "error": timeout_err}
+    if returncode is None:
+        return {"ok": False, "total_exec_ms": None, "colors": None,
+                "returncode": None, "error": "internal: no returncode"}
     if returncode != 0:
         return {"ok": False, "total_exec_ms": None, "colors": None,
                 "returncode": returncode,
