@@ -4,7 +4,8 @@
 Default layout: datasets are split into multiple panels by total execution
 time so each panel has its own y-axis scale and small bars stay readable
 alongside europe_osm. Panels are laid out horizontally; within each panel
-datasets are sorted by edge count ascending. Each bar is a stack of CA
+datasets are sorted alphabetically by displayed name (deterministic
+across servers). Each bar is a stack of CA
 (bottom) / PA scan / PA decrement (top); each framework gets a distinct
 hatch. Two horizontal legends sit above the figure: stack colours and
 framework hatches. No title.
@@ -59,9 +60,9 @@ FRAMEWORK_LABELS = {
     #   -adw-d       same as -adw, with the on-device dynamic-θ
     #                 bumping controller enabled
     "cuSL_ELS_SDC":          r"CHROMA$^{*}$",
-    "cuSL_ELS_SDC_CTA":      r"CHROMA$^{*}$-cta",
-    "cuSL_ELS_SDC_CTA_S":    r"CHROMA$^{*}$-adw",
-    "cuSL_ELS_SDC_CTA_S_D":  r"CHROMA$^{*}$-adw-d",
+    "cuSL_ELS_SDC_CTA":      r"CHROMA$_{v2}$-b-cta",
+    "cuSL_ELS_SDC_CTA_S":    r"CHROMA$_{v2}$-b",
+    "cuSL_ELS_SDC_CTA_S_D":  r"CHROMA$_{v2}$",
     # Diagnostic SPLIT-mode variants reuse the same paper labels.
     "cuSL_ELS_SDC_SPLIT":        r"CHROMA$^{*}$",
     "cuSL_ELS_SDC_CTA_SPLIT":    r"CHROMA$^{*}$-cta",
@@ -116,7 +117,8 @@ def bin_datasets(datasets, frameworks, by_key, segments, bin_edges):
 
     bin_edges is a sorted ascending list of millisecond thresholds. Returns
     a list of (label, ds_list) pairs in display order; empty bins are
-    dropped. Within each bin, ds_list is sorted by edge count ascending.
+    dropped. Within each bin, ds_list is sorted alphabetically by the
+    displayed dataset name (deterministic across servers).
     """
     n_bins = len(bin_edges) + 1
     buckets = [[] for _ in range(n_bins)]
@@ -141,7 +143,13 @@ def bin_datasets(datasets, frameworks, by_key, segments, bin_edges):
     for label, ds_list in zip(labels, buckets):
         if not ds_list:
             continue
-        ds_list = sorted(ds_list, key=lambda d: d["edges"])
+        # Sort by the displayed dataset name, case-insensitively. This is
+        # fully deterministic regardless of which server produced the
+        # sweep JSON (edge-count order can tie / vary with .egr glob
+        # order across filesystems).
+        ds_list = sorted(
+            ds_list,
+            key=lambda d: DATASET_LABELS.get(d["name"], d["name"]).lower())
         out.append((label, ds_list))
     return out
 

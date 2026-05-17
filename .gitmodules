@@ -10,3 +10,12 @@
 [submodule "External/mt-KaHIP"]
 	path = External/mt-KaHIP
 	url = https://github.com/KaHIP/mt-KaHIP.git
+[submodule "External/Parallel-Graph-Colouring"]
+	path = External/Parallel-Graph-Colouring
+	url = https://github.com/Aj163/Parallel-Graph-Colouring.git
+[submodule "External/kokkos-kernels"]
+	path = External/kokkos-kernels
+	url = https://github.com/kokkos/kokkos-kernels.git
+[submodule "External/csrcolor"]
+	path = External/csrcolor
+	url = https://github.com/chenxuhao/csrcolor.git
