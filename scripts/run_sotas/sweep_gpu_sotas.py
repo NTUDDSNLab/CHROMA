@@ -239,6 +239,184 @@ def pick_best(runs: list[dict]) -> Optional[dict]:
                   key=lambda r: (r["colors"], r["total_exec_ms"]))[0]
 
 
+def build_argv(tool: dict, binary_abs: str, graph_abs: str) -> list[str]:
+    return [binary_abs] + [graph_abs if a == "{G}" else a
+                           for a in tool["argv"]]
+
+
+def build_unit_steps(unit: str, nn: str) -> list[dict]:
+    """Ordered build steps for a unit. nn = numeric arch (e.g. '89')."""
+    sm = f"sm_{nn}"
+    if unit == "csrcolor":
+        d = "External/csrcolor/src/csrcolor"
+        return [
+            {"cmd": ["make", "-C", d, "clean"], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["make", "-C", d, f"COMPUTECAPABILITY={sm}"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+        ]
+    if unit == "csrcolor_data":
+        d = "External/csrcolor/src/data"
+        return [
+            {"cmd": ["make", "-C", d, "clean"], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["make", "-C", d, f"COMPUTECAPABILITY={sm}"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+        ]
+    if unit == "kokkos":
+        b = "External/kokkos-kernels/build"
+        kk = "/home/chsieh45/local/kokkos-cuda"
+        return [
+            {"cmd": ["rm", "-rf", b], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["cmake", "-S", "External/kokkos-kernels", "-B", b,
+                     f"-DCMAKE_CXX_COMPILER={kk}/bin/nvcc_wrapper",
+                     f"-DKokkos_ROOT={kk}",
+                     "-DKokkosKernels_ENABLE_PERFTESTS=ON",
+                     "-DCMAKE_BUILD_TYPE=Release"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+            {"cmd": ["cmake", "--build", b, "--target", "graph_color",
+                     "-j"], "cwd": ".", "ignore_fail": False,
+             "retry": None},
+        ]
+    if unit == "pgc":
+        return [
+            {"cmd": ["nvcc", "-O3", "-std=c++14", f"-arch={sm}",
+                     "parallel.cu", "-o", "pgc_parallel"],
+             "cwd": "External/Parallel-Graph-Colouring",
+             "ignore_fail": False,
+             "retry": ["nvcc", "-O3", "-std=c++14", "parallel.cu",
+                       "-o", "pgc_parallel"]},
+        ]
+    if unit == "picasso":
+        b = "External/Picasso/build"
+        return [
+            {"cmd": ["rm", "-rf", b], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["cmake", "-S", "External/Picasso", "-B", b,
+                     f"-DCMAKE_CUDA_ARCHITECTURES={nn}",
+                     "-DCMAKE_BUILD_TYPE=Release"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+            {"cmd": ["cmake", "--build", b, "--target", "palcolEgrG",
+                     "-j"], "cwd": ".", "ignore_fail": False,
+             "retry": ["cmake", "--build", b, "-j"]},
+        ]
+    if unit == "ecl-gc":
+        return [
+            {"cmd": ["nvcc", "-O3", "-std=c++17", f"-arch={sm}",
+                     "ECL-GC_12.cu", "-o", "ecl-gc"],
+             "cwd": "External/ECL-GC", "ignore_fail": False,
+             "retry": None},
+        ]
+    if unit == "ecl-gc-r":
+        return [
+            {"cmd": ["nvcc", "-O3", "-std=c++17", f"-arch={sm}",
+                     "ECL-GC-ColorReduction_12.cu", "-o", "ecl-gc-r"],
+             "cwd": "External/ECL-GC", "ignore_fail": False,
+             "retry": None},
+        ]
+    if unit == "jp-series":
+        return [
+            {"cmd": ["make", "-C", "JP-Series", "clean"], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["make", "-C", "JP-Series", f"ARCH={sm}"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+        ]
+    raise ValueError(f"unknown build unit: {unit}")
+
+
+def _run_cmd(cmd: list[str], cwd_rel: str,
+             timeout: int) -> tuple[int, str]:
+    cwd = os.path.join(REPO_ROOT, cwd_rel)
+    try:
+        proc = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True,
+                               timeout=timeout, check=False)
+        return proc.returncode, proc.stdout
+    except subprocess.TimeoutExpired:
+        return 124, f"(timeout after {timeout}s)"
+    except OSError as e:
+        return 127, f"(exec error: {e})"
+
+
+def build_one_unit(unit: str, nn: str) -> dict:
+    start = time.perf_counter()
+    last_cmd = ""
+    for step in build_unit_steps(unit, nn):
+        last_cmd = " ".join(step["cmd"])
+        rc, out = _run_cmd(step["cmd"], step["cwd"], BUILD_TIMEOUT_SEC)
+        if rc != 0 and not step["ignore_fail"]:
+            if step.get("retry"):
+                last_cmd = " ".join(step["retry"])
+                rc, out = _run_cmd(step["retry"], step["cwd"],
+                                   BUILD_TIMEOUT_SEC)
+            if rc != 0:
+                return {"unit": unit, "ok": False, "cmd": last_cmd,
+                        "seconds": round(time.perf_counter() - start, 2),
+                        "error": out.strip()[-800:]}
+    return {"unit": unit, "ok": True, "cmd": last_cmd,
+            "seconds": round(time.perf_counter() - start, 2),
+            "error": None}
+
+
+def run_build_phase(units: set[str], nn: str) -> dict:
+    """unit -> build result dict. Built in a stable order."""
+    order = ["csrcolor", "csrcolor_data", "kokkos", "pgc", "picasso",
+             "ecl-gc", "ecl-gc-r", "jp-series"]
+    out = {}
+    for unit in order:
+        if unit in units:
+            print(f"[build] {unit} ...", flush=True)
+            res = build_one_unit(unit, nn)
+            print(f"[build] {unit}: "
+                  f"{'OK' if res['ok'] else 'FAIL'} "
+                  f"({res['seconds']}s)", flush=True)
+            out[unit] = res
+    return out
+
+
+def assemble_run(tool: dict, returncode: Optional[int], stdout: str,
+                 timeout_err: Optional[str]) -> dict:
+    if timeout_err is not None:
+        return {"ok": False, "total_exec_ms": None, "colors": None,
+                "returncode": returncode, "error": timeout_err}
+    if returncode != 0:
+        return {"ok": False, "total_exec_ms": None, "colors": None,
+                "returncode": returncode,
+                "error": f"exit code {returncode}: "
+                         f"{stdout.strip()[-400:]}"}
+    colors = parse_colors(tool, stdout)
+    ms = parse_time_ms(tool, stdout)
+    if colors is None or ms is None:
+        return {"ok": False, "total_exec_ms": ms, "colors": colors,
+                "returncode": returncode,
+                "error": "could not parse colors/time from output"}
+    return {"ok": True, "total_exec_ms": ms, "colors": colors,
+            "returncode": returncode, "error": None}
+
+
+def run_cell(tool: dict, binary_abs: str, graph_abs: str, runs: int,
+             timeout: int) -> list[dict]:
+    out = []
+    for _ in range(runs):
+        argv = build_argv(tool, binary_abs, graph_abs)
+        try:
+            proc = subprocess.run(argv, cwd=REPO_ROOT,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT, text=True,
+                                   timeout=timeout, check=False)
+            out.append(assemble_run(tool, proc.returncode,
+                                    proc.stdout, None))
+        except subprocess.TimeoutExpired:
+            out.append(assemble_run(tool, None, "",
+                                    f"timeout after {timeout}s"))
+            break  # skip remaining runs for this cell on timeout
+        except OSError as e:
+            out.append(assemble_run(tool, 127, "", f"exec error: {e}"))
+            break
+    return out
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
@@ -293,6 +471,8 @@ def run_selftest() -> int:
     selftest_arch(results)
     selftest_parsers(results)
     selftest_engine(results)
+    selftest_commands(results)
+    selftest_run(results)
     failed = [r for r in results if not r[0]]
     for ok, name, got, expected in results:
         if not ok:
@@ -404,6 +584,75 @@ def selftest_engine(results: list) -> None:
     _check(results, "pick_best tie->faster", best["total_exec_ms"], 11.0)
     _check(results, "pick_best none", pick_best(
         [{"ok": False, "colors": None, "total_exec_ms": None}]), None)
+
+
+def selftest_commands(results: list) -> None:
+    by_name = {t["name"]: t for t in REGISTRY}
+
+    _check(results, "argv csrcolor",
+           build_argv(by_name["csrcolor"], "/b/csr", "/g/x.egr"),
+           ["/b/csr", "/g/x.egr"])
+    _check(results, "argv Picasso",
+           build_argv(by_name["Picasso"], "/b/p", "/g/x.egr"),
+           ["/b/p", "--in", "/g/x.egr", "--target", "16", "--recurse",
+            "--order", "LIST", "--check"])
+    _check(results, "argv kokkos_VBBIT",
+           build_argv(by_name["kokkos_VBBIT"], "/b/k", "/g/x.egr"),
+           ["/b/k", "--cuda", "0", "--amtx", "/g/x.egr", "--algorithm",
+            "COLORING_VBBIT", "--repeat", "1"])
+    _check(results, "argv cuSL",
+           build_argv(by_name["cuSL"], "/b/jp", "/g/x.egr"),
+           ["/b/jp", "-f", "/g/x.egr", "-a", "cuSL"])
+
+    eg = build_unit_steps("ecl-gc", "89")
+    _check(results, "ecl-gc steps len", len(eg), 1)
+    _check(results, "ecl-gc cwd", eg[0]["cwd"], "External/ECL-GC")
+    _check(results, "ecl-gc cmd", eg[0]["cmd"],
+           ["nvcc", "-O3", "-std=c++17", "-arch=sm_89",
+            "ECL-GC_12.cu", "-o", "ecl-gc"])
+
+    pc = build_unit_steps("picasso", "90")
+    _check(results, "picasso cmake arch flag",
+           "-DCMAKE_CUDA_ARCHITECTURES=90" in pc[1]["cmd"], True)
+
+    cs = build_unit_steps("csrcolor", "86")
+    _check(results, "csrcolor clean ignore_fail",
+           cs[0]["ignore_fail"], True)
+    _check(results, "csrcolor make arch",
+           "COMPUTECAPABILITY=sm_86" in cs[1]["cmd"], True)
+
+    pg = build_unit_steps("pgc", "89")
+    _check(results, "pgc retry present", pg[0].get("retry") is not None,
+           True)
+    _check(results, "pgc retry drops -arch",
+           any(a.startswith("-arch=") for a in pg[0]["retry"]), False)
+
+    ko = build_unit_steps("kokkos", "89")
+    _check(results, "kokkos ignores arch (no sm_ in any cmd)",
+           any("sm_89" in " ".join(s["cmd"]) for s in ko), False)
+
+
+def selftest_run(results: list) -> None:
+    by_name = {t["name"]: t for t in REGISTRY}
+
+    good = ("runtime:    3.500000 ms\ncolors used: 40\n")
+    r = assemble_run(by_name["csrcolor"], 0, good, None)
+    _check(results, "assemble ok", r["ok"], True)
+    _check(results, "assemble colors", r["colors"], 40)
+    _check(results, "assemble ms", r["total_exec_ms"], 3.5)
+    _check(results, "assemble err none", r["error"], None)
+
+    r2 = assemble_run(by_name["csrcolor"], 1, "boom\n", None)
+    _check(results, "assemble nonzero rc not ok", r2["ok"], False)
+    _check(results, "assemble nonzero rc err",
+           "exit code 1" in r2["error"], True)
+
+    r3 = assemble_run(by_name["csrcolor"], 0, "no metrics here", None)
+    _check(results, "assemble unparseable not ok", r3["ok"], False)
+
+    r4 = assemble_run(by_name["csrcolor"], None, "", "timeout")
+    _check(results, "assemble timeout flagged",
+           r4["error"], "timeout")
 
 
 def selftest_arch(results: list) -> None:
