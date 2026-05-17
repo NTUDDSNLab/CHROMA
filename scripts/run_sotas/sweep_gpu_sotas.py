@@ -806,14 +806,15 @@ def selftest_run(results: list) -> None:
 
 def selftest_json(results: list) -> None:
     tools = select_tools("cuSL,ECL-GC-R", None)
-    builds = {"jp-series": {"unit": "jp-series", "ok": True,
+    builds = {"jp-series": {"unit": "jp-series", "ok": False,
                             "cmd": "make ...", "seconds": 9.0,
-                            "error": None},
+                            "error": "boom"},
               "ecl-gc-r": {"unit": "ecl-gc-r", "ok": False,
                            "cmd": "nvcc ...", "seconds": 1.0,
                            "error": "boom"}}
     avail = compute_availability(tools, builds, skip_build=False)
-    _check(results, "cuSL available", avail["cuSL"][0], True)
+    _check(results, "cuSL unavailable (build fail)", avail["cuSL"][0],
+           False)
     _check(results, "ECL-GC-R unavailable (build fail)",
            avail["ECL-GC-R"][0], False)
 
