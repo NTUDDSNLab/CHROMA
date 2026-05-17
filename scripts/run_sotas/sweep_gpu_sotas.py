@@ -420,6 +420,77 @@ def run_cell(tool: dict, binary_abs: str, graph_abs: str, runs: int,
     return out
 
 
+def compute_availability(tools: list[dict], builds: dict,
+                          skip_build: bool) -> dict:
+    """name -> (available: bool, reason: Optional[str])."""
+    out = {}
+    for t in tools:
+        binary_abs = os.path.join(REPO_ROOT, t["binrel"])
+        if not skip_build:
+            b = builds.get(t["unit"])
+            if b is not None and not b["ok"]:
+                out[t["name"]] = (False,
+                                  f"build failed ({t['unit']})")
+                continue
+        if not os.path.isfile(binary_abs):
+            out[t["name"]] = (False, f"binary missing: {t['binrel']}")
+            continue
+        out[t["name"]] = (True, None)
+    return out
+
+
+def build_json_doc(config: dict, builds: dict, tools: list[dict],
+                   availability: dict, datasets: list[str],
+                   rows: list[dict]) -> dict:
+    tool_meta = []
+    for t in tools:
+        avail, reason = availability.get(t["name"], (False, "unknown"))
+        tool_meta.append({
+            "name": t["name"], "kind": t["kind"],
+            "build_unit": t["unit"],
+            "binary": os.path.join(REPO_ROOT, t["binrel"]),
+            "algorithm": t["algo"], "time_unit_src": t["usrc"],
+            "available": avail, "unavailable_reason": reason,
+        })
+    return {
+        "config": config,
+        "builds": list(builds.values()),
+        "tools": tool_meta,
+        "datasets": datasets,
+        "rows": rows,
+    }
+
+
+def write_json_atomic(path: str, doc: dict) -> None:
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    fd, tmp = tempfile.mkstemp(
+        dir=os.path.dirname(os.path.abspath(path)), suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(doc, f, indent=2)
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+
+
+def print_summary(doc: dict) -> None:
+    print("\n=== build summary ===")
+    for b in doc["builds"]:
+        print(f"  {b['unit']:<14} {'OK' if b['ok'] else 'FAIL':<5} "
+              f"{b['seconds']}s")
+    if not doc["builds"]:
+        print("  (skipped --skip-build)")
+    print("=== sweep summary (ok cells / total) ===")
+    n_ds = len(doc["datasets"]) or 1
+    for tm in doc["tools"]:
+        ok = sum(1 for r in doc["rows"]
+                 if r["tool"] == tm["name"] and r["ok"])
+        flag = "" if tm["available"] else \
+            f"  [unavailable: {tm['unavailable_reason']}]"
+        print(f"  {tm['name']:<14} {ok}/{n_ds}{flag}")
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
@@ -476,6 +547,7 @@ def run_selftest() -> int:
     selftest_engine(results)
     selftest_commands(results)
     selftest_run(results)
+    selftest_json(results)
     failed = [r for r in results if not r[0]]
     for ok, name, got, expected in results:
         if not ok:
@@ -656,6 +728,37 @@ def selftest_run(results: list) -> None:
     r4 = assemble_run(by_name["csrcolor"], None, "", "timeout")
     _check(results, "assemble timeout flagged",
            r4["error"], "timeout")
+
+
+def selftest_json(results: list) -> None:
+    tools = select_tools("cuSL,ECL-GC-R", None)
+    builds = {"jp-series": {"unit": "jp-series", "ok": True,
+                            "cmd": "make ...", "seconds": 9.0,
+                            "error": None},
+              "ecl-gc-r": {"unit": "ecl-gc-r", "ok": False,
+                           "cmd": "nvcc ...", "seconds": 1.0,
+                           "error": "boom"}}
+    avail = compute_availability(tools, builds, skip_build=False)
+    _check(results, "cuSL available", avail["cuSL"][0], True)
+    _check(results, "ECL-GC-R unavailable (build fail)",
+           avail["ECL-GC-R"][0], False)
+
+    doc = build_json_doc(
+        config={"runs_per_cell": 1}, builds=builds, tools=tools,
+        availability=avail, datasets=["g1.egr"],
+        rows=[{"tool": "cuSL", "dataset": "g1.egr",
+               "dataset_path": "/d/g1.egr", "ok": True,
+               "best_total_exec_ms": 5.0, "best_colors": 7,
+               "runs": [], "error": None}])
+    _check(results, "json top keys",
+           sorted(doc.keys()),
+           ["builds", "config", "datasets", "rows", "tools"])
+    _check(results, "json builds is list", isinstance(doc["builds"],
+           list), True)
+    _check(results, "json tool meta has available",
+           doc["tools"][0]["available"] in (True, False), True)
+    _check(results, "json no ca/pa keys",
+           any(k in doc["rows"][0] for k in ("ca_ms", "pa_ms")), False)
 
 
 def selftest_arch(results: list) -> None:
