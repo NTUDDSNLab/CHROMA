@@ -69,6 +69,122 @@ def resolve_arch(cli_arch: Optional[str]) -> tuple[str, str]:
     return "89", "fallback"
 
 
+def _find_int(pattern: str, text: str) -> Optional[int]:
+    m = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
+    return int(m.group(1)) if m else None
+
+
+def _find_float(pattern: str, text: str) -> Optional[float]:
+    m = re.search(pattern, text, re.MULTILINE | re.IGNORECASE)
+    return float(m.group(1)) if m else None
+
+
+def parse_colors(tool: dict, text: str) -> Optional[int]:
+    return _find_int(tool["colors"], text)
+
+
+def parse_time_ms(tool: dict, text: str) -> Optional[float]:
+    spec = tool["time"]
+    kind = spec[0]
+    if kind == "ms":
+        return _find_float(spec[1], text)
+    if kind == "sec":
+        v = _find_float(spec[1], text)
+        return None if v is None else v * 1000.0
+    if kind == "sec_first":
+        for pat in spec[1]:
+            v = _find_float(pat, text)
+            if v is not None:
+                return v * 1000.0
+        return None
+    if kind == "sec_sum":
+        base = _find_float(spec[1], text)
+        if base is None:
+            return None
+        red = _find_float(spec[2], text)
+        return (base + (red or 0.0)) * 1000.0
+    raise ValueError(f"bad time spec: {spec!r}")
+
+
+# Time-format strings verified against each tool's source.
+_MS = r"^\s*runtime:\s+([0-9]+(?:\.[0-9]+)?)\s*ms"
+_COLORS_USED = r"^\s*colors used:\s*(\d+)"
+
+REGISTRY: list[dict] = [
+    dict(name="csrcolor", kind="sota", unit="csrcolor",
+         binrel="External/csrcolor/bin/csrcolor", argv=["{G}"],
+         colors=_COLORS_USED, time=("ms", _MS), algo=None, usrc="ms"),
+    dict(name="data_wlc", kind="sota", unit="csrcolor_data",
+         binrel="External/csrcolor/bin/data_wlc", argv=["{G}"],
+         colors=_COLORS_USED, time=("ms", _MS), algo=None, usrc="ms"),
+    dict(name="data_pq", kind="sota", unit="csrcolor_data",
+         binrel="External/csrcolor/bin/data_pq", argv=["{G}"],
+         colors=_COLORS_USED, time=("ms", _MS), algo=None, usrc="ms"),
+    dict(name="kokkos_VB", kind="sota", unit="kokkos",
+         binrel="External/kokkos-kernels/build/perf_test/graph/graph_color",
+         argv=["--cuda", "0", "--amtx", "{G}", "--algorithm",
+               "COLORING_VB", "--repeat", "1"],
+         colors=r"Num colors:\s*(\d+)",
+         time=("sec_first",
+               [r"Average time over \d+ trials:\s*([0-9.eE+\-]+)\s*sec",
+                r"^\s*Time:\s*([0-9.eE+\-]+)\s*sec"]),
+         algo="COLORING_VB", usrc="s"),
+    dict(name="kokkos_VBBIT", kind="sota", unit="kokkos",
+         binrel="External/kokkos-kernels/build/perf_test/graph/graph_color",
+         argv=["--cuda", "0", "--amtx", "{G}", "--algorithm",
+               "COLORING_VBBIT", "--repeat", "1"],
+         colors=r"Num colors:\s*(\d+)",
+         time=("sec_first",
+               [r"Average time over \d+ trials:\s*([0-9.eE+\-]+)\s*sec",
+                r"^\s*Time:\s*([0-9.eE+\-]+)\s*sec"]),
+         algo="COLORING_VBBIT", usrc="s"),
+    dict(name="pgc_parallel", kind="sota", unit="pgc",
+         binrel="External/Parallel-Graph-Colouring/pgc_parallel",
+         argv=["{G}"],
+         colors=r"Number of colours used \(chromatic number\)\s*==>\s*(\d+)",
+         time=("ms",
+               r"Time Taken \(Parallel\)\s*=\s*([0-9]+(?:\.[0-9]+)?)\s*ms"),
+         algo=None, usrc="ms"),
+    dict(name="Picasso", kind="sota", unit="picasso",
+         binrel="External/Picasso/build/apps/palcolEgrG",
+         argv=["--in", "{G}", "--target", "16", "--recurse",
+               "--order", "LIST", "--check"],
+         colors=r"^#\s*of Final colors:\s*(\d+)",
+         time=("sec", r"^\s*Pure Compute Time:\s*([0-9.eE+\-]+)\s*$"),
+         algo="target=16,recurse,LIST", usrc="s"),
+    dict(name="ECL-GC", kind="sota", unit="ecl-gc",
+         binrel="External/ECL-GC/ecl-gc", argv=["{G}"],
+         colors=_COLORS_USED,
+         time=("sec", r"^\s*runtime:\s+([0-9.]+)\s+s\s*$"),
+         algo=None, usrc="s"),
+    dict(name="ECL-GC-R", kind="sota", unit="ecl-gc-r",
+         binrel="External/ECL-GC/ecl-gc-r", argv=["{G}"],
+         colors=r"colors used after improvement heuristic:\s*(\d+)",
+         time=("sec_sum",
+               r"^\s*runtime:\s+([0-9.]+)\s+s\s*$",
+               r"^\s*reduce[12] runtime:\s+([0-9.]+)\s+s\s*$"),
+         algo=None, usrc="s"),
+    dict(name="cuSL", kind="jp", unit="jp-series",
+         binrel="JP-Series/JP-Series",
+         argv=["-f", "{G}", "-a", "cuSL"],
+         colors=r"colors\s+used:\s*(\d+)",
+         time=("ms", r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms"),
+         algo="cuSL", usrc="ms"),
+    dict(name="JP-ADG", kind="jp", unit="jp-series",
+         binrel="JP-Series/JP-Series",
+         argv=["-f", "{G}", "-a", "JP-ADG"],
+         colors=r"colors\s+used:\s*(\d+)",
+         time=("ms", r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms"),
+         algo="JP-ADG", usrc="ms"),
+    dict(name="JP-SLL", kind="jp", unit="jp-series",
+         binrel="JP-Series/JP-Series",
+         argv=["-f", "{G}", "-a", "JP-SLL"],
+         colors=r"colors\s+used:\s*(\d+)",
+         time=("ms", r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms"),
+         algo="JP-SLL", usrc="ms"),
+]
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
@@ -121,6 +237,7 @@ def _check(results: list, name: str, got, expected) -> None:
 def run_selftest() -> int:
     results: list = []
     selftest_arch(results)
+    selftest_parsers(results)
     failed = [r for r in results if not r[0]]
     for ok, name, got, expected in results:
         if not ok:
@@ -128,6 +245,70 @@ def run_selftest() -> int:
     print(f"SELFTEST: {'PASS' if not failed else 'FAIL'} "
           f"({len(results) - len(failed)}/{len(results)} checks)")
     return 0 if not failed else 1
+
+
+def selftest_parsers(results: list) -> None:
+    by_name = {t["name"]: t for t in REGISTRY}
+
+    csr = ("num_vertices 4039 num_edges 176468\n"
+           "runtime:    1.234560 ms\ncolors used: 72\ncorrect.\n")
+    _check(results, "csrcolor colors",
+           parse_colors(by_name["csrcolor"], csr), 72)
+    _check(results, "csrcolor ms",
+           parse_time_ms(by_name["csrcolor"], csr), 1.23456)
+
+    kok = ("algorithm: 3\n\nTime:0.005599 sec. Num colors:5 Num Phases:5\n"
+           "\t5 4 3 2 1 \nAverage time over 1 trials: 0.005599 sec.\n")
+    _check(results, "kokkos colors",
+           parse_colors(by_name["kokkos_VB"], kok), 5)
+    _check(results, "kokkos ms",
+           round(parse_time_ms(by_name["kokkos_VB"], kok), 4), 5.599)
+
+    pgc = ("Read .egr: nodes=4039, edges=176468\n\n"
+           "Number of colours used (chromatic number) ==> 70\n"
+           "Time Taken (Parallel) = 2.500000 ms\n")
+    _check(results, "pgc colors",
+           parse_colors(by_name["pgc_parallel"], pgc), 70)
+    _check(results, "pgc ms",
+           parse_time_ms(by_name["pgc_parallel"], pgc), 2.5)
+
+    pic = ("EGR Load Time: 0.0012\n***********Level 0*******\n"
+           "Num Nodes: 4039\nNum Colors: 15\nAssign Time: 1.30097\n"
+           "# of Final colors: 26\nPure Compute Time: 1.335427\n"
+           "GPU Copy/Alloc Time: 0.0123\n")
+    _check(results, "picasso colors",
+           parse_colors(by_name["Picasso"], pic), 26)
+    _check(results, "picasso ms (final, not per-level)",
+           round(parse_time_ms(by_name["Picasso"], pic), 3), 1335.427)
+
+    eclg = ("ECL-GC v1.2 (ECL-GC_12.cu)\ninput: facebook.egr\nnodes: 4039\n"
+            "runtime:    0.001234 s\nresult verification passed\n"
+            "colors used: 71\ncol  0: 100\n")
+    _check(results, "ecl-gc colors",
+           parse_colors(by_name["ECL-GC"], eclg), 71)
+    _check(results, "ecl-gc ms",
+           round(parse_time_ms(by_name["ECL-GC"], eclg), 4), 1.234)
+
+    eclr = ("colors used by the original heuristic : 71\n"
+            "runtime:    0.002000 s\nreduce1 runtime:    0.000500 s\n"
+            "colors used after improvement heuristic: 65\n")
+    _check(results, "ecl-gc-r colors (after improvement)",
+           parse_colors(by_name["ECL-GC-R"], eclr), 65)
+    _check(results, "ecl-gc-r ms (base+reduce)",
+           round(parse_time_ms(by_name["ECL-GC-R"], eclr), 4), 2.5)
+
+    jp = ("Input file: facebook.egr\nAlgorithm: cuSL\n"
+          "Resilient number: 0\nNodes: 4039\nEdges: 176468\n"
+          "runtime:    15.666178 ms\nresult verification passed\n"
+          "colors used: 72\n")
+    _check(results, "jp cuSL colors",
+           parse_colors(by_name["cuSL"], jp), 72)
+    _check(results, "jp cuSL ms",
+           parse_time_ms(by_name["cuSL"], jp), 15.666178)
+
+    _check(results, "registry size", len(REGISTRY), 12)
+    _check(results, "registry names unique",
+           len({t["name"] for t in REGISTRY}), 12)
 
 
 def selftest_arch(results: list) -> None:
