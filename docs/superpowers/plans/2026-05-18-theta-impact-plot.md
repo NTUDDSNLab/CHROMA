@@ -601,15 +601,29 @@ python3 scripts/plots/theta_impact/plot_theta_impact.py
 ```
 Expected: `scripts/plots/theta_impact/theta_impact_results.json` written with `data` for all three datasets (each `sweep` having keys `"0".."20"` and integer `cep_theta`/`aep_theta`), then `theta_impact.{pdf,png}` written. This is the heavy run (3 datasets × 21 θ × 5 + 6 predicted invocations); europe_osm small-θ runs dominate wall time — leave it running. If a θ cell times out it is recorded as an `error` gap and the sweep continues.
 
-- [ ] **Step 5: Commit the sweep log**
+- [ ] **Step 5: Commit the sweep record**
 
-The JSON and figure are gitignored on this branch (regenerable); commit only the sweep log as the reproducibility record:
+The JSON, PDF and PNG are gitignored on this branch (regenerable). The
+sweep stderr already contains every per-θ `colors/runtime_ms/iter` line
+plus the `CEP θ=… | AEP θ=…` line, so it is a sufficient reproducibility
+record. NOTE: `*.log` is also gitignored on this branch — store the
+record as a non-ignored `.md` file (a fenced log), not `.log`:
 ```bash
 git reset -q
 mkdir -p scripts/plots/theta_impact/logs
-cp /tmp/theta_impact_sweep.log scripts/plots/theta_impact/logs/theta_impact_sweep.log
-git add scripts/plots/theta_impact/logs/theta_impact_sweep.log
-git commit -m "scripts/plots/theta_impact: record full-sweep log
+{
+  echo "# θ-Impact full-sweep record"
+  echo
+  echo "\`scripts/plots/theta_impact/theta_impact.py\` (defaults: 3 datasets,"
+  echo "θ=0..20, 5 runs/θ keep-best) + \`plot_theta_impact.py\`. Generated"
+  echo "$(date -Is). JSON/PDF/PNG are gitignored & regenerable."
+  echo
+  echo '```'
+  cat /tmp/theta_impact_sweep.log
+  echo '```'
+} > scripts/plots/theta_impact/logs/theta_impact_sweep.md
+git add scripts/plots/theta_impact/logs/theta_impact_sweep.md
+git commit -m "scripts/plots/theta_impact: record full-sweep results
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```
