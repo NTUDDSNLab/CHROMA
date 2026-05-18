@@ -55,10 +55,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-# Same patterns scripts/grid_elastic.py uses against CHROMA verbose
-# single-run output ("Total runtime: <f> ms" / "colors used: <d>" /
-# "Iter count: <d>"); PRED_RE matches "EGC θ: <d> (Predicted)".
-RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
+# Patterns for CHROMA verbose single-run output. CHROMA prints phase
+# timings ("PA runtime:", "CA runtime:", ...) BEFORE the "Total
+# runtime:" line, so RUNTIME_RE is anchored to "Total runtime:" — a
+# bare "runtime:" (as grid_elastic.py uses) would match PA time first.
+# COLORS_RE / ITER_RE mirror grid_elastic.py; PRED_RE matches
+# "EGC θ: <d> (Predicted)".
+RUNTIME_RE = re.compile(r"Total\s+runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 ITER_RE = re.compile(r"Iter\s+count:\s*(\d+)", re.IGNORECASE)
 PRED_RE = re.compile(r"EGC[^:]*:\s*(\d+)\s*\(Predicted\)")

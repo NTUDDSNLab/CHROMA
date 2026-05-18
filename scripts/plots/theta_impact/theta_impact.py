@@ -23,6 +23,7 @@ Examples:
 from __future__ import annotations
 import argparse
 import json
+import os
 import re
 import struct
 import subprocess
@@ -31,10 +32,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-# Same patterns scripts/grid_elastic.py uses against CHROMA verbose
-# single-run output ("Total runtime: <f> ms" / "colors used: <d>" /
-# "Iter count: <d>"); PRED_RE matches "EGC θ: <d> (Predicted)".
-RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
+# Patterns for CHROMA verbose single-run output. CHROMA prints phase
+# timings ("PA runtime:", "CA runtime:", ...) BEFORE the "Total
+# runtime:" line, so RUNTIME_RE is anchored to "Total runtime:" — a
+# bare "runtime:" (as grid_elastic.py uses) would match PA time first.
+# COLORS_RE / ITER_RE mirror grid_elastic.py; PRED_RE matches
+# "EGC θ: <d> (Predicted)".
+RUNTIME_RE = re.compile(r"Total\s+runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 ITER_RE = re.compile(r"Iter\s+count:\s*(\d+)", re.IGNORECASE)
 PRED_RE = re.compile(r"EGC[^:]*:\s*(\d+)\s*\(Predicted\)")
@@ -120,9 +124,9 @@ def main() -> int:
     ap.add_argument("--out", default=str(here / "theta_impact_results.json"))
     args = ap.parse_args()
 
-    if not Path(args.binary).exists():
-        sys.exit(f"ERROR: CHROMA binary not found at {args.binary} "
-                 f"(build CHROMA/ with PRE_MODEL=1 for --predict)")
+    if not os.access(args.binary, os.X_OK):
+        sys.exit(f"ERROR: CHROMA binary not found or not executable at "
+                 f"{args.binary} (build CHROMA/ with PRE_MODEL=1 for --predict)")
     ds_dir = Path(args.dataset_dir)
 
     data = {}
@@ -177,7 +181,9 @@ def main() -> int:
         "runs": args.runs,
         "data": data,
     }
-    Path(args.out).write_text(json.dumps(out, indent=2))
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(out, indent=2))
     print(f"# wrote {args.out}", file=sys.stderr)
     return 0
 
