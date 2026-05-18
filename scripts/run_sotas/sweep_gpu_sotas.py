@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build-and-sweep 12 GPU graph-coloring tools over a directory of .egr graphs.
+"""Build-and-sweep 18 GPU graph-coloring tools over a directory of .egr graphs.
 
 Records total execution time (excluding graph loading) and color count per
 (tool, dataset) into one JSON. See
