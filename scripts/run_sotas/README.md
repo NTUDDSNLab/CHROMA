@@ -1,6 +1,6 @@
 # run_sotas — GPU SOTA + JP-Series coloring sweep
 
-`sweep_gpu_sotas.py` builds (fresh, by default) and sweeps 12 GPU
+`sweep_gpu_sotas.py` builds (fresh, by default) and sweeps 18 GPU
 graph-coloring tools over a directory of `.egr` graphs, writing one
 aggregated JSON of **total execution time (excluding graph loading)** and
 **color count** per `(tool, dataset)`.
