@@ -3,6 +3,9 @@
 *.o
 *.json
 *.txt
+*.log
+*.png
+*.pdf
 
 # Datasets
 Datasets/*.egr

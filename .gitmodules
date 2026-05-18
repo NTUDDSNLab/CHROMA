@@ -22,3 +22,6 @@
 [submodule "External/Picasso"]
 	path = External/Picasso
 	url = https://github.com/PunchShadow/Picasso.git
+[submodule "External/kokkos"]
+	path = External/kokkos
+	url = https://github.com/kokkos/kokkos.git
