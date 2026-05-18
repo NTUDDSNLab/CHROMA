@@ -30,7 +30,7 @@ import numpy as np
 SUBPLOT_TAGS = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
 COLOR_CYCLE = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B3",
                "#937860", "#DA8BC3", "#8C8C8C", "#CCB974", "#64B5CD"]
-CEP_COLOR, AEP_COLOR = "#D62728", "#1F77B4"
+CEP_COLOR, AEP_COLOR = "#D62728", "#17BECF"
 TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 10, 12, 9, 12
 
 
@@ -57,7 +57,8 @@ def main() -> int:
     theta_max = d["theta_max"]
     thetas = list(range(0, theta_max + 1))
 
-    fig, axes = plt.subplots(1, len(datasets), figsize=tuple(args.figsize))
+    fig, axes = plt.subplots(1, len(datasets), figsize=tuple(args.figsize),
+                             constrained_layout=True)
     if len(datasets) == 1:
         axes = [axes]
 
@@ -91,7 +92,7 @@ def main() -> int:
 
         cep = entry.get("cep_theta")
         aep = entry.get("aep_theta")
-        ymax = max([r for r in runtimes if r] or [1.0])
+        ymax = max([r for r in runtimes if r > 0] or [1.0])
         y0 = ymax * 0.02
         if cep is not None:
             ax.scatter([cep], [y0], marker="*", s=240, color=CEP_COLOR,
@@ -101,7 +102,7 @@ def main() -> int:
                        edgecolor="black", linewidth=0.5, zorder=5)
 
         ax.set_xlim(-0.6, theta_max + 0.6)
-        ax.set_xticks(range(0, theta_max + 1, 2))
+        ax.set_xticks(range(0, theta_max + 1, max(1, theta_max // 10)))
         ax.set_ylim(bottom=0.0)
         ax.tick_params(axis="both", labelsize=TICK_FS)
         ax2.tick_params(axis="y", labelsize=TICK_FS)
@@ -125,10 +126,10 @@ def main() -> int:
                 [], [], linestyle="none", marker="D", markersize=8,
                 color=AEP_COLOR, markeredgecolor="black",
                 label="AEP theta (v3_raw)"))
-        ax.legend(handles=handles, fontsize=LEGEND_FS, frameon=True,
-                  loc="upper right", handlelength=1.2, borderpad=0.4)
+        if handles:
+            ax.legend(handles=handles, fontsize=LEGEND_FS, frameon=True,
+                      loc="upper right", handlelength=1.2, borderpad=0.4)
 
-    fig.tight_layout()
     pdf = Path(args.out_prefix + ".pdf")
     png = Path(args.out_prefix + ".png")
     pdf.parent.mkdir(parents=True, exist_ok=True)
