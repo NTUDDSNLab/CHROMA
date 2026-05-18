@@ -55,10 +55,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
-# Same patterns scripts/grid_elastic.py uses against CHROMA verbose
-# single-run output ("Total runtime: <f> ms" / "colors used: <d>" /
-# "Iter count: <d>"); PRED_RE matches "EGC θ: <d> (Predicted)".
-RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
+# Patterns for CHROMA verbose single-run output. CHROMA prints phase
+# timings ("PA runtime:", "CA runtime:", ...) BEFORE the "Total
+# runtime:" line, so RUNTIME_RE is anchored to "Total runtime:" — a
+# bare "runtime:" (as grid_elastic.py uses) would match PA time first.
+# COLORS_RE / ITER_RE mirror grid_elastic.py; PRED_RE matches
+# "EGC θ: <d> (Predicted)".
+RUNTIME_RE = re.compile(r"Total\s+runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
 ITER_RE = re.compile(r"Iter\s+count:\s*(\d+)", re.IGNORECASE)
 PRED_RE = re.compile(r"EGC[^:]*:\s*(\d+)\s*\(Predicted\)")
@@ -313,7 +316,7 @@ import numpy as np
 SUBPLOT_TAGS = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
 COLOR_CYCLE = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B3",
                "#937860", "#DA8BC3", "#8C8C8C", "#CCB974", "#64B5CD"]
-CEP_COLOR, AEP_COLOR = "#D62728", "#1F77B4"
+CEP_COLOR, AEP_COLOR = "#D62728", "#17BECF"
 TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 10, 12, 9, 12
 
 
@@ -340,7 +343,8 @@ def main() -> int:
     theta_max = d["theta_max"]
     thetas = list(range(0, theta_max + 1))
 
-    fig, axes = plt.subplots(1, len(datasets), figsize=tuple(args.figsize))
+    fig, axes = plt.subplots(1, len(datasets), figsize=tuple(args.figsize),
+                             constrained_layout=True)
     if len(datasets) == 1:
         axes = [axes]
 
@@ -374,7 +378,7 @@ def main() -> int:
 
         cep = entry.get("cep_theta")
         aep = entry.get("aep_theta")
-        ymax = max([r for r in runtimes if r] or [1.0])
+        ymax = max([r for r in runtimes if r > 0] or [1.0])
         y0 = ymax * 0.02
         if cep is not None:
             ax.scatter([cep], [y0], marker="*", s=240, color=CEP_COLOR,
@@ -384,7 +388,7 @@ def main() -> int:
                        edgecolor="black", linewidth=0.5, zorder=5)
 
         ax.set_xlim(-0.6, theta_max + 0.6)
-        ax.set_xticks(range(0, theta_max + 1, 2))
+        ax.set_xticks(range(0, theta_max + 1, max(1, theta_max // 10)))
         ax.set_ylim(bottom=0.0)
         ax.tick_params(axis="both", labelsize=TICK_FS)
         ax2.tick_params(axis="y", labelsize=TICK_FS)
@@ -408,10 +412,10 @@ def main() -> int:
                 [], [], linestyle="none", marker="D", markersize=8,
                 color=AEP_COLOR, markeredgecolor="black",
                 label="AEP theta (v3_raw)"))
-        ax.legend(handles=handles, fontsize=LEGEND_FS, frameon=True,
-                  loc="upper right", handlelength=1.2, borderpad=0.4)
+        if handles:
+            ax.legend(handles=handles, fontsize=LEGEND_FS, frameon=True,
+                      loc="upper right", handlelength=1.2, borderpad=0.4)
 
-    fig.tight_layout()
     pdf = Path(args.out_prefix + ".pdf")
     png = Path(args.out_prefix + ".png")
     pdf.parent.mkdir(parents=True, exist_ok=True)
@@ -546,7 +550,9 @@ iteration-count line, ★ CEP / ◆ AEP near y=0.
 - [ ] **Step 2: Sanity check the README renders the two-step workflow**
 
 Run: `grep -c -E 'theta_impact\.py|plot_theta_impact\.py' scripts/plots/theta_impact/README.md`
-Expected: a count ≥ 4 (both scripts referenced in prereqs + both steps).
+Expected: a count ≥ 3 (Step 1 sweep cmd + Step 2 plot cmd + the Notes
+smoke cmd). The Prerequisites section names the `CHROMA/CHROMA` binary
+and the dataset paths, not the `.py` scripts.
 
 - [ ] **Step 3: Commit**
 
@@ -595,15 +601,29 @@ python3 scripts/plots/theta_impact/plot_theta_impact.py
 ```
 Expected: `scripts/plots/theta_impact/theta_impact_results.json` written with `data` for all three datasets (each `sweep` having keys `"0".."20"` and integer `cep_theta`/`aep_theta`), then `theta_impact.{pdf,png}` written. This is the heavy run (3 datasets × 21 θ × 5 + 6 predicted invocations); europe_osm small-θ runs dominate wall time — leave it running. If a θ cell times out it is recorded as an `error` gap and the sweep continues.
 
-- [ ] **Step 5: Commit the sweep log**
+- [ ] **Step 5: Commit the sweep record**
 
-The JSON and figure are gitignored on this branch (regenerable); commit only the sweep log as the reproducibility record:
+The JSON, PDF and PNG are gitignored on this branch (regenerable). The
+sweep stderr already contains every per-θ `colors/runtime_ms/iter` line
+plus the `CEP θ=… | AEP θ=…` line, so it is a sufficient reproducibility
+record. NOTE: `*.log` is also gitignored on this branch — store the
+record as a non-ignored `.md` file (a fenced log), not `.log`:
 ```bash
 git reset -q
 mkdir -p scripts/plots/theta_impact/logs
-cp /tmp/theta_impact_sweep.log scripts/plots/theta_impact/logs/theta_impact_sweep.log
-git add scripts/plots/theta_impact/logs/theta_impact_sweep.log
-git commit -m "scripts/plots/theta_impact: record full-sweep log
+{
+  echo "# θ-Impact full-sweep record"
+  echo
+  echo "\`scripts/plots/theta_impact/theta_impact.py\` (defaults: 3 datasets,"
+  echo "θ=0..20, 5 runs/θ keep-best) + \`plot_theta_impact.py\`. Generated"
+  echo "$(date -Is). JSON/PDF/PNG are gitignored & regenerable."
+  echo
+  echo '```'
+  cat /tmp/theta_impact_sweep.log
+  echo '```'
+} > scripts/plots/theta_impact/logs/theta_impact_sweep.md
+git add scripts/plots/theta_impact/logs/theta_impact_sweep.md
+git commit -m "scripts/plots/theta_impact: record full-sweep results
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```

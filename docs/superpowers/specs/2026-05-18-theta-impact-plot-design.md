@@ -48,8 +48,10 @@ For each dataset in `as-skitter`, `cit-Patents`, `europe_osm`:
    `{color, runtime_ms, iter_count}`.
    - Parse the verbose single-run output with the same regexes
      `scripts/grid_elastic.py` uses:
-     - runtime: `re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.I)`
-       (matches CHROMA's `Total runtime: <f> ms`)
+     - runtime: `re.compile(r"Total\s+runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.I)`
+       (anchored — CHROMA prints "PA runtime:"/"CA runtime:" before
+       the "Total runtime:" line, so an unanchored "runtime:" would
+       match PA time first)
      - colors: `re.compile(r"colors\s+used:\s*(\d+)", re.I)`
      - iter: `re.compile(r"Iter\s+count:\s*(\d+)", re.I)`
    - Reuse grid_elastic's keep-best rule:
