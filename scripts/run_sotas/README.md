@@ -31,7 +31,10 @@ e.g. `--only 'CHROMA*'`.
 `--dataset-dir` is required. `--arch` is numeric (e.g. `89` → `sm_89`;
 Picasso → `-DCMAKE_CUDA_ARCHITECTURES=89`); default = `nvidia-smi`
 auto-detect. `kokkos` arch is fixed by the prebuilt Kokkos (sm_86) and is
-not overridden. Build-all-fresh by default; `--skip-build` reuses existing
+not overridden; the Kokkos install prefix used by the kokkos build unit is
+`--kokkos-root PATH` (else `$KOKKOS_ROOT`, else a built-in default) — set it
+when running as a different user/machine where the default path is invalid.
+Build-all-fresh by default; `--skip-build` reuses existing
 binaries. Any build/run failure is recorded in the JSON and the sweep
 continues.
 

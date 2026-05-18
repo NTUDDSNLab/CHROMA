@@ -137,9 +137,34 @@ No pytest (parent constraint) — `--selftest` is the mechanism. Acceptance
    line doesn't break parsing); `best_total_exec_ms` corresponds to
    `Total runtime:` (not the smaller `PA`/`CA runtime:` values) by
    eyeballing one raw run vs the recorded value.
-4. Regression: full `--selftest` → `SELFTEST: PASS (61/61 checks)`, exit 0;
+4. Regression: full `--selftest` → `SELFTEST: PASS` exit 0 (61/61 at this
+   addendum; later 63/63 after the fix-(A) follow-up, see §8);
    the other 12 tools + kokkos behavior unchanged.
 
 Implementation proceeds via the established subagent-driven loop
 (implementer → spec-compliance review → code-quality review) and scoped
 commits (concurrent-session-safe pathspec discipline) — same as the parent.
+
+## 8. Follow-up — fix (A): configurable Kokkos root
+
+The `kokkos` build unit hardcoded `/home/chsieh45/local/kokkos-cuda`
+(`Kokkos_ROOT` + `nvcc_wrapper`), so running the sweep as a different
+user/machine made the `kokkos` unit fail instantly (cmake can't find that
+prefix). Fix (A) makes the Kokkos install prefix overridable, default
+unchanged:
+
+- New constant `KOKKOS_ROOT_DEFAULT = "/home/chsieh45/local/kokkos-cuda"`.
+- `resolve_kokkos_root(cli)` precedence: `--kokkos-root` flag > env
+  `$KOKKOS_ROOT` > `KOKKOS_ROOT_DEFAULT`.
+- New CLI flag `--kokkos-root PATH` (default `None`).
+- `kokkos_root` threaded as an optional param (default
+  `KOKKOS_ROOT_DEFAULT`, behavior-preserving for all existing callers and
+  the selftest) through `build_unit_steps` → `build_one_unit` →
+  `run_build_phase`; `run_sweep` resolves it and records it in
+  `config.kokkos_root`.
+- Only the `kokkos` build unit uses it; all other units unchanged.
+- Selftest: +2 deterministic checks (override propagates to
+  `-DKokkos_ROOT`/`-DCMAKE_CXX_COMPILER`; default preserved) → new total
+  **`SELFTEST: PASS (63/63 checks)`** (61 + 2).
+- Out of scope: CHROMA/csrcolor build failures in a foreign environment are
+  separate (their nvcc/arch), not addressed by (A).

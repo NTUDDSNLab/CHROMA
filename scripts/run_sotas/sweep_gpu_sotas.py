@@ -24,6 +24,7 @@ from typing import Optional
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 BUILD_TIMEOUT_SEC = 3600  # hard cap per build-unit (cmake/make can run minutes)
+KOKKOS_ROOT_DEFAULT = "/home/chsieh45/local/kokkos-cuda"
 
 
 def normalize_arch(value: str) -> str:
@@ -279,7 +280,15 @@ def build_argv(tool: dict, binary_abs: str, graph_abs: str) -> list[str]:
                            for a in tool["argv"]]
 
 
-def build_unit_steps(unit: str, nn: str) -> list[dict]:
+def resolve_kokkos_root(cli_value: Optional[str]) -> str:
+    """Kokkos install prefix: --kokkos-root > $KOKKOS_ROOT > built-in."""
+    if cli_value:
+        return cli_value
+    return os.environ.get("KOKKOS_ROOT") or KOKKOS_ROOT_DEFAULT
+
+
+def build_unit_steps(unit: str, nn: str,
+                     kokkos_root: str = KOKKOS_ROOT_DEFAULT) -> list[dict]:
     """Ordered build steps for a unit. nn = numeric arch (e.g. '89')."""
     sm = f"sm_{nn}"
     if unit == "csrcolor":
@@ -300,7 +309,7 @@ def build_unit_steps(unit: str, nn: str) -> list[dict]:
         ]
     if unit == "kokkos":
         b = "External/kokkos-kernels/build"
-        kk = "/home/chsieh45/local/kokkos-cuda"
+        kk = kokkos_root
         return [
             {"cmd": ["rm", "-rf", b], "cwd": ".",
              "ignore_fail": True, "retry": None},
@@ -382,10 +391,11 @@ def _run_cmd(cmd: list[str], cwd_rel: str,
         return 127, f"(exec error: {e})"
 
 
-def build_one_unit(unit: str, nn: str) -> dict:
+def build_one_unit(unit: str, nn: str,
+                   kokkos_root: str = KOKKOS_ROOT_DEFAULT) -> dict:
     start = time.perf_counter()
     last_cmd = ""
-    for step in build_unit_steps(unit, nn):
+    for step in build_unit_steps(unit, nn, kokkos_root):
         last_cmd = " ".join(step["cmd"])
         rc, out = _run_cmd(step["cmd"], step["cwd"], BUILD_TIMEOUT_SEC)
         if rc != 0 and not step["ignore_fail"]:
@@ -402,7 +412,8 @@ def build_one_unit(unit: str, nn: str) -> dict:
             "error": None}
 
 
-def run_build_phase(units: set[str], nn: str) -> dict:
+def run_build_phase(units: set[str], nn: str,
+                    kokkos_root: str = KOKKOS_ROOT_DEFAULT) -> dict:
     """unit -> build result dict. Built in a stable order."""
     order = ["csrcolor", "csrcolor_data", "kokkos", "pgc", "picasso",
              "ecl-gc", "ecl-gc-r", "jp-series", "chroma"]
@@ -410,7 +421,7 @@ def run_build_phase(units: set[str], nn: str) -> dict:
     for unit in order:
         if unit in units:
             print(f"[build] {unit} ...", flush=True)
-            res = build_one_unit(unit, nn)
+            res = build_one_unit(unit, nn, kokkos_root)
             print(f"[build] {unit}: "
                   f"{'OK' if res['ok'] else 'FAIL'} "
                   f"({res['seconds']}s)", flush=True)
@@ -565,6 +576,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--arch", default=None,
                    help="Numeric compute capability, e.g. 89 (also accepts "
                         "sm_89). Default: nvidia-smi auto-detect.")
+    p.add_argument("--kokkos-root", default=None,
+                   help="Kokkos install prefix for the kokkos build unit "
+                        "(default: $KOKKOS_ROOT, else the built-in path).")
     p.add_argument("--skip-build", action="store_true",
                    help="Reuse existing binaries; skip the build phase.")
     p.add_argument("--only", default=None,
@@ -593,12 +607,13 @@ def run_sweep(args: argparse.Namespace) -> int:
         return 2
 
     nn, arch_source = resolve_arch(args.arch)
+    kokkos_root = resolve_kokkos_root(args.kokkos_root)
     tools = select_tools(args.only, args.exclude)
     units = needed_units(tools)
 
     builds: dict = {}
     if not args.skip_build:
-        builds = run_build_phase(units, nn)
+        builds = run_build_phase(units, nn, kokkos_root)
 
     availability = compute_availability(tools, builds, args.skip_build)
 
@@ -641,6 +656,7 @@ def run_sweep(args: argparse.Namespace) -> int:
         "timeout_sec": args.timeout,
         "arch": int(nn) if nn.isdigit() else nn,
         "arch_source": arch_source,
+        "kokkos_root": kokkos_root,
         "skip_build": args.skip_build,
         "tools": [t["name"] for t in tools],
     }
@@ -823,6 +839,15 @@ def selftest_commands(results: list) -> None:
     ko = build_unit_steps("kokkos", "89")
     _check(results, "kokkos ignores arch (no sm_ in any cmd)",
            any("sm_89" in " ".join(s["cmd"]) for s in ko), False)
+
+    kko = build_unit_steps("kokkos", "89", "/opt/kk")[1]["cmd"]
+    _check(results, "kokkos --kokkos-root override",
+           "-DKokkos_ROOT=/opt/kk" in kko
+           and "-DCMAKE_CXX_COMPILER=/opt/kk/bin/nvcc_wrapper" in kko,
+           True)
+    _check(results, "kokkos default root preserved",
+           "-DKokkos_ROOT=" + KOKKOS_ROOT_DEFAULT
+           in build_unit_steps("kokkos", "89")[1]["cmd"], True)
 
 
 def selftest_run(results: list) -> None:
