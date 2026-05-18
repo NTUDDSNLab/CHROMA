@@ -550,7 +550,9 @@ iteration-count line, ★ CEP / ◆ AEP near y=0.
 - [ ] **Step 2: Sanity check the README renders the two-step workflow**
 
 Run: `grep -c -E 'theta_impact\.py|plot_theta_impact\.py' scripts/plots/theta_impact/README.md`
-Expected: a count ≥ 4 (both scripts referenced in prereqs + both steps).
+Expected: a count ≥ 3 (Step 1 sweep cmd + Step 2 plot cmd + the Notes
+smoke cmd). The Prerequisites section names the `CHROMA/CHROMA` binary
+and the dataset paths, not the `.py` scripts.
 
 - [ ] **Step 3: Commit**
 
