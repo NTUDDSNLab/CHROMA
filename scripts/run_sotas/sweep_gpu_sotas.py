@@ -282,7 +282,7 @@ def build_argv(tool: dict, binary_abs: str, graph_abs: str) -> list[str]:
 
 def resolve_kokkos_root(cli_value: Optional[str]) -> str:
     """Kokkos install prefix: --kokkos-root > $KOKKOS_ROOT > built-in."""
-    if cli_value:
+    if cli_value:  # argparse None / "" fall through to env then default
         return cli_value
     return os.environ.get("KOKKOS_ROOT") or KOKKOS_ROOT_DEFAULT
 
@@ -309,13 +309,12 @@ def build_unit_steps(unit: str, nn: str,
         ]
     if unit == "kokkos":
         b = "External/kokkos-kernels/build"
-        kk = kokkos_root
         return [
             {"cmd": ["rm", "-rf", b], "cwd": ".",
              "ignore_fail": True, "retry": None},
             {"cmd": ["cmake", "-S", "External/kokkos-kernels", "-B", b,
-                     f"-DCMAKE_CXX_COMPILER={kk}/bin/nvcc_wrapper",
-                     f"-DKokkos_ROOT={kk}",
+                     f"-DCMAKE_CXX_COMPILER={kokkos_root}/bin/nvcc_wrapper",
+                     f"-DKokkos_ROOT={kokkos_root}",
                      "-DKokkosKernels_ENABLE_PERFTESTS=ON",
                      "-DCMAKE_BUILD_TYPE=Release"],
              "cwd": ".", "ignore_fail": False, "retry": None},
@@ -577,8 +576,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
                    help="Numeric compute capability, e.g. 89 (also accepts "
                         "sm_89). Default: nvidia-smi auto-detect.")
     p.add_argument("--kokkos-root", default=None,
-                   help="Kokkos install prefix for the kokkos build unit "
-                        "(default: $KOKKOS_ROOT, else the built-in path).")
+                   help="Kokkos install prefix for the kokkos build unit; "
+                        "default: $KOKKOS_ROOT, else "
+                        + KOKKOS_ROOT_DEFAULT + ".")
     p.add_argument("--skip-build", action="store_true",
                    help="Reuse existing binaries; skip the build phase.")
     p.add_argument("--only", default=None,
