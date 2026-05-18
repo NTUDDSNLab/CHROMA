@@ -5,11 +5,20 @@ graph-coloring tools over a directory of `.egr` graphs, writing one
 aggregated JSON of **total execution time (excluding graph loading)** and
 **color count** per `(tool, dataset)`.
 
-## Tools (12)
+## Tools (18)
 
 SOTA (`External/`): `csrcolor`, `data_wlc`, `data_pq`, `kokkos_VB`,
 `kokkos_VBBIT`, `pgc_parallel`, `Picasso`, `ECL-GC`, `ECL-GC-R`.
 JP-Series: `cuSL`, `JP-ADG`, `JP-SLL`.
+CHROMA (`CHROMA/`, one `make PRE_MODEL=1` binary): `CHROMA` (-a 0),
+`CHROMA+` (-a 1), `CHROMA*` (-a 1 -p --predict-model v0_paper),
+`CHROMA_v2-b-adw` (-a 1 -p --predict-model v3 --no-dynamic-theta),
+`CHROMA_v2-b` (-a 10 -p --predict-model v3 --no-dynamic-theta),
+`CHROMA_v2` (-a 10 -p --predict-model v3).
+
+Note: the `*` / `+` in CHROMA names are valid in JSON and in the
+`--only`/`--exclude` CSV, but quote them in a shell to avoid globbing,
+e.g. `--only 'CHROMA*'`.
 
 ## Usage
 

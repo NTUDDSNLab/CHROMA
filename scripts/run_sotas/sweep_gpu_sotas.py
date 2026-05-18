@@ -109,6 +109,7 @@ def parse_time_ms(tool: dict, text: str) -> Optional[float]:
 # Time-format strings verified against each tool's source.
 _MS = r"^\s*runtime:\s+([0-9]+(?:\.[0-9]+)?)\s*ms"
 _COLORS_USED = r"^\s*colors used:\s*(\d+)"
+_CHROMA_TOTAL_MS = r"^\s*Total runtime:\s+([0-9]+(?:\.[0-9]+)?)\s*ms"
 
 REGISTRY: list[dict] = [
     dict(name="csrcolor", kind="sota", unit="csrcolor",
@@ -182,6 +183,40 @@ REGISTRY: list[dict] = [
          colors=r"colors\s+used:\s*(\d+)",
          time=("ms", r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms"),
          algo="JP-SLL", usrc="ms"),
+    dict(name="CHROMA", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "0"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=0", usrc="ms"),
+    dict(name="CHROMA+", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "1"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=1", usrc="ms"),
+    dict(name="CHROMA*", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "1", "-p",
+               "--predict-model", "v0_paper"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=1,predict=v0_paper", usrc="ms"),
+    dict(name="CHROMA_v2-b-adw", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "1", "-p",
+               "--predict-model", "v3", "--no-dynamic-theta"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=1,predict=v3,no-dyn-theta", usrc="ms"),
+    dict(name="CHROMA_v2-b", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "10", "-p",
+               "--predict-model", "v3", "--no-dynamic-theta"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=10,predict=v3,no-dyn-theta", usrc="ms"),
+    dict(name="CHROMA_v2", kind="chroma", unit="chroma",
+         binrel="CHROMA/CHROMA",
+         argv=["-f", "{G}", "-a", "10", "-p",
+               "--predict-model", "v3"],
+         colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
+         algo="a=10,predict=v3", usrc="ms"),
 ]
 
 
@@ -322,6 +357,14 @@ def build_unit_steps(unit: str, nn: str) -> list[dict]:
             {"cmd": ["make", "-C", "JP-Series", f"ARCH={sm}"],
              "cwd": ".", "ignore_fail": False, "retry": None},
         ]
+    if unit == "chroma":
+        return [
+            {"cmd": ["make", "-C", "CHROMA", "clean"], "cwd": ".",
+             "ignore_fail": True, "retry": None},
+            {"cmd": ["make", "-C", "CHROMA", "PRE_MODEL=1",
+                     f"ARCH={sm}"],
+             "cwd": ".", "ignore_fail": False, "retry": None},
+        ]
     raise ValueError(f"unknown build unit: {unit}")
 
 
@@ -362,7 +405,7 @@ def build_one_unit(unit: str, nn: str) -> dict:
 def run_build_phase(units: set[str], nn: str) -> dict:
     """unit -> build result dict. Built in a stable order."""
     order = ["csrcolor", "csrcolor_data", "kokkos", "pgc", "picasso",
-             "ecl-gc", "ecl-gc-r", "jp-series"]
+             "ecl-gc", "ecl-gc-r", "jp-series", "chroma"]
     out = {}
     for unit in order:
         if unit in units:
@@ -622,6 +665,7 @@ def run_selftest() -> int:
     selftest_commands(results)
     selftest_run(results)
     selftest_json(results)
+    selftest_chroma(results)
     failed = [r for r in results if not r[0]]
     for ok, name, got, expected in results:
         if not ok:
@@ -690,9 +734,9 @@ def selftest_parsers(results: list) -> None:
     _check(results, "jp cuSL ms",
            parse_time_ms(by_name["cuSL"], jp), 15.666178)
 
-    _check(results, "registry size", len(REGISTRY), 12)
+    _check(results, "registry size", len(REGISTRY), 18)
     _check(results, "registry names unique",
-           len({t["name"] for t in REGISTRY}), 12)
+           len({t["name"] for t in REGISTRY}), 18)
 
 
 def selftest_engine(results: list) -> None:
@@ -701,12 +745,12 @@ def selftest_engine(results: list) -> None:
            ["ECL-GC", "cuSL"])  # registry order preserved
 
     sel2 = select_tools(only=None, exclude="data_wlc,data_pq")
-    _check(results, "exclude filter count", len(sel2), 10)
+    _check(results, "exclude filter count", len(sel2), 16)
     _check(results, "exclude removed", "data_wlc" in
            [t["name"] for t in sel2], False)
 
     sel3 = select_tools(only=None, exclude=None)
-    _check(results, "no filter = all", len(sel3), 12)
+    _check(results, "no filter = all", len(sel3), 18)
 
     raised = False
     try:
@@ -834,6 +878,28 @@ def selftest_json(results: list) -> None:
            doc["tools"][0]["available"] in (True, False), True)
     _check(results, "json no ca/pa keys",
            any(k in doc["rows"][0] for k in ("ca_ms", "pa_ms")), False)
+
+
+def selftest_chroma(results: list) -> None:
+    by_name = {t["name"]: t for t in REGISTRY}
+
+    # Realistic CHROMA single-run stdout (reduction default-off; a predict
+    # config also prints the "EGC θ: N (Predicted)" info line).
+    out = ("EGC θ: 12 (Predicted)\nFinish PA\nFinish CA\n"
+           "PA runtime: 5.000000 ms\nCA runtime: 2.000000 ms\n"
+           "Post reduction runtime: 0.000000 ms\n"
+           "Total runtime: 7.000000 ms\n"
+           "colors before reduction: 50\ncolors after reduction: 50\n"
+           "color reduction delta: 0\nresult verification passed\n"
+           "colors used: 50\nIter count: 7\n")
+    _check(results, "chroma colors (colors used, not reduction lines)",
+           parse_colors(by_name["CHROMA"], out), 50)
+    _check(results, "chroma ms (Total runtime, not PA/CA)",
+           parse_time_ms(by_name["CHROMA"], out), 7.0)
+    _check(results, "argv CHROMA_v2-b-adw",
+           build_argv(by_name["CHROMA_v2-b-adw"], "/b/c", "/g/x.egr"),
+           ["/b/c", "-f", "/g/x.egr", "-a", "1", "-p",
+            "--predict-model", "v3", "--no-dynamic-theta"])
 
 
 def selftest_arch(results: list) -> None:
