@@ -45,3 +45,26 @@ continues.
 tool metadata) + `datasets` (names) + `rows` (flat list, one per
 `tool × dataset`: `best_total_exec_ms`, `best_colors`, `runs[]`, `error`).
 No CA/PA columns. Default out: `scripts/run_sotas/gpu_sotas_results.json`.
+
+## CPU sweep (`sweep_cpu_sotas.py`)
+
+Sibling of `sweep_gpu_sotas.py` (same engine/JSON schema), independent of
+it. Sweeps the 6 CPU coloring configs:
+
+- Sequential (`CPU/Sequential/`, build unit `cpu_sequential`): `DSatur`
+  (cpu_Dstura), `Greedy` (cpu_greedy), `JP-SL^M` (cpu_SDL).
+- Parallel (`CPU/Parallel/`, build unit `cpu_parallel`, OpenMP): `JP-SL^A`
+  (cpu_SL), `ADG` (cpu_ADG), `SLL` (cpu_SLL).
+
+    python3 scripts/run_sotas/sweep_cpu_sotas.py --dataset-dir Datasets/test
+    python3 scripts/run_sotas/sweep_cpu_sotas.py --dataset-dir Datasets/test --threads 16
+    python3 scripts/run_sotas/sweep_cpu_sotas.py --selftest
+
+`--threads N` is the OpenMP thread count passed to the 3 parallel configs
+(default: all logical cores, `os.cpu_count()`); the 3 sequential configs
+ignore it. No `--arch` (CPU/g++). `--dataset-dir` is required.
+Build-all-fresh by default (`make -C CPU/Sequential` / `CPU/Parallel`);
+`--skip-build` reuses existing binaries; any build/run failure is recorded
+and the sweep continues. Default out:
+`scripts/run_sotas/cpu_sotas_results.json`. `^` in `JP-SL^M`/`JP-SL^A` is a
+valid JSON key and bash-safe in `--only`/`--exclude`.
