@@ -3,6 +3,7 @@
  * build : g++ -O3 -std=c++17 -fopenmp ADG_noCSV.cpp -o adg_cpu
  *********************************************************************/
  #include <algorithm>
+ #include <cstring>
  #include <sys/time.h>
  #include "ECLgraph.h"
  #include <bits/stdc++.h>
@@ -426,28 +427,60 @@ printf("ADG finished: iterations = %d\n", iter);
  
  int main(int argc, char** argv)
  {
-   if (argc != 3) {
-     fprintf(stderr, "USAGE: %s <graph.egr> <threads>\n", argv[0]);
-     return 0;
+   const char* dump_path  = nullptr;
+   const char* graph_path = nullptr;
+   int threads = 0;
+   int pos = 0;
+   for (int i = 1; i < argc; ++i) {
+     if (strcmp(argv[i], "--dump") == 0) {
+       if (i + 1 >= argc) { fprintf(stderr, "ERROR: --dump needs a path\n"); return 1; }
+       dump_path = argv[++i];
+     } else if (strncmp(argv[i], "--dump=", 7) == 0) {
+       dump_path = argv[i] + 7;
+     } else if (pos == 0) { graph_path = argv[i]; pos = 1; }
+     else if (pos == 1) { threads = atoi(argv[i]); pos = 2; }
    }
-   int threads = atoi(argv[2]);
-   if (threads < 1) { fprintf(stderr, "threads must be >= 1\n"); return 0; }
- 
-   ECLgraph g = readECLgraph(argv[1]);
+   if (graph_path == nullptr || threads < 1) {
+     fprintf(stderr, "USAGE: %s <graph.egr> <threads> [--dump <path>]\n", argv[0]);
+     return 1;
+   }
+
+   ECLgraph g = readECLgraph(graph_path);
    printf("nodes=%d edges=%d avgDeg=%.2f\n", g.nodes, g.edges, 1.0 * g.edges / g.nodes);
- 
+
    std::vector<int> priority(g.nodes, 0);
- 
+
      int* const color = new int [g.nodes];
      int* const nlist2 = new int [g.edges];
      int* const posscol = new int [g.nodes];
      int* const posscol2 = new int [g.edges / BPI + 1];
      int* const wl = new int [g.nodes];
-   
+
      CPUTimer timer;
      timer.start();
      compute_ADG(g, threads, priority,0);
- 
+
+     if (dump_path != nullptr) {
+       FILE* df = fopen(dump_path, "wb");
+       if (df == nullptr) {
+         fprintf(stderr, "ERROR: cannot open %s for write\n", dump_path);
+         delete[] color; delete[] nlist2; delete[] posscol; delete[] posscol2; delete[] wl;
+         return 1;
+       }
+       size_t w = fwrite(priority.data(), sizeof(int), (size_t)g.nodes, df);
+       if (w != (size_t)g.nodes) {
+         fclose(df);
+         remove(dump_path);
+         fprintf(stderr, "ERROR: short write to %s\n", dump_path);
+         delete[] color; delete[] nlist2; delete[] posscol; delete[] posscol2; delete[] wl;
+         return 1;
+       }
+       fclose(df);
+       printf("dumped %d priorities to %s\n", g.nodes, dump_path);
+       delete[] color; delete[] nlist2; delete[] posscol; delete[] posscol2; delete[] wl;
+       return 0;
+     }
+
      printf("Start init \n");
  
      const int wlsize = init(g.nodes, g.edges, g.nindex, g.nlist, nlist2, posscol, posscol2, color, wl, threads,priority.data());
