@@ -31,7 +31,7 @@ SUBPLOT_TAGS = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
 # Single colour family, sequential shades: darker = more colors used.
 BAR_CMAP = "Oranges"
 CEP_COLOR, AEP_COLOR = "#D62728", "#17BECF"
-TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 10, 12, 9, 12
+TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 13, 15, 12, 15
 
 
 def main() -> int:
@@ -42,7 +42,7 @@ def main() -> int:
     ap.add_argument("--in", dest="in_path",
                     default=str(here / "theta_impact_results.json"))
     ap.add_argument("--out-prefix", default=str(here / "theta_impact"))
-    ap.add_argument("--figsize", nargs=2, type=float, default=[15.0, 4.0],
+    ap.add_argument("--figsize", nargs=2, type=float, default=[15.0, 3.0],
                     metavar=("W", "H"))
     args = ap.parse_args()
 
