@@ -28,8 +28,8 @@ import matplotlib.lines as mlines
 import numpy as np
 
 SUBPLOT_TAGS = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
-COLOR_CYCLE = ["#4C72B0", "#DD8452", "#55A868", "#C44E52", "#8172B3",
-               "#937860", "#DA8BC3", "#8C8C8C", "#CCB974", "#64B5CD"]
+# Single colour family, sequential shades: darker = more colors used.
+BAR_CMAP = "Blues"
 CEP_COLOR, AEP_COLOR = "#D62728", "#17BECF"
 TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 10, 12, 9, 12
 
@@ -81,9 +81,16 @@ def main() -> int:
                 iters.append(ic if ic is not None else np.nan)
                 colors.append(cell["color"])
 
+        # uniq ascending: fewest colors -> lightest, most -> darkest.
         uniq = sorted({c for c in colors if c is not None})
-        cmap = {c: COLOR_CYCLE[i % len(COLOR_CYCLE)]
-                for i, c in enumerate(uniq)}
+        cm = matplotlib.colormaps[BAR_CMAP]
+        if len(uniq) <= 1:
+            shades = [cm(0.65)] * len(uniq)
+        else:
+            lo, hi = 0.30, 0.95
+            shades = [cm(lo + (hi - lo) * i / (len(uniq) - 1))
+                      for i in range(len(uniq))]
+        cmap = {c: s for c, s in zip(uniq, shades)}
         bar_colors = [cmap.get(c, "#CCCCCC") for c in colors]
         ax.bar(thetas, runtimes, width=0.8, color=bar_colors,
                edgecolor="black", linewidth=0.4, zorder=2)
