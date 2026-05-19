@@ -29,7 +29,7 @@ import numpy as np
 
 SUBPLOT_TAGS = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
 # Single colour family, sequential shades: darker = more colors used.
-BAR_CMAP = "Blues"
+BAR_CMAP = "Oranges"
 CEP_COLOR, AEP_COLOR = "#D62728", "#17BECF"
 TICK_FS, LABEL_FS, LEGEND_FS, TAG_FS = 10, 12, 9, 12
 
@@ -102,10 +102,10 @@ def main() -> int:
         ymax = max([r for r in runtimes if r > 0] or [1.0])
         y0 = ymax * 0.02
         if cep is not None:
-            ax.scatter([cep], [y0], marker="*", s=240, color=CEP_COLOR,
+            ax.scatter([cep], [y0], marker="D", s=90, color=CEP_COLOR,
                        edgecolor="black", linewidth=0.5, zorder=5)
         if aep is not None:
-            ax.scatter([aep], [y0], marker="D", s=90, color=AEP_COLOR,
+            ax.scatter([aep], [y0], marker="*", s=240, color=AEP_COLOR,
                        edgecolor="black", linewidth=0.5, zorder=5)
 
         ax.set_xlim(-0.6, theta_max + 0.6)
@@ -125,14 +125,14 @@ def main() -> int:
                    for c in uniq]
         if cep is not None:
             handles.append(mlines.Line2D(
-                [], [], linestyle="none", marker="*", markersize=13,
+                [], [], linestyle="none", marker="D", markersize=8,
                 color=CEP_COLOR, markeredgecolor="black",
-                label="CEP theta (v0_paper)"))
+                label=r"CEP $\theta$"))
         if aep is not None:
             handles.append(mlines.Line2D(
-                [], [], linestyle="none", marker="D", markersize=8,
+                [], [], linestyle="none", marker="*", markersize=13,
                 color=AEP_COLOR, markeredgecolor="black",
-                label="AEP theta (v3_raw)"))
+                label=r"AEP $\theta$"))
         if handles:
             ax.legend(handles=handles, fontsize=LEGEND_FS, frameon=True,
                       loc="upper right", handlelength=1.2, borderpad=0.4)
