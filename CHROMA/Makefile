@@ -39,7 +39,7 @@ SRCS := globals.cu chroma_utils.cu color_reduction.cu ECLGC.cu PA.cu PA_split.cu
 CPP_SRCS := ../lib/io/graph.cpp ../lib/io/mmio.cpp ../lib/io/graph_features.cpp
 
 ifeq ($(PRE_MODEL), 1)
-	CPP_SRCS += ../model/model.cpp ../model/model_v0_paper.cpp
+	CPP_SRCS += ../model/model.cpp ../model/model_v0_paper.cpp ../model/model_v2_skew.cpp
 	DC_FLAGS += -DPRED_MODEL -I../model
 	CXXFLAGS += -DPRED_MODEL -I../model
 	ifeq ($(DYNAMIC_THETA), 1)

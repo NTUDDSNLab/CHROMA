@@ -200,24 +200,26 @@ REGISTRY: list[dict] = [
                "--predict-model", "v0_paper"],
          colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
          algo="a=1,predict=v0_paper", usrc="ms"),
+    # {PM} = --predict-model value, filled from the CLI (default v3).
+    # CHROMA* stays pinned to v0_paper (paper baseline).
     dict(name="CHROMA_v2-b-adw", kind="chroma", unit="chroma",
          binrel="CHROMA/CHROMA",
          argv=["-f", "{G}", "-a", "1", "-p",
-               "--predict-model", "v3", "--no-dynamic-theta"],
+               "--predict-model", "{PM}", "--no-dynamic-theta"],
          colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
-         algo="a=1,predict=v3,no-dyn-theta", usrc="ms"),
+         algo="a=1,predict={PM},no-dyn-theta", usrc="ms"),
     dict(name="CHROMA_v2-b", kind="chroma", unit="chroma",
          binrel="CHROMA/CHROMA",
          argv=["-f", "{G}", "-a", "10", "-p",
-               "--predict-model", "v3", "--no-dynamic-theta"],
+               "--predict-model", "{PM}", "--no-dynamic-theta"],
          colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
-         algo="a=10,predict=v3,no-dyn-theta", usrc="ms"),
+         algo="a=10,predict={PM},no-dyn-theta", usrc="ms"),
     dict(name="CHROMA_v2", kind="chroma", unit="chroma",
          binrel="CHROMA/CHROMA",
          argv=["-f", "{G}", "-a", "10", "-p",
-               "--predict-model", "v3"],
+               "--predict-model", "{PM}"],
          colors=_COLORS_USED, time=("ms", _CHROMA_TOTAL_MS),
-         algo="a=10,predict=v3", usrc="ms"),
+         algo="a=10,predict={PM}", usrc="ms"),
 ]
 
 
@@ -273,6 +275,18 @@ def pick_best(runs: list[dict]) -> Optional[dict]:
         return None
     return sorted(valid,
                   key=lambda r: (r["colors"], r["total_exec_ms"]))[0]
+
+
+def resolve_predict_model(tools: list[dict], model: str) -> list[dict]:
+    """Fill the {PM} placeholder in argv/algo; no-op for other tools."""
+    out = []
+    for t in tools:
+        t = dict(t)
+        t["argv"] = [a.replace("{PM}", model) for a in t["argv"]]
+        if t["algo"]:
+            t["algo"] = t["algo"].replace("{PM}", model)
+        out.append(t)
+    return out
 
 
 def build_argv(tool: dict, binary_abs: str, graph_abs: str) -> list[str]:
@@ -581,6 +595,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
                         + KOKKOS_ROOT_DEFAULT + ".")
     p.add_argument("--skip-build", action="store_true",
                    help="Reuse existing binaries; skip the build phase.")
+    p.add_argument("--predict-model", default="v3",
+                   help="Model name passed to the CHROMA_v2* tools' "
+                        "--predict-model flag (default v3). CHROMA* stays "
+                        "pinned to v0_paper.")
     p.add_argument("--only", default=None,
                    help="Comma-separated tool names to include.")
     p.add_argument("--exclude", default=None,
@@ -608,7 +626,8 @@ def run_sweep(args: argparse.Namespace) -> int:
 
     nn, arch_source = resolve_arch(args.arch)
     kokkos_root = resolve_kokkos_root(args.kokkos_root)
-    tools = select_tools(args.only, args.exclude)
+    tools = resolve_predict_model(select_tools(args.only, args.exclude),
+                                  args.predict_model)
     units = needed_units(tools)
 
     builds: dict = {}
@@ -658,6 +677,7 @@ def run_sweep(args: argparse.Namespace) -> int:
         "arch_source": arch_source,
         "kokkos_root": kokkos_root,
         "skip_build": args.skip_build,
+        "predict_model": args.predict_model,
         "tools": [t["name"] for t in tools],
     }
     doc = build_json_doc(config, builds, tools, availability,
@@ -921,10 +941,16 @@ def selftest_chroma(results: list) -> None:
            parse_colors(by_name["CHROMA"], out), 50)
     _check(results, "chroma ms (Total runtime, not PA/CA)",
            parse_time_ms(by_name["CHROMA"], out), 7.0)
-    _check(results, "argv CHROMA_v2-b-adw",
-           build_argv(by_name["CHROMA_v2-b-adw"], "/b/c", "/g/x.egr"),
+    v2 = resolve_predict_model([by_name["CHROMA_v2-b-adw"]], "v9")[0]
+    _check(results, "argv CHROMA_v2-b-adw (predict-model resolved)",
+           build_argv(v2, "/b/c", "/g/x.egr"),
            ["/b/c", "-f", "/g/x.egr", "-a", "1", "-p",
-            "--predict-model", "v3", "--no-dynamic-theta"])
+            "--predict-model", "v9", "--no-dynamic-theta"])
+    _check(results, "resolved algo string",
+           v2["algo"], "a=1,predict=v9,no-dyn-theta")
+    star = resolve_predict_model([by_name["CHROMA*"]], "v9")[0]
+    _check(results, "CHROMA* pinned to v0_paper",
+           star["argv"], by_name["CHROMA*"]["argv"])
 
 
 def selftest_arch(results: list) -> None:

@@ -13,10 +13,15 @@
 #include <algorithm>
 #include "chroma_utils.cuh"
 #include <cstring>
+#include <chrono>
 #include "graph.h"
 #include "graph_features.h"
 #ifdef PRED_MODEL
 #include "scaler.h"
+#include "scaler_skew.h"
+#include <thrust/execution_policy.h>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/transform_reduce.h>
 #endif
 
 // namespace cg = cooperative_groups;
@@ -24,6 +29,36 @@
 #ifdef PRED_MODEL
 extern double score(double *input);
 extern double score_v0_paper(double *input);   // paper-era 200-tree RF on raw V/E
+extern double score_skew(double *input);       // 4-feat RF: V, E, d, gamma1
+
+// p-th central moment term of deg(v) = nindex[v+1] - nindex[v].
+struct CentralMomentTerm {
+    const int* nidx;
+    double mu;
+    int p;
+    __host__ __device__ double operator()(int v) const {
+        double c = (double)(nidx[v + 1] - nidx[v]) - mu;
+        return p == 2 ? c * c : c * c * c;
+    }
+};
+
+// Moment-based degree skewness gamma1 = m3 / m2^1.5, reduced on the GPU.
+// Takes nindex already resident on the device — the HtoD copy is charged to
+// the coloring run (which needs nindex anyway), not to feature extraction.
+// ponytail: caller does its own copy; reuse allocAndInit's nidx_d if the
+// duplicate transfer ever matters — allocAndInit needs θ first.
+static double gpu_gamma1(const int* d_nidx, int nodes, int edges) {
+    if (nodes == 0) return 0.0;
+    const double mu = (double)edges / nodes;       // Σdeg == edges for .egr
+    thrust::counting_iterator<int> first(0), last(nodes);
+    double m2 = thrust::transform_reduce(thrust::device, first, last,
+                    CentralMomentTerm{d_nidx, mu, 2}, 0.0,
+                    thrust::plus<double>()) / nodes;
+    double m3 = thrust::transform_reduce(thrust::device, first, last,
+                    CentralMomentTerm{d_nidx, mu, 3}, 0.0,
+                    thrust::plus<double>()) / nodes;
+    return m2 > 0.0 ? m3 / pow(m2, 1.5) : 0.0;
+}
 #endif
 
 
@@ -60,7 +95,7 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
-    std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF) or v0_paper (paper-era RF on V/E only)\n";
+    std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF), skew (4-feat RF: V, E, d, gamma1; GPU-reduced), or v0_paper (paper-era RF on V/E only)\n";
     std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
     std::cout << "  --no-dynamic-theta        Disable on-device θ controller (opt-out, ablation)\n";
     std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 5)\n";
@@ -246,8 +281,9 @@ int main(int argc, char* argv[])
         } else if (strcmp(argv[i], "--predict-model") == 0) {
             if (i + 1 >= argc) { std::cerr << "Error: --predict-model needs a name (v3|v0_paper).\n"; return 1; }
             predict_model = argv[++i];
-            if (predict_model != "v3" && predict_model != "v0_paper") {
-                std::cerr << "Error: --predict-model must be 'v3' or 'v0_paper' (got '"
+            if (predict_model != "v3" && predict_model != "v0_paper" &&
+                predict_model != "skew") {
+                std::cerr << "Error: --predict-model must be 'v3', 'skew' or 'v0_paper' (got '"
                           << predict_model << "').\n";
                 return 1;
             }
@@ -384,19 +420,50 @@ int main(int argc, char* argv[])
     // If prediction model is enabled, compute graph features and call score().
     // Deployed model is v3: 9 features (V, E, d, s, R, GI, H_er, kcore, assort)
     // with floor + score-shift policy embedded in scaler.h.
+    double feature_ms = 0.0;  // CPU-side feature extraction + inference time (--predict only)
     #ifdef PRED_MODEL
+    int* skew_nidx_d = nullptr;
     if (use_predicted_elastic) {
-        GraphFeatures f = compute_graph_features(g);
+        if (predict_model == "skew") {
+            // Context init and the nindex HtoD copy are costs the coloring
+            // run pays anyway — keep them out of the feature timer.
+            cudaFree(0);
+            cudaMalloc(&skew_nidx_d, (size_t)(g.nodes + 1) * sizeof(int));
+            cudaMemcpy(skew_nidx_d, g.nindex,
+                       (size_t)(g.nodes + 1) * sizeof(int),
+                       cudaMemcpyHostToDevice);
+        }
+        auto feat_beg = std::chrono::steady_clock::now();
         if (predict_model == "v0_paper") {
             // Paper-era 200-tree RF on raw V/E only (pre-T21 reference baseline).
             // No scaler, no score-shift, no floor — round() to match original deployment.
             double v0_input[2] = { (double)g.nodes, (double)g.edges };
             fuzzy_number = (int)round(score_v0_paper(v0_input));
+        } else if (predict_model == "skew") {
+            // 4-feat RF on raw V, E, d, gamma1 — the only computed feature is
+            // gamma1, reduced on the GPU; no CPU feature pass (no kcore).
+            double skew_input[chroma_predictor_skew::FEATURE_COUNT] = {
+                (double)g.nodes, (double)g.edges,
+                (double)g.edges / g.nodes,
+                gpu_gamma1(skew_nidx_d, g.nodes, g.edges) };
+            double score_result = score_skew(skew_input)
+                                + chroma_predictor_skew::SCORE_SHIFT;
+            fuzzy_number = chroma_predictor_skew::USE_FLOOR
+                           ? (int)floor(score_result)
+                           : (int)round(score_result);
         } else {
+            GraphFeatures f = compute_graph_features(g);
+            // train.py standardises features only for linear/svr; tree models
+            // are trained on raw values, so scaling here would push every
+            // input below the raw-scale split thresholds and collapse the
+            // prediction to a near-constant θ.
+            const bool standardise = strcmp(chroma_predictor::MODEL_CLASS, "rf") != 0;
             double input[chroma_predictor::FEATURE_COUNT];
             for (int i = 0; i < chroma_predictor::FEATURE_COUNT; ++i) {
-                input[i] = (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
-                         /  chroma_predictor::SCALER_STD[i];
+                input[i] = standardise
+                         ? (f.as_array[i] - chroma_predictor::SCALER_MEAN[i])
+                           / chroma_predictor::SCALER_STD[i]
+                         : f.as_array[i];
             }
             double score_result = score(input) + chroma_predictor::SCORE_SHIFT;
             fuzzy_number = chroma_predictor::USE_FLOOR
@@ -404,6 +471,9 @@ int main(int argc, char* argv[])
                            : (int)round(score_result);
         }
         if (fuzzy_number < 0) fuzzy_number = 0;
+        feature_ms = std::chrono::duration<double, std::milli>(
+                         std::chrono::steady_clock::now() - feat_beg).count();
+        if (skew_nidx_d != nullptr) cudaFree(skew_nidx_d);
     }
     #else
     if (use_predicted_elastic) {
@@ -708,6 +778,11 @@ int main(int argc, char* argv[])
             printf("Post reduction runtime: %.6f ms\n",
                    reduction_stats.runtime_sec * 1000);
             printf("Total runtime: %.6f ms\n", total_runtime * 1000);
+            if (use_predicted_elastic) {
+                printf("Feature computation runtime: %.6f ms\n", feature_ms);
+                printf("Total runtime (w/ features): %.6f ms\n",
+                       total_runtime * 1000 + feature_ms);
+            }
             printf("colors before reduction: %d\n", reduction_stats.colors_before);
             printf("colors after reduction: %d\n", reduction_stats.colors_after);
             printf("color reduction delta: %d\n",
@@ -758,6 +833,10 @@ int main(int argc, char* argv[])
         printf("CA time     : %s\n", stats_f(ca_ms_arr).c_str());
         printf("Reduce time : %s\n", stats_f(reduce_ms_arr).c_str());
         printf("Total time  : %s\n", stats_f(total_ms_arr).c_str());
+        if (use_predicted_elastic) {
+            // Features are computed once, before the run loop — a single number.
+            printf("Feature time: %.3f ms (once, not in Total)\n", feature_ms);
+        }
         printf("colors used : %s\n", stats_i(colors_arr).c_str());
         printf("iter count  : %s\n", stats_i(iter_count_arr).c_str());
     }
