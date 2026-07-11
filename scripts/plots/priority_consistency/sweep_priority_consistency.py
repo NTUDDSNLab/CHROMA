@@ -16,10 +16,11 @@ Framework -> priority source:
   CHROMA+         pa_dumper -a cuSL_ELS_SDC    -e 0
   CHROMA*         CHROMA -a cuSL_ELS_SDC --predict --predict-model v0_paper
                          --no-dynamic-theta
-  CHROMA_v2_raw   CHROMA -a cuSL_ELS_SDC --predict --predict-model v3
+  CHROMA_v2_raw   CHROMA -a cuSL_ELS_SDC --predict --predict-model <M>
                          --no-dynamic-theta   (offline predictor only)
-  CHROMA_v2_bump  CHROMA -a cuSL_ELS_SDC --predict --predict-model v3
+  CHROMA_v2_bump  CHROMA -a cuSL_ELS_SDC --predict --predict-model <M>
                          (predictor + on-device dynamic-theta bumping)
+  <M> = --predict-model (default v3); CHROMA* stays pinned to v0_paper.
 
 Examples:
     python3 scripts/plots/priority_consistency/sweep_priority_consistency.py
@@ -123,6 +124,9 @@ def main():
     ap.add_argument("--dataset-dir", default=str(repo / "Datasets" / "EGR"))
     ap.add_argument("--threads",     type=int, default=32,
                     help="OpenMP threads for cpu_SL (JP-SL^A reference)")
+    ap.add_argument("--predict-model", default="v3",
+                    help="Model for CHROMA_v2_raw/CHROMA_v2_bump (e.g. v3, "
+                         "skew); CHROMA* stays pinned to v0_paper.")
     ap.add_argument("--frameworks",  nargs="+", default=DEFAULT_FRAMEWORKS)
     ap.add_argument("--only",        nargs="*", default=None)
     ap.add_argument("--skip",        nargs="*", default=[])
@@ -133,6 +137,9 @@ def main():
         repo / "scripts" / "plots" / "priority_consistency" /
         "consistency_results.json"))
     args = ap.parse_args()
+
+    for fw in ("CHROMA_v2_raw", "CHROMA_v2_bump"):
+        FRAMEWORKS[fw][1]["model"] = args.predict_model
 
     bad = [fw for fw in args.frameworks if fw not in FRAMEWORKS]
     if bad:
@@ -244,6 +251,7 @@ def main():
     summary = {
         "baseline":   "JP-SL^A",
         "frameworks": list(args.frameworks),
+        "predict_model": args.predict_model,
         "datasets":   datasets_meta,
         "rows":       rows,
     }

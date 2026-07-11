@@ -6,8 +6,8 @@ For each dataset (default: as-skitter, cit-Patents, europe_osm):
     keep the best run (min colors, tie -> min runtime); record
     {color, runtime_ms, iter_count}.
   - CEP θ: one run  CHROMA -a cuSL_ELS_SDC --predict --predict-model v0_paper
-  - AEP θ: one run  CHROMA -a cuSL_ELS_SDC --predict --predict-model v3
-                           --no-dynamic-theta
+  - AEP θ: one run  CHROMA -a cuSL_ELS_SDC --predict --predict-model <M>
+                           --no-dynamic-theta   (<M> = --predict-model, default v3)
 Writes theta_impact_results.json consumed by plot_theta_impact.py.
 
 The `EGC θ: N (Predicted)` line reports the predictor's *initial* θ
@@ -117,6 +117,9 @@ def main() -> int:
     ap.add_argument("--datasets", nargs="+",
                     default=["as-skitter", "cit-Patents", "europe_osm"])
     ap.add_argument("--algo", default="cuSL_ELS_SDC")
+    ap.add_argument("--predict-model", default="v3",
+                    help="Model for the AEP θ run (e.g. v3, skew); "
+                         "CEP stays pinned to v0_paper.")
     ap.add_argument("--theta-max", type=int, default=20)
     ap.add_argument("--runs", type=int, default=5)
     ap.add_argument("--timeout", type=int, default=1200,
@@ -167,7 +170,7 @@ def main() -> int:
         cep, cep_err = predicted_theta(args.binary, egr, args.algo,
                                        "v0_paper", False, args.timeout)
         aep, aep_err = predicted_theta(args.binary, egr, args.algo,
-                                       "v3", True, args.timeout)
+                                       args.predict_model, True, args.timeout)
         entry["cep_theta"] = cep
         entry["aep_theta"] = aep
         print(f"# {stem:16s} CEP θ={cep} ({cep_err or 'ok'}) | "
@@ -179,6 +182,7 @@ def main() -> int:
         "algo": args.algo,
         "theta_max": args.theta_max,
         "runs": args.runs,
+        "predict_model": args.predict_model,
         "data": data,
     }
     out_path = Path(args.out)
