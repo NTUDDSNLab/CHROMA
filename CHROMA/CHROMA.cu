@@ -19,6 +19,7 @@
 #ifdef PRED_MODEL
 #include "scaler.h"
 #include "scaler_skew.h"
+#include "scaler_3feat.h"
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform_reduce.h>
@@ -30,6 +31,7 @@
 extern double score(double *input);
 extern double score_v0_paper(double *input);   // paper-era 200-tree RF on raw V/E
 extern double score_skew(double *input);       // 4-feat RF: V, E, d, gamma1
+extern double score_3feat(double *input);      // 3-feat RF: V, E, d (header-only)
 
 // p-th central moment term of deg(v) = nindex[v+1] - nindex[v].
 struct CentralMomentTerm {
@@ -95,7 +97,7 @@ void print_help(const char* program_name) {
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
-    std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF), skew (4-feat RF: V, E, d, gamma1; GPU-reduced), or v0_paper (paper-era RF on V/E only)\n";
+    std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF), skew (4-feat RF: V, E, d, gamma1; GPU-reduced), 3feat (V, E, d; zero-cost), or v0_paper (paper-era RF on V/E only)\n";
     std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
     std::cout << "  --no-dynamic-theta        Disable on-device θ controller (opt-out, ablation)\n";
     std::cout << "  --dynamic-K <int>         Sample interval, iterations between checks (default 5)\n";
@@ -282,8 +284,8 @@ int main(int argc, char* argv[])
             if (i + 1 >= argc) { std::cerr << "Error: --predict-model needs a name (v3|v0_paper).\n"; return 1; }
             predict_model = argv[++i];
             if (predict_model != "v3" && predict_model != "v0_paper" &&
-                predict_model != "skew") {
-                std::cerr << "Error: --predict-model must be 'v3', 'skew' or 'v0_paper' (got '"
+                predict_model != "skew" && predict_model != "3feat") {
+                std::cerr << "Error: --predict-model must be 'v3', 'skew', '3feat' or 'v0_paper' (got '"
                           << predict_model << "').\n";
                 return 1;
             }
@@ -439,6 +441,16 @@ int main(int argc, char* argv[])
             // No scaler, no score-shift, no floor — round() to match original deployment.
             double v0_input[2] = { (double)g.nodes, (double)g.edges };
             fuzzy_number = (int)round(score_v0_paper(v0_input));
+        } else if (predict_model == "3feat") {
+            // 3-feat RF on raw V, E, d — everything comes from the graph
+            // header, so feature extraction is free.
+            double in3[chroma_predictor_3feat::FEATURE_COUNT] = {
+                (double)g.nodes, (double)g.edges, (double)g.edges / g.nodes };
+            double score_result = score_3feat(in3)
+                                + chroma_predictor_3feat::SCORE_SHIFT;
+            fuzzy_number = chroma_predictor_3feat::USE_FLOOR
+                           ? (int)floor(score_result)
+                           : (int)round(score_result);
         } else if (predict_model == "skew") {
             // 4-feat RF on raw V, E, d, gamma1 — the only computed feature is
             // gamma1, reduced on the GPU; no CPU feature pass (no kcore).

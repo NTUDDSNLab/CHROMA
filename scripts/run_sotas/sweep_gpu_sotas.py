@@ -111,6 +111,14 @@ def parse_time_ms(tool: dict, text: str) -> Optional[float]:
 _MS = r"^\s*runtime:\s+([0-9]+(?:\.[0-9]+)?)\s*ms"
 _COLORS_USED = r"^\s*colors used:\s*(\d+)"
 _CHROMA_TOTAL_MS = r"^\s*Total runtime:\s+([0-9]+(?:\.[0-9]+)?)\s*ms"
+# One-off predictor cost (feature extraction + inference); printed by
+# CHROMA under --predict only, NOT included in "Total runtime:".
+_CHROMA_FEATURE_MS = (r"^\s*Feature computation runtime:\s+"
+                      r"([0-9]+(?:\.[0-9]+)?)\s*ms")
+# θ_initial ("EGC θ: N" / "EGC θ: N (Predicted)"), printed by every
+# CHROMA run; bumps come from the dynamic-θ trajectory line.
+_CHROMA_THETA = r"^\s*EGC θ:\s*(\d+)"
+_CHROMA_BUMP = r"\(iter=\d+, θ=(\d+)\)"
 
 REGISTRY: list[dict] = [
     dict(name="csrcolor", kind="sota", unit="csrcolor",
@@ -446,22 +454,33 @@ def assemble_run(tool: dict, returncode: Optional[int], stdout: str,
                  timeout_err: Optional[str]) -> dict:
     if timeout_err is not None:
         return {"ok": False, "total_exec_ms": None, "colors": None,
+                "feature_ms": None, "theta": None, "theta_final": None,
                 "returncode": returncode, "error": timeout_err}
     if returncode is None:
         return {"ok": False, "total_exec_ms": None, "colors": None,
+                "feature_ms": None, "theta": None, "theta_final": None,
                 "returncode": None, "error": "internal: no returncode"}
     if returncode != 0:
         return {"ok": False, "total_exec_ms": None, "colors": None,
+                "feature_ms": None, "theta": None, "theta_final": None,
                 "returncode": returncode,
                 "error": f"exit code {returncode}: "
                          f"{stdout.strip()[-400:]}"}
     colors = parse_colors(tool, stdout)
     ms = parse_time_ms(tool, stdout)
+    feature_ms = _find_float(_CHROMA_FEATURE_MS, stdout)
+    theta = _find_int(_CHROMA_THETA, stdout)
+    bumps = re.findall(_CHROMA_BUMP, stdout)
+    theta_final = int(bumps[-1]) if bumps else theta
     if colors is None or ms is None:
         return {"ok": False, "total_exec_ms": ms, "colors": colors,
+                "feature_ms": feature_ms,
+                "theta": theta, "theta_final": theta_final,
                 "returncode": returncode,
                 "error": "could not parse colors/time from output"}
     return {"ok": True, "total_exec_ms": ms, "colors": colors,
+            "feature_ms": feature_ms,
+            "theta": theta, "theta_final": theta_final,
             "returncode": returncode, "error": None}
 
 
@@ -659,6 +678,11 @@ def run_sweep(args: argparse.Namespace) -> int:
                 "best_total_exec_ms":
                     best["total_exec_ms"] if best else None,
                 "best_colors": best["colors"] if best else None,
+                "best_feature_ms":
+                    best.get("feature_ms") if best else None,
+                "best_theta": best.get("theta") if best else None,
+                "best_theta_final":
+                    best.get("theta_final") if best else None,
                 "runs": cell,
                 "error": None if best else
                          (cell[-1]["error"] if cell else "no runs"),
@@ -941,6 +965,26 @@ def selftest_chroma(results: list) -> None:
            parse_colors(by_name["CHROMA"], out), 50)
     _check(results, "chroma ms (Total runtime, not PA/CA)",
            parse_time_ms(by_name["CHROMA"], out), 7.0)
+    out_feat = out + ("Feature computation runtime: 1.250000 ms\n"
+                      "Total runtime (w/ features): 8.250000 ms\n")
+    rf = assemble_run(by_name["CHROMA_v2"], 0, out_feat, None)
+    _check(results, "chroma feature_ms parsed", rf["feature_ms"], 1.25)
+    _check(results, "chroma total excludes (w/ features) line",
+           rf["total_exec_ms"], 7.0)
+    _check(results, "feature_ms None without predict",
+           assemble_run(by_name["CHROMA"], 0, out, None)["feature_ms"],
+           None)
+    _check(results, "chroma theta (EGC θ line)", rf["theta"], 12)
+    _check(results, "theta_final = theta when no bumps",
+           rf["theta_final"], 12)
+    out_bump = out_feat + ("θ trajectory: start=12  bumps=[(iter=3, θ=13), "
+                           "(iter=5, θ=15)]  total=2\n")
+    rb = assemble_run(by_name["CHROMA_v2"], 0, out_bump, None)
+    _check(results, "theta_final follows last bump", rb["theta_final"], 15)
+    _check(results, "theta None for non-CHROMA output",
+           assemble_run(by_name["csrcolor"], 0,
+                        "runtime:    1.0 ms\ncolors used: 5\n",
+                        None)["theta"], None)
     v2 = resolve_predict_model([by_name["CHROMA_v2-b-adw"]], "v9")[0]
     _check(results, "argv CHROMA_v2-b-adw (predict-model resolved)",
            build_argv(v2, "/b/c", "/g/x.egr"),
