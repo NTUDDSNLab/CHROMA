@@ -174,11 +174,13 @@ def main():
                     help="Use the linked-in ML model (CHROMA --predict) "
                          "instead of a fixed -e. Mutually exclusive with "
                          "--elastic.")
-    ap.add_argument("--predict-model", choices=["v3", "skew", "v0_paper"],
+    ap.add_argument("--predict-model",
+                    choices=["v3", "skew", "3feat", "v0_paper"],
                     default="v3",
                     help="When --predict is set, pick which model CHROMA "
                          "should use. 'v3' (default, 9-feature random forest), "
                          "'skew' (4-feature RF: V, E, d, gamma1), "
+                         "'3feat' (V, E, d; zero-cost), "
                          "or 'v0_paper' (paper-era RF on V/E only). Forwarded "
                          "verbatim as --predict-model <name>. Ignored when "
                          "--predict is not set.")
