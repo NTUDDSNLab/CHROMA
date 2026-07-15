@@ -192,12 +192,10 @@ __global__ void P_SL_ELS_SDC_CTA_split_decrement(
 // ──────────────────────────────────────────────────────────────────────────
 // P_SL_ELS_SDC_CTA_S_split_decrement — Phase 2 of P_SL_ELS_SDC_CTA_S,
 // isolated for per-phase profiling. Per-block dispatch:
-//   remove_size <  CTA_S_THRESHOLD : SDC warp-per-vertex path
-//   remove_size >= CTA_S_THRESHOLD : CTA-balanced removal
+//   remove_size <  cta_s_threshold : SDC warp-per-vertex path
+//   remove_size >= cta_s_threshold : CTA-balanced removal
+// η lives in the device global `cta_s_threshold` (host-set via --eta).
 // ──────────────────────────────────────────────────────────────────────────
-#ifndef CTA_S_THRESHOLD
-#define CTA_S_THRESHOLD (BLOCK_SIZE * 4)
-#endif
 
 __global__ void P_SL_ELS_SDC_CTA_S_split_decrement(
     const int* __restrict__ nidx,
@@ -222,7 +220,7 @@ __global__ void P_SL_ELS_SDC_CTA_S_split_decrement(
     __shared__ typename BlockScan::TempStorage temp_storage;
 
     if (threadIdx.x == 0) {
-        use_sdc_path = (remove_size < CTA_S_THRESHOLD) ? 1 : 0;
+        use_sdc_path = (remove_size < cta_s_threshold) ? 1 : 0;
     }
     __syncthreads();
 

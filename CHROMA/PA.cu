@@ -514,7 +514,7 @@ __global__ void P_SL_ELS_SDC_CTA_W(
 //
 // Phase 2 chooses one of two paths per outer iteration:
 //
-//   * remove_size <  CTA_S_THRESHOLD : SDC's classic warp-per-vertex pattern
+//   * remove_size <  cta_s_threshold : SDC's classic warp-per-vertex pattern
 //     (no work-balance, no per-warp atomicAdd on cursor_remove). Each warp
 //     consumes remove_list entries via grid-stride k = warpId, k+numWarp,
 //     ... and processes that vertex's neighbours across its 32 lanes.
@@ -523,15 +523,13 @@ __global__ void P_SL_ELS_SDC_CTA_W(
 //     it avoids the cursor_remove atomic contention and the per-work-unit
 //     source lookup entirely.
 //
-//   * remove_size >= CTA_S_THRESHOLD : the existing CTA-balanced path
+//   * remove_size >= cta_s_threshold : the existing CTA-balanced path
 //     (cub::BlockScan + binary search), which beats SDC on big sparse
 //     low-degree-variance graphs.
 //
-// Threshold default: BLOCK_SIZE * 4 (= 2048). Tuned later if needed.
+// Threshold η lives in the device global `cta_s_threshold` (globals.cu,
+// default 4*512 = 2048) and is host-set via the --eta CLI flag.
 // ═══════════════════════════════════════════════════════════════════════════
-#ifndef CTA_S_THRESHOLD
-#define CTA_S_THRESHOLD (BLOCK_SIZE * 4)
-#endif
 
 __global__ void P_SL_ELS_SDC_CTA_S(
     const int  nodes,
@@ -590,7 +588,7 @@ __global__ void P_SL_ELS_SDC_CTA_S(
     // ── Phase 2 dispatch (uniform across grid: every block reads the same
     //    remove_size after the grid.sync above) ─────────────────────────────
     if (threadIdx.x == 0) {
-      use_sdc_path = (remove_size < CTA_S_THRESHOLD) ? 1 : 0;
+      use_sdc_path = (remove_size < cta_s_threshold) ? 1 : 0;
     }
     __syncthreads();
 

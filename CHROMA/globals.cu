@@ -17,6 +17,10 @@ __device__ int  iter_count  = 0;
 // CTA-balanced removal cursor (used by P_SL_ELS_SDC_CTA)
 __device__ int  cursor_remove = 0;
 
+// CTA_S dispatch threshold η: remove_size < η → SDC warp-per-vertex path,
+// else CTA-balanced. Overridden from host via the --eta CLI flag.
+__device__ int  cta_s_threshold = 4 * ThreadsPerBlock;   // = 2048
+
 // JP-Series PA globals (used by JP_ADG; defined here so a unified pa_dumper
 // can link CHROMA + JP-Series PA against shared globals).
 __device__ int  avg_deg      = 0;

@@ -19,6 +19,9 @@ extern __device__ int  iter_count;
 // ── CTA-balanced removal cursor (used by P_SL_ELS_SDC_CTA) ────────────────
 extern __device__ int  cursor_remove;
 
+// ── CTA_S dispatch threshold η (used by P_SL_ELS_SDC_CTA_S; host-set --eta) ─
+extern __device__ int  cta_s_threshold;
+
 // ── JP-Series PA globals (used by JP_ADG; declared here so the unified
 //    pa_dumper binary can link CHROMA + JP-Series PA against shared globals) ─
 extern __device__ int  avg_deg;

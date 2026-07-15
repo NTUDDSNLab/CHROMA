@@ -96,6 +96,9 @@ void print_help(const char* program_name) {
     std::cout << "                           12 or cuSL_ELS_SDC_CTA_S_SPLIT : Dispatched CTA_S SDC, per-phase split-kernel diagnostic variant\n";
     std::cout << "                            (default: cuSL_ELS)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 0)\n";
+    std::cout << "  --eta <int>               CTA_S dispatch threshold η: remove_size < η uses the\n"
+                 "                            SDC warp-per-vertex path, else CTA-balanced\n"
+                 "                            (default: 2048 = 4*block_size; CTA_S kernels only)\n";
     std::cout << "  -p, --predict             Use prediction model for elastic parameter\n";
     std::cout << "  --predict-model <name>    Select predictor: v3 (default, 9-feat RF), skew (4-feat RF: V, E, d, gamma1; GPU-reduced), 3feat (V, E, d; zero-cost), or v0_paper (paper-era RF on V/E only)\n";
     std::cout << "  --dynamic-theta           Enable on-device θ controller (default ON in DYNAMIC_THETA=1 build)\n";
@@ -173,8 +176,9 @@ void* select_algorithm(const std::string& algo_str, std::string& algo_name, bool
     }
 }
 
-__global__ void setParameters(int fuzzy_number) {
+__global__ void setParameters(int fuzzy_number, int eta) {
   FuzzyNumber = fuzzy_number;
+  cta_s_threshold = eta;
 }
 
 static __global__
@@ -221,6 +225,7 @@ int main(int argc, char* argv[])
     // Default settings
     std::string filename;
     int fuzzy_number = 0;  // EGC θ default value is 0
+    int eta = 4 * ThreadsPerBlock;  // CTA_S dispatch threshold η (--eta)
     void* kernel_to_launch = (void*)P_SL_ELS;
     std::string algo_name = "cuSL_ELS";
     bool is_fused = false;
@@ -276,6 +281,14 @@ int main(int argc, char* argv[])
             } else {
                 std::cerr << "Error: EGC option requires an argument.\n";
                 print_help(argv[0]);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "--eta") == 0) {
+            if (i + 1 >= argc) { std::cerr << "Error: --eta needs an int.\n"; return 1; }
+            try {
+                eta = std::stoi(argv[++i]);
+            } catch (const std::exception&) {
+                std::cerr << "Error: Invalid --eta value '" << argv[i] << "'.\n";
                 return 1;
             }
         } else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--predict") == 0) {
@@ -510,7 +523,7 @@ int main(int argc, char* argv[])
     printf("Average degree: %.2f\n", 1.0 * g.edges / g.nodes);
     
     
-    setParameters<<<1, 1>>>(fuzzy_number);
+    setParameters<<<1, 1>>>(fuzzy_number, eta);
 
     // Dynamic θ controller setup (no-op when --dynamic-theta isn't set).
     if (dynamic_theta) {
@@ -622,7 +635,7 @@ int main(int argc, char* argv[])
             resetForRun(g, d);
             // Re-upload FuzzyNumber so each run starts from the same θ_initial
             // (controller may have ramped it during the previous run).
-            setParameters<<<1, 1>>>(fuzzy_number);
+            setParameters<<<1, 1>>>(fuzzy_number, eta);
 #ifdef DYNAMIC_THETA
             // Re-upload dynamic-θ tunables AND clear last_remove_size +
             // bump_count so the controller starts fresh each run.
