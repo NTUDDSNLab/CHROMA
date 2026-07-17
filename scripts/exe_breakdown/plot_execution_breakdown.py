@@ -40,16 +40,22 @@ import matplotlib.patches as mpatches
 import numpy as np
 
 
+# Segments are told apart by hatch; configs by color. Segment tuples are
+# (json key, legend label, hatch).
 SEGMENTS_BREAKDOWN = [
-    ("ca_ms",            "CA time",           "#4C72B0"),  # blue
-    ("pa_scan_ms",       "PA scan time",      "#DD8452"),  # orange
-    ("pa_decrement_ms",  "PA decrement time", "#55A467"),  # green
+    ("ca_ms",            "CA time",           ""),
+    ("pa_scan_ms",       "PA scan time",      "//"),
+    ("pa_decrement_ms",  "PA decrement time", "xx"),
 ]
 SEGMENTS_UNIFIED = [
-    ("ca_ms",  "CA time", "#4C72B0"),  # blue
-    ("pa_ms",  "PA time", "#DD8452"),  # orange
+    ("ca_ms",  "CA time", ""),
+    ("pa_ms",  "PA time", "//"),
 ]
-HATCHES = ["", "//", "xx", "..", "\\\\", "++", "oo", "--"]  # one per config, in input order
+# One color per config, in input order. CVD-validated categorical order
+# (adjacent-pair ΔE >= 8 under protan/deutan/tritan on a white surface);
+# the black bar edges keep the lighter hues legible in print.
+CONFIG_COLORS = ["#2a78d6", "#008300", "#e87ba4", "#eda100",
+                 "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
 
 # Font sizes (pt). Tuned for a paper-figure-sized PDF.
 TICK_FS   = 12
@@ -176,13 +182,13 @@ def draw_panel(ax, panel_datasets, configs, by_key, segments, bar_w):
     for cfg_idx, cfg in enumerate(configs):
         xs = group_centers + offsets[cfg_idx]
         bottoms = np.zeros(n_ds)
-        for seg_key, _seg_label, seg_color in segments:
+        for seg_key, _seg_label, seg_hatch in segments:
             heights = np.array([by_key.get((cfg, name), {}).get(seg_key, 0.0)
                                 for name in names])
             ax.bar(xs, heights, width=bar_w, bottom=bottoms,
-                   color=seg_color,
+                   color=CONFIG_COLORS[cfg_idx],
                    edgecolor="black", linewidth=0.8,
-                   hatch=HATCHES[cfg_idx])
+                   hatch=seg_hatch)
             bottoms += heights
 
     ax.set_xticks(group_centers)
@@ -233,9 +239,9 @@ def main():
                   f"(available: {configs})", file=sys.stderr)
             sys.exit(1)
         configs = args.configs
-    if len(configs) > len(HATCHES):
-        print(f"ERROR: {len(configs)} configs but only {len(HATCHES)} "
-              "hatches; select fewer with --configs.", file=sys.stderr)
+    if len(configs) > len(CONFIG_COLORS):
+        print(f"ERROR: {len(configs)} configs but only {len(CONFIG_COLORS)} "
+              "colors; select fewer with --configs.", file=sys.stderr)
         sys.exit(1)
     # Restrict rows to the selected configs so pick_segments doesn't fall
     # back to 2-segment mode because of an unselected non-SPLIT config.
@@ -282,14 +288,13 @@ def main():
     # repeated "Time (ms)" label.
     axes[0].set_ylabel("Time (ms)", fontsize=LABEL_FS)
 
-    # Single combined horizontal legend above the axes: segment colours
-    # first, then config hatches. Single row keeps the top strip thin
-    # so the figure stays short without legend rows colliding.
-    seg_handles = [mpatches.Patch(facecolor=c, edgecolor="black",
-                                   linewidth=0.8, label=lbl)
-                   for _k, lbl, c in segments]
-    cfg_handles = [mpatches.Patch(facecolor="lightgrey", edgecolor="black",
-                                  linewidth=0.8, hatch=HATCHES[i],
+    # Single combined horizontal legend above the axes: segment hatches
+    # first (on white so only the hatch reads), then config colours.
+    seg_handles = [mpatches.Patch(facecolor="white", edgecolor="black",
+                                   linewidth=0.8, hatch=h, label=lbl)
+                   for _k, lbl, h in segments]
+    cfg_handles = [mpatches.Patch(facecolor=CONFIG_COLORS[i], edgecolor="black",
+                                  linewidth=0.8,
                                   label=CONFIG_LABELS.get(cfg, cfg))
                   for i, cfg in enumerate(configs)]
     combined_handles = seg_handles + cfg_handles
