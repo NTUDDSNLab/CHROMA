@@ -4,6 +4,7 @@
 #include <map>
 #include "Partitioners.h"
 #include "ECLgraph.h"
+#include "bcsr.h"
 #include <omp.h>
 #include <cuda.h>
 #include <random>
@@ -998,6 +999,7 @@ void print_help(const char* program_name) {
     std::cout << "Usage: " << program_name << " [options]\n\n";
     std::cout << "Options:\n";
     std::cout << "  -f, --file <path>         Input graph file path (required)\n";
+    std::cout << "                            Formats: .egr, .txt, .bin, .bcsr, .bwcsr (weights ignored)\n";
     std::cout << "  -e, --elastic <number>    Set elastic number θ value (default: 10)\n";
     std::cout << "  -p, --parts <number>      Number of partitions (default: 2)\n";
     std::cout << "      --partitioner <name>  Partitioner: metis, round_robinm, random, ldg, kahip, mt_kahip (default: metis)\n";
@@ -1115,6 +1117,9 @@ int main(int argc, char* argv[]) {
 
     if (file_extension == "egr") {
         g = readECLgraph(filename.c_str());
+    } else if (file_extension == "bcsr" || file_extension == "bwcsr") {
+        // caga 32-bit block-CSR; .bwcsr weights are dropped (unused by coloring)
+        g = readBCSRgraph(filename.c_str(), file_extension == "bwcsr");
     } else if (file_extension == "txt" || file_extension == "bin") {
         std::string binary_filename = filename.substr(0, filename.find_last_of(".")) + ".bin";
         
@@ -1160,7 +1165,7 @@ int main(int argc, char* argv[]) {
          std::cout << filename << " is zero based: " << graph.is_zero_based << std::endl;
          graph.transfromToECLGraph(g);
     } else {
-         std::cerr << "Error: Unsupported file format '" << file_extension << "'. Supported formats: .egr, .txt, .bin" << std::endl;
+         std::cerr << "Error: Unsupported file format '" << file_extension << "'. Supported formats: .egr, .txt, .bin, .bcsr, .bwcsr" << std::endl;
          return 1;
     }
 

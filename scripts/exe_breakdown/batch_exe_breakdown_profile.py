@@ -1,37 +1,45 @@
 #!/usr/bin/env python3
-"""Sweep three CHROMA frameworks over EGR datasets and capture timings
-for an execution-time breakdown figure.
+"""Sweep the paper's CHROMA configurations over EGR datasets and capture
+timings for an execution-time breakdown figure — all configs land in ONE
+JSON so the plot script can pick any subset.
 
-Defaults to the unified (non-SPLIT) cooperative kernels:
-  cuSL_ELS_SDC, cuSL_ELS_SDC_CTA, cuSL_ELS_SDC_CTA_S
-which produce a single `PA time` per run (scan + decrement fused inside
-one cooperative-launch kernel — the production path).
+Each config bundles an algorithm (-a), extra CLI flags, and its own theta
+regime (fixed -e vs --predict with a specific model), matching the paper's
+configuration table:
 
-If you pass SPLIT-mode framework names instead (e.g. cuSL_ELS_SDC_SPLIT)
-the script also captures the separate `PA scan` / `PA decrement` rows
-that CHROMA emits for those variants, and the plot script renders a
-three-segment stack accordingly.
+  name             -a algo              EGC theta          AWD  Bumping
+  CHROMA           cuSL_ELS             -e <N>             -    -
+  CHROMA+          cuSL_ELS_SDC         -e <N>             -    -
+  CHROMA_star      cuSL_ELS_SDC         predict v0_paper   -    -
+  CHROMA_star_awd  cuSL_ELS_SDC_CTA_S   predict v0_paper   v    -
+  CHROMA_v2-b-awd  cuSL_ELS_SDC         predict 3feat      -    -
+  CHROMA_v2-b      cuSL_ELS_SDC_CTA_S   predict 3feat      v    -
+  CHROMA_v2        cuSL_ELS_SDC_CTA_S   predict 3feat      v    v
 
-For each (framework, dataset) pair the script invokes the CHROMA binary
-with --runs N (default 5), parses the `=== Statistics over N runs (ms) ===`
+Names not in CONFIG_SPECS pass through as a raw -a algorithm with the -e
+theta (the SPLIT-mode diagnostic algos use this; their per-phase `PA scan`
+/ `PA decrement` rows are captured when present and the plot script then
+renders a three-segment stack).
+
+For each (config, dataset) pair the script invokes the CHROMA binary with
+--runs N (default 5), parses the `=== Statistics over N runs (ms) ===`
 block from stdout, and writes a JSON suitable for
-`scripts/plots/plot_execution_breakdown.py`.
+`scripts/exe_breakdown/plot_execution_breakdown.py`.
 
-The theta configuration is chosen via mutually-exclusive --elastic and
---predict flags so the same script can profile different theta regimes
-into separate JSON files.
+NOTE: the predict-based configs need a PRE_MODEL=1 binary, and CHROMA_v2
+(bumping) additionally needs DYNAMIC_THETA=1 (the Makefile default).
 
 Examples:
-    python3 scripts/batch_exe_breakdown_profile.py
-    python3 scripts/batch_exe_breakdown_profile.py --only facebook le450_25d --runs 3
-    python3 scripts/batch_exe_breakdown_profile.py --elastic 10
-    python3 scripts/batch_exe_breakdown_profile.py --predict
-    python3 scripts/batch_exe_breakdown_profile.py --predict --predict-model v3 \\
-        --out scripts/breakdown_predict_v3.json
+    python3 scripts/exe_breakdown/batch_exe_breakdown_profile.py
+    python3 scripts/exe_breakdown/batch_exe_breakdown_profile.py \\
+        --only facebook le450_25d --runs 3
+    # Just the journal-version configs.
+    python3 scripts/exe_breakdown/batch_exe_breakdown_profile.py \\
+        --configs CHROMA_v2-b-awd CHROMA_v2-b CHROMA_v2
     # Three-segment breakdown via SPLIT kernels (slower, diagnostic-only).
-    python3 scripts/batch_exe_breakdown_profile.py \\
-        --frameworks cuSL_ELS_SDC_SPLIT cuSL_ELS_SDC_CTA_SPLIT \\
-                     cuSL_ELS_SDC_CTA_S_SPLIT
+    python3 scripts/exe_breakdown/batch_exe_breakdown_profile.py \\
+        --configs cuSL_ELS_SDC_SPLIT cuSL_ELS_SDC_CTA_SPLIT \\
+                  cuSL_ELS_SDC_CTA_S_SPLIT
 """
 from __future__ import annotations
 import argparse
@@ -45,33 +53,36 @@ from pathlib import Path
 from typing import Optional
 
 #
-# Logical framework name → (CHROMA -a value, extra CLI flags). The first
-# three entries match the three SDC variants with the on-device θ
-# controller turned OFF for a fair static-theta comparison; the fourth
-# (..._D) reruns the dispatched CTA_S kernel with dynamic-θ ON (CHROMA's
-# default in DYNAMIC_THETA=1 builds) so the figure can isolate the
-# effect of dynamic bumping vs. the predictor's initial θ alone.
+# Paper config name → (CHROMA -a value, extra CLI flags, theta spec).
+# theta spec is ("elastic", None) — use the sweep-level -e value — or
+# ("predict", <model>) — use --predict --predict-model <model>.
 #
-# Logical framework names not in this dict fall through with no extras —
-# this is what the SPLIT-mode diagnostic algos use.
+# All static-theta configs pass --no-dynamic-theta so the on-device θ
+# controller (default ON in DYNAMIC_THETA=1 builds) doesn't contaminate
+# them; only CHROMA_v2 leaves it enabled (the Bumping column).
+# "_star" stands in for the paper's superscript-* (shell-safe).
 #
-FRAMEWORK_SPECS = {
-    "cuSL_ELS_SDC":         ("cuSL_ELS_SDC",        ["--no-dynamic-theta"]),
-    "cuSL_ELS_SDC_CTA":     ("cuSL_ELS_SDC_CTA",    ["--no-dynamic-theta"]),
-    "cuSL_ELS_SDC_CTA_S":   ("cuSL_ELS_SDC_CTA_S",  ["--no-dynamic-theta"]),
-    "cuSL_ELS_SDC_CTA_S_D": ("cuSL_ELS_SDC_CTA_S",  []),  # dynamic-θ default ON
+CONFIG_SPECS = {
+    "CHROMA":          ("cuSL_ELS",           ["--no-dynamic-theta"], ("elastic", None)),
+    "CHROMA+":         ("cuSL_ELS_SDC",       ["--no-dynamic-theta"], ("elastic", None)),
+    "CHROMA_star":     ("cuSL_ELS_SDC",       ["--no-dynamic-theta"], ("predict", "v0_paper")),
+    "CHROMA_star_awd": ("cuSL_ELS_SDC_CTA_S", ["--no-dynamic-theta"], ("predict", "v0_paper")),
+    "CHROMA_v2-b-awd": ("cuSL_ELS_SDC",       ["--no-dynamic-theta"], ("predict", "3feat")),
+    "CHROMA_v2-b":     ("cuSL_ELS_SDC_CTA_S", ["--no-dynamic-theta"], ("predict", "3feat")),
+    "CHROMA_v2":       ("cuSL_ELS_SDC_CTA_S", [],                     ("predict", "3feat")),
 }
 
-DEFAULT_FRAMEWORKS = list(FRAMEWORK_SPECS.keys())
+DEFAULT_CONFIGS = list(CONFIG_SPECS.keys())
 
 
-def resolve_framework(framework: str) -> tuple[str, list]:
-    """Return the (CHROMA -a value, extra CLI flag list) for a logical
-    framework name. Names not in FRAMEWORK_SPECS pass through unchanged
-    with no extras (the SPLIT-mode diagnostic algos use this path)."""
-    spec = FRAMEWORK_SPECS.get(framework)
+def resolve_config(config: str) -> tuple[str, list, tuple]:
+    """Return (CHROMA -a value, extra CLI flags, theta spec) for a config
+    name. Names not in CONFIG_SPECS pass through unchanged as a raw -a
+    algorithm with no extras and the -e theta (the SPLIT-mode diagnostic
+    algos use this path)."""
+    spec = CONFIG_SPECS.get(config)
     if spec is None:
-        return (framework, [])
+        return (config, [], ("elastic", None))
     return spec
 
 # stats_f produces  "avg=%9.3f  min=%9.3f  max=%9.3f" — \s* covers padding.
@@ -116,17 +127,17 @@ def parse_stats(stdout: str) -> Optional[dict]:
     return out
 
 
-def build_cmd(binary: Path, egr: Path, framework: str, runs: int,
-              elastic: int, predict: bool, predict_model: str) -> list:
+def build_cmd(binary: Path, egr: Path, config: str, runs: int,
+              elastic: int) -> list:
     # --no-reduce: the figure measures pure CA + PA scan + PA decrement.
     # Color reduction is a separate post-CA phase and is not part of the
     # breakdown; disabling it also keeps CHROMA's runtime cleaner.
-    algo, framework_extras = resolve_framework(framework)
+    algo, extras, (theta_mode, model) = resolve_config(config)
     cmd = [str(binary), "-f", str(egr), "-a", algo, "--no-reduce",
            "--runs", str(runs)]
-    cmd.extend(framework_extras)
-    if predict:
-        cmd.extend(["--predict", "--predict-model", predict_model])
+    cmd.extend(extras)
+    if theta_mode == "predict":
+        cmd.extend(["--predict", "--predict-model", model])
     else:
         cmd.extend(["-e", str(elastic)])
     return cmd
@@ -150,7 +161,7 @@ def run_one(cmd: list, timeout: int):
 
 
 def main():
-    repo = Path(__file__).resolve().parents[1]
+    repo = Path(__file__).resolve().parents[2]
     ap = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--binary",      default=str(repo / "CHROMA" / "CHROMA"))
     ap.add_argument("--dataset-dir", default=str(repo / "Datasets" / "EGR"))
@@ -159,40 +170,25 @@ def main():
                          "block is gated on num_runs > 1)")
     ap.add_argument("--timeout",     type=int, default=1200,
                     help="Per-cell timeout (seconds). SPLIT mode is slow.")
-    ap.add_argument("--frameworks",  nargs="+", default=DEFAULT_FRAMEWORKS)
+    ap.add_argument("--configs",     nargs="+", default=DEFAULT_CONFIGS,
+                    help="Paper config names (see CONFIG_SPECS) and/or raw "
+                         "CHROMA -a algorithm names. Default: all "
+                         f"{len(DEFAULT_CONFIGS)} paper configs.")
     ap.add_argument("--only",        nargs="*", default=None,
                     help="Restrict to dataset stems (matched by .egr basename)")
     ap.add_argument("--skip",        nargs="*", default=[])
-    ap.add_argument("--out",         default=str(repo / "scripts" / "batch_profile_results.json"))
-
-    # Theta configuration. --elastic and --predict are mutually exclusive;
-    # default is --elastic 0.
-    ap.add_argument("-e", "--elastic", type=int, default=None,
-                    help="Set theta via CHROMA's -e flag. Default: 0. "
-                         "Mutually exclusive with --predict.")
-    ap.add_argument("-p", "--predict", action="store_true",
-                    help="Use the linked-in ML model (CHROMA --predict) "
-                         "instead of a fixed -e. Mutually exclusive with "
-                         "--elastic.")
-    ap.add_argument("--predict-model",
-                    choices=["v3", "skew", "3feat", "v0_paper"],
-                    default="v3",
-                    help="When --predict is set, pick which model CHROMA "
-                         "should use. 'v3' (default, 9-feature random forest), "
-                         "'skew' (4-feature RF: V, E, d, gamma1), "
-                         "'3feat' (V, E, d; zero-cost), "
-                         "or 'v0_paper' (paper-era RF on V/E only). Forwarded "
-                         "verbatim as --predict-model <name>. Ignored when "
-                         "--predict is not set.")
+    ap.add_argument("--out",         default=str(repo / "scripts" / "exe_breakdown"
+                                                 / "batch_profile_results.json"))
+    ap.add_argument("-e", "--elastic", type=int, default=0,
+                    help="Theta for the fixed-theta configs (CHROMA, CHROMA+ "
+                         "and raw algo names). Predict-based configs ignore "
+                         "it. Default: 0.")
     args = ap.parse_args()
 
     if args.runs < 2:
         sys.exit("ERROR: --runs must be >= 2 (CHROMA only prints the "
                  "statistics block when num_runs > 1)")
-
-    if args.predict and args.elastic is not None:
-        sys.exit("ERROR: --elastic and --predict are mutually exclusive.")
-    elastic = args.elastic if args.elastic is not None else 0
+    elastic = args.elastic
 
     bin_path = Path(args.binary)
     if not bin_path.exists():
@@ -210,9 +206,9 @@ def main():
         egrs = [p for p in egrs
                 if p.stem.split('.')[0] not in skip and p.stem not in skip]
 
-    config_label = ("predict=" + args.predict_model) if args.predict else f"e={elastic}"
-    print(f"# {len(egrs)} datasets x {len(args.frameworks)} frameworks x "
-          f"{args.runs} runs ({config_label})", file=sys.stderr)
+    print(f"# {len(egrs)} datasets x {len(args.configs)} configs x "
+          f"{args.runs} runs (e={elastic} for fixed-theta configs)",
+          file=sys.stderr)
 
     datasets_meta = []
     seen_names = set()
@@ -229,24 +225,26 @@ def main():
             datasets_meta.append({"name": name, "nodes": nodes, "edges": edges})
             seen_names.add(name)
 
-        for fw in args.frameworks:
-            cmd = build_cmd(bin_path, egr, fw, args.runs,
-                            elastic, args.predict, args.predict_model)
+        for cfg in args.configs:
+            algo, _extras, (theta_mode, model) = resolve_config(cfg)
+            predict = theta_mode == "predict"
+            cmd = build_cmd(bin_path, egr, cfg, args.runs, elastic)
             stats, wall, err = run_one(cmd, args.timeout)
             row = {
-                "framework":     fw,
+                "config":        cfg,
+                "algo":          algo,
                 "dataset":       name,
                 "nodes":         nodes,
                 "edges":         edges,
                 "runs":          args.runs,
                 "wall_s":        wall,
-                "elastic":       None if args.predict else elastic,
-                "predict":       args.predict,
-                "predict_model": args.predict_model if args.predict else None,
+                "elastic":       None if predict else elastic,
+                "predict":       predict,
+                "predict_model": model,
             }
             if err:
                 row["error"] = err
-                print(f"# {name:32s} {fw:30s} FAIL  ({err})", file=sys.stderr)
+                print(f"# {name:32s} {cfg:20s} FAIL  ({err})", file=sys.stderr)
             else:
                 row.update(stats)
                 if "pa_scan_ms" in stats and "pa_decrement_ms" in stats:
@@ -254,7 +252,7 @@ def main():
                               f"dec={stats['pa_decrement_ms']:7.2f}ms")
                 else:
                     pa_str = f"pa={stats['pa_ms']:7.2f}ms"
-                print(f"# {name:32s} {fw:30s} "
+                print(f"# {name:32s} {cfg:20s} "
                       f"ca={stats['ca_ms']:7.2f}ms "
                       f"{pa_str} "
                       f"colors={stats['colors_used']:5.1f} "
@@ -263,15 +261,13 @@ def main():
 
     summary = {
         "config": {
-            "elastic":       None if args.predict else elastic,
-            "predict":       args.predict,
-            "predict_model": args.predict_model if args.predict else None,
-            "runs":          args.runs,
-            "no_reduce":     True,
+            "elastic":   elastic,
+            "runs":      args.runs,
+            "no_reduce": True,
         },
-        "frameworks": list(args.frameworks),
-        "datasets":   datasets_meta,
-        "rows":       rows,
+        "configs":  list(args.configs),
+        "datasets": datasets_meta,
+        "rows":     rows,
     }
     Path(args.out).write_text(json.dumps(summary, indent=2))
     print(f"# wrote {args.out}", file=sys.stderr)

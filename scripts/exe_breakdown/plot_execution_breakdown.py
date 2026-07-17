@@ -1,24 +1,30 @@
 #!/usr/bin/env python3
 """Render the execution-time breakdown figure from batch_profile_results.json.
 
+The sweep JSON holds every profiled config; --configs picks which ones to
+plot (and in what order). Default: all configs in the file.
+
 Default layout: datasets are split into multiple panels by total execution
 time so each panel has its own y-axis scale and small bars stay readable
 alongside europe_osm. Panels are laid out horizontally; within each panel
 datasets are sorted alphabetically by displayed name (deterministic
 across servers). Each bar is a stack of CA
-(bottom) / PA scan / PA decrement (top); each framework gets a distinct
+(bottom) / PA scan / PA decrement (top); each config gets a distinct
 hatch. Two horizontal legends sit above the figure: stack colours and
-framework hatches. No title.
+config hatches. No title.
 
 Use --bins "" to render a single panel (legacy single-axes mode).
 
 Examples:
-    python3 scripts/plots/plot_execution_breakdown.py
-    python3 scripts/plots/plot_execution_breakdown.py --bins 100,300,1000
-    python3 scripts/plots/plot_execution_breakdown.py --bins ""    # single panel
-    python3 scripts/plots/plot_execution_breakdown.py --log
-    python3 scripts/plots/plot_execution_breakdown.py \\
-        --in scripts/batch_profile_results.json \\
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py \\
+        --configs CHROMA_star CHROMA_star_awd            # conference pair only
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py \\
+        --configs CHROMA_v2-b-awd CHROMA_v2-b CHROMA_v2  # journal trio
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py --bins 100,300,1000
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py --bins ""  # single panel
+    python3 scripts/exe_breakdown/plot_execution_breakdown.py \\
+        --in scripts/exe_breakdown/batch_profile_results.json \\
         --out-prefix /tmp/figure --figsize 18 5
 """
 from __future__ import annotations
@@ -43,22 +49,24 @@ SEGMENTS_UNIFIED = [
     ("ca_ms",  "CA time", "#4C72B0"),  # blue
     ("pa_ms",  "PA time", "#DD8452"),  # orange
 ]
-HATCHES = ["",  "//", "xx", ".."]  # one per framework, in input order
+HATCHES = ["", "//", "xx", "..", "\\\\", "++", "oo", "--"]  # one per config, in input order
 
 # Font sizes (pt). Tuned for a paper-figure-sized PDF.
 TICK_FS   = 12
 LABEL_FS  = 13
 LEGEND_FS = 13
 
-FRAMEWORK_LABELS = {
-    # Unified cooperative kernels. CHROMA^* (superscript asterisk via
-    # mathtext) marks the SDC family in paper figures; the suffix encodes
-    # the workload-balancing strategy:
-    #   * (no suffix) baseline warp-per-vertex SDC
-    #   -cta         CTA-balanced decrement (BlockScan)
-    #   -adw         adaptive dispatched warp/CTA (a.k.a. CTA_S)
-    #   -adw-d       same as -adw, with the on-device dynamic-θ
-    #                 bumping controller enabled
+CONFIG_LABELS = {
+    # Paper configuration-table names, as emitted by
+    # batch_exe_breakdown_profile.py ("_star" = superscript-*, shell-safe).
+    "CHROMA":          r"CHROMA",
+    "CHROMA+":         r"CHROMA$^{+}$",
+    "CHROMA_star":     r"CHROMA$^{*}$",
+    "CHROMA_star_awd": r"CHROMA$^{*}$+awd",
+    "CHROMA_v2-b-awd": r"CHROMA$_{v2}$-b-awd",
+    "CHROMA_v2-b":     r"CHROMA$_{v2}$-b",
+    "CHROMA_v2":       r"CHROMA$_{v2}$",
+    # Legacy framework-comparison names (pre-config sweep JSONs).
     "cuSL_ELS_SDC":          r"CHROMA$^{*}$",
     "cuSL_ELS_SDC_CTA":      r"CHROMA$_{v2}$-b-cta",
     "cuSL_ELS_SDC_CTA_S":    r"CHROMA$_{v2}$-b",
@@ -85,8 +93,12 @@ DATASET_LABELS = {
 
 def load(path: Path):
     d = json.loads(path.read_text())
-    by_key = {(r["framework"], r["dataset"]): r for r in d["rows"]}
-    return d["frameworks"], d["datasets"], by_key
+    # "config"/"configs" keys, with fallback to the pre-config sweep
+    # JSONs that used "framework"/"frameworks".
+    configs = d.get("configs") or d["frameworks"]
+    by_key = {(r.get("config") or r["framework"], r["dataset"]): r
+              for r in d["rows"]}
+    return configs, d["datasets"], by_key
 
 
 def pick_segments(by_key):
@@ -101,18 +113,18 @@ def pick_segments(by_key):
     return SEGMENTS_BREAKDOWN
 
 
-def max_total_ms(name, frameworks, by_key, segments) -> float:
+def max_total_ms(name, configs, by_key, segments) -> float:
     seg_keys = [k for k, _l, _c in segments]
     best = 0.0
-    for fw in frameworks:
-        r = by_key.get((fw, name), {})
+    for cfg in configs:
+        r = by_key.get((cfg, name), {})
         t = sum(r.get(k, 0.0) for k in seg_keys)
         if t > best:
             best = t
     return best
 
 
-def bin_datasets(datasets, frameworks, by_key, segments, bin_edges):
+def bin_datasets(datasets, configs, by_key, segments, bin_edges):
     """Partition datasets into len(bin_edges)+1 bins by max total time.
 
     bin_edges is a sorted ascending list of millisecond thresholds. Returns
@@ -132,7 +144,7 @@ def bin_datasets(datasets, frameworks, by_key, segments, bin_edges):
         labels.append(f">{bin_edges[-1]:g} ms")
 
     for ds in datasets:
-        t = max_total_ms(ds["name"], frameworks, by_key, segments)
+        t = max_total_ms(ds["name"], configs, by_key, segments)
         idx = 0
         for j, edge in enumerate(bin_edges):
             if t >= edge:
@@ -154,23 +166,23 @@ def bin_datasets(datasets, frameworks, by_key, segments, bin_edges):
     return out
 
 
-def draw_panel(ax, panel_datasets, frameworks, by_key, segments, bar_w):
+def draw_panel(ax, panel_datasets, configs, by_key, segments, bar_w):
     n_ds = len(panel_datasets)
-    n_fw = len(frameworks)
+    n_cfg = len(configs)
     group_centers = np.arange(n_ds)
-    offsets = (np.arange(n_fw) - (n_fw - 1) / 2) * bar_w
+    offsets = (np.arange(n_cfg) - (n_cfg - 1) / 2) * bar_w
     names = [d["name"] for d in panel_datasets]
 
-    for fw_idx, fw in enumerate(frameworks):
-        xs = group_centers + offsets[fw_idx]
+    for cfg_idx, cfg in enumerate(configs):
+        xs = group_centers + offsets[cfg_idx]
         bottoms = np.zeros(n_ds)
         for seg_key, _seg_label, seg_color in segments:
-            heights = np.array([by_key.get((fw, name), {}).get(seg_key, 0.0)
+            heights = np.array([by_key.get((cfg, name), {}).get(seg_key, 0.0)
                                 for name in names])
             ax.bar(xs, heights, width=bar_w, bottom=bottoms,
                    color=seg_color,
                    edgecolor="black", linewidth=0.8,
-                   hatch=HATCHES[fw_idx])
+                   hatch=HATCHES[cfg_idx])
             bottoms += heights
 
     ax.set_xticks(group_centers)
@@ -188,9 +200,14 @@ def main():
     repo = Path(__file__).resolve().parents[2]
     ap = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--in", dest="in_path",
-                    default=str(repo / "scripts" / "batch_profile_results.json"))
+                    default=str(repo / "scripts" / "exe_breakdown"
+                                / "batch_profile_results.json"))
     ap.add_argument("--out-prefix",
-                    default=str(repo / "scripts" / "plots" / "execution_time_breakdown"))
+                    default=str(repo / "scripts" / "exe_breakdown"
+                                / "execution_time_breakdown"))
+    ap.add_argument("--configs", nargs="+", default=None,
+                    help="Which configs to plot, in legend/bar order. "
+                         "Default: every config recorded in the JSON.")
     ap.add_argument("--bins", default="20,100,300,1000",
                     help="Comma-separated ascending ms thresholds for splitting "
                          "datasets across horizontal panels. Pass --bins \"\" for "
@@ -208,7 +225,21 @@ def main():
         print(f"ERROR: {in_path} not found. Run batch_profile.py first.", file=sys.stderr)
         sys.exit(1)
 
-    frameworks, datasets, by_key = load(in_path)
+    configs, datasets, by_key = load(in_path)
+    if args.configs:
+        missing = [c for c in args.configs if c not in configs]
+        if missing:
+            print(f"ERROR: configs not in {in_path.name}: {missing} "
+                  f"(available: {configs})", file=sys.stderr)
+            sys.exit(1)
+        configs = args.configs
+    if len(configs) > len(HATCHES):
+        print(f"ERROR: {len(configs)} configs but only {len(HATCHES)} "
+              "hatches; select fewer with --configs.", file=sys.stderr)
+        sys.exit(1)
+    # Restrict rows to the selected configs so pick_segments doesn't fall
+    # back to 2-segment mode because of an unselected non-SPLIT config.
+    by_key = {k: r for k, r in by_key.items() if k[0] in configs}
     segments = pick_segments(by_key)
 
     bin_edges = []
@@ -220,7 +251,7 @@ def main():
                   file=sys.stderr)
             sys.exit(1)
 
-    panels = bin_datasets(datasets, frameworks, by_key, segments, bin_edges)
+    panels = bin_datasets(datasets, configs, by_key, segments, bin_edges)
     if not panels:
         print("ERROR: no datasets to plot.", file=sys.stderr)
         sys.exit(1)
@@ -239,10 +270,10 @@ def main():
 
     # bar_w scales so the bars in a group span ~85% of the unit slot,
     # leaving ~15% white space between adjacent dataset groups regardless
-    # of framework count (3 fw → ~0.28, 4 fw → ~0.21).
-    bar_w = 0.85 / max(1, len(frameworks))
+    # of config count (3 cfg → ~0.28, 7 cfg → ~0.12).
+    bar_w = 0.85 / max(1, len(configs))
     for ax, (_label, ds_list) in zip(axes, panels):
-        draw_panel(ax, ds_list, frameworks, by_key, segments, bar_w)
+        draw_panel(ax, ds_list, configs, by_key, segments, bar_w)
         if args.log:
             ax.set_yscale("symlog", linthresh=0.1)
 
@@ -252,27 +283,34 @@ def main():
     axes[0].set_ylabel("Time (ms)", fontsize=LABEL_FS)
 
     # Single combined horizontal legend above the axes: segment colours
-    # first, then framework hatches. Single row keeps the top strip thin
+    # first, then config hatches. Single row keeps the top strip thin
     # so the figure stays short without legend rows colliding.
     seg_handles = [mpatches.Patch(facecolor=c, edgecolor="black",
                                    linewidth=0.8, label=lbl)
                    for _k, lbl, c in segments]
-    fw_handles = [mpatches.Patch(facecolor="lightgrey", edgecolor="black",
+    cfg_handles = [mpatches.Patch(facecolor="lightgrey", edgecolor="black",
                                   linewidth=0.8, hatch=HATCHES[i],
-                                  label=FRAMEWORK_LABELS.get(fw, fw))
-                  for i, fw in enumerate(frameworks)]
-    combined_handles = seg_handles + fw_handles
+                                  label=CONFIG_LABELS.get(cfg, cfg))
+                  for i, cfg in enumerate(configs)]
+    combined_handles = seg_handles + cfg_handles
 
+    # One legend row holds ~6 handles at 16in width; wrap onto two rows
+    # beyond that (7-config sweeps have 9 handles) and drop the axes top
+    # to make room.
+    two_rows = len(combined_handles) > 6
+    ncol = ((len(combined_handles) + 1) // 2 if two_rows
+            else len(combined_handles))
     fig.legend(handles=combined_handles, loc="upper center",
                bbox_to_anchor=(0.5, 1.02),
-               ncol=len(combined_handles),
+               ncol=ncol,
                frameon=False, handlelength=2.0, columnspacing=2.5,
                fontsize=LEGEND_FS)
 
-    # Margins: drop the axes top to 0.84 so the legend sits well above
-    # the bars with clear whitespace; rotated dataset labels need ~25%
-    # at the bottom; side gutters as small as practical.
-    fig.subplots_adjust(top=0.84, bottom=0.27, left=0.035, right=0.997,
+    # Margins: drop the axes top so the legend sits well above the bars
+    # with clear whitespace; rotated dataset labels need ~25% at the
+    # bottom; side gutters as small as practical.
+    fig.subplots_adjust(top=0.76 if two_rows else 0.84,
+                        bottom=0.27, left=0.048, right=0.997,
                         wspace=0.16)
 
     pdf_path = Path(args.out_prefix + ".pdf")

@@ -18,7 +18,7 @@ fastest runtime. Results are written as JSON with the structure:
   }
 
 Examples:
-  python3 CHROMA_RGP/batch_rgp.py \
+  python3 scripts/run_rgp/batch_rgp.py \
     --dataset-dir Datasets \
     --pattern "*.egr" \
     --partitioners metis ldg \
@@ -50,6 +50,9 @@ from typing import Dict, List, Optional
 # Regex patterns match CHROMA_RGP output
 RUNTIME_RE = re.compile(r"runtime:\s*([0-9]+(?:\.[0-9]+)?)\s*ms", re.IGNORECASE)
 COLORS_RE = re.compile(r"colors\s+used:\s*(\d+)", re.IGNORECASE)
+PHASE1_RE = re.compile(r"Phase 1 \(Boundary\+Preload\)\s*:\s*([\d\.]+)\s*ms")
+PHASE2_RE = re.compile(r"Phase 2 \(Parallel Exec\)\s*:\s*([\d\.]+)\s*ms")
+PHASE3_RE = re.compile(r"Phase 3 \(Result Merge\)\s*:\s*([\d\.]+)\s*ms")
 
 
 @dataclass
@@ -60,6 +63,9 @@ class RunResult:
     error: Optional[str] = None
     stdout: Optional[str] = None
     gpu_stats: Optional[List[Dict[str, float]]] = None
+    phase1_ms: Optional[float] = None
+    phase2_ms: Optional[float] = None
+    phase3_ms: Optional[float] = None
 
 
 # Regex for the per-GPU table rows:
@@ -80,6 +86,10 @@ def parse_output(stdout: str) -> RunResult:
     m = COLORS_RE.search(stdout)
     if m:
         colors_used = int(m.group(1))
+
+    p1 = PHASE1_RE.search(stdout)
+    p2 = PHASE2_RE.search(stdout)
+    p3 = PHASE3_RE.search(stdout)
 
     # Parse GPU table lines
     for line in stdout.split("\n"):
@@ -114,6 +124,9 @@ def parse_output(stdout: str) -> RunResult:
         ok=True,
         stdout=stdout,
         gpu_stats=gpu_stats,
+        phase1_ms=float(p1.group(1)) if p1 else None,
+        phase2_ms=float(p2.group(1)) if p2 else None,
+        phase3_ms=float(p3.group(1)) if p3 else None,
     )
 
 
@@ -171,7 +184,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                     help="Glob pattern for dataset files (default: *.egr)")
     ap.add_argument("--recursive", action="store_true",
                     help="Recurse into subdirectories when matching datasets")
-    ap.add_argument("--binary", default=os.path.join(script_dir, "CHROMA_RGP"),
+    ap.add_argument("--binary",
+                    default=os.path.join(script_dir, "..", "..", "CHROMA_RGP", "CHROMA_RGP"),
                     help="Path to CHROMA_RGP binary (default: CHROMA_RGP/CHROMA_RGP)")
     ap.add_argument("--parts", "-p", type=int, nargs="+", required=False, default=[2],
                     help="Partition counts to test, e.g. -p 2 4 8 (default: 2)")
@@ -240,11 +254,22 @@ def main(argv: Optional[List[str]] = None) -> int:
 
                 # Pick best: min colors, then min runtime
                 valids = [r for r in run_results if r.ok]
+                runs_json = [{
+                    "ok": r.ok,
+                    "colors": r.colors_used,
+                    "runtime_ms": r.runtime_ms,
+                    "phase1_ms": r.phase1_ms,
+                    "phase2_ms": r.phase2_ms,
+                    "phase3_ms": r.phase3_ms,
+                    "gpu_stats": r.gpu_stats,
+                    "error": r.error,
+                } for r in run_results]
                 if not valids:
                     print("      all runs failed", file=sys.stderr)
                     out_data[part_method][dname][str(parts)] = {
                         "color": None,
                         "runtime": None,
+                        "runs": runs_json,
                     }
                     continue
 
@@ -252,7 +277,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 out_data[part_method][dname][str(parts)] = {
                     "color": int(best.colors_used),
                     "runtime": float(round(best.runtime_ms, 6)),  # ms
+                    "phase1_ms": best.phase1_ms,
+                    "phase2_ms": best.phase2_ms,
+                    "phase3_ms": best.phase3_ms,
                     "gpu_stats": best.gpu_stats,
+                    "runs": runs_json,
                 }
                 print(
                     f"      best => color={best.colors_used}, "
